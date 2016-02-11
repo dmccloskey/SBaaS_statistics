@@ -1,0 +1,5 @@
+#SBaaS
+from .stage02_quantification_statistics_io import stage02_quantification_statistics_io
+
+class stage02_quantification_statistics_execute(stage02_quantification_statistics_io):
+    pass  

@@ -3,7 +3,6 @@ from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
 from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
 from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
 from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
-from SBaaS_base.sbaas_analysis_query_select import sbaas_analysis_query_select
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 

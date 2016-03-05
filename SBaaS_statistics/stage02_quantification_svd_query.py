@@ -96,7 +96,8 @@ class stage02_quantification_svd_query(sbaas_template_query,
                 query['where'] = [{
                         'table_name':table,
                         'column_name':'analysis_id',
-		                'value':self.convert_string2StringString(analysis_id_I),
+                        'value':analysis_id_I,
+                        #'value':self.convert_string2StringString(analysis_id_I),
 		                'operator':'LIKE',
                         'connector':'AND'
                         }
@@ -127,7 +128,8 @@ class stage02_quantification_svd_query(sbaas_template_query,
         query['where'] = [
             {"table_name":tables[0],
             'column_name':'analysis_id',
-            'value':self.convert_string2StringString(analysis_id_I),
+            'value':analysis_id_I,
+            #'value':self.convert_string2StringString(analysis_id_I),
             'operator':'LIKE',
             'connector':'AND'
                         },
@@ -186,7 +188,8 @@ class stage02_quantification_svd_query(sbaas_template_query,
         query['where'] = [
             {"table_name":tables[0],
             'column_name':'analysis_id',
-            'value':self.convert_string2StringString(analysis_id_I),
+            'value':analysis_id_I,
+            #'value':self.convert_string2StringString(analysis_id_I),
             'operator':'LIKE',
             'connector':'AND'
                         },
@@ -246,7 +249,8 @@ class stage02_quantification_svd_query(sbaas_template_query,
         query['where'] = [
             {"table_name":tables[0],
             'column_name':'analysis_id',
-            'value':self.convert_string2StringString(analysis_id_I),
+            'value':analysis_id_I,
+            #'value':self.convert_string2StringString(analysis_id_I),
             'operator':'LIKE',
             'connector':'AND'
                         },

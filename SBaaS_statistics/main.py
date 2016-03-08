@@ -1,10 +1,10 @@
 import sys
-sys.path.append('C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_base')
+sys.path.append('C:/Users/dmccloskey-sbrg/Documents/GitHub/SBaaS_base')
 from SBaaS_base.postgresql_settings import postgresql_settings
 from SBaaS_base.postgresql_orm import postgresql_orm
 
 # read in the settings file
-filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_base/settings_metabolomics.ini';
+filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
 pg_settings = postgresql_settings(filename);
 
 # connect to the database from the settings file
@@ -126,15 +126,22 @@ svd01 = stage02_quantification_svd_execute(session,engine,pg_settings.datadir_se
 #svd01.drop_dataStage02_quantification_svd();
 svd01.initialize_supportedTables();
 svd01.initialize_tables();
-#svd01.initialize_dataStage02_quantification_svd();
+
+#make the pairWiseCorrelation tables
+from SBaaS_statistics.stage02_quantification_pairWiseCorrelation_execute import stage02_quantification_pairWiseCorrelation_execute
+pairWiseCorrelation01 = stage02_quantification_pairWiseCorrelation_execute(session,engine,pg_settings.datadir_settings);
+pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
+pairWiseCorrelation01.initialize_supportedTables();
+pairWiseCorrelation01.initialize_tables();
+#pairWiseCorrelation01.initialize_dataStage02_quantification_pairWiseCorrelation();
 
 analysis_ids_run = [
-        #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
+        "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0',
         #"rpomut02",
-        "chemoCLim01",
-        "chemoNLim01",
-        "rpomut01",
+        #"chemoCLim01",
+        #"chemoNLim01",
+        #"rpomut01",
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -360,3 +367,6 @@ for analysis_id in analysis_ids_run:
 #    );
 #svd01.export_dataStage02QuantificationSVDScoresAndLoadings_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01");
 #svd01.export_dataStage02QuantificationSVDScoresAndLoadingsAndMethods_js("ALEsKOs01_0-1-2-3-11_evo04pgiEvo02");
+
+#norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
+norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');

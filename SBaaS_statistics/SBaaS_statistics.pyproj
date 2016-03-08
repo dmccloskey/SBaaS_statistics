@@ -22,7 +22,6 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="heatmap.py" />
     <Compile Include="main.py" />
     <Compile Include="stage02_quantification_analysis_execute.py" />
     <Compile Include="stage02_quantification_analysis_io.py" />
@@ -66,9 +65,13 @@
     <Compile Include="stage02_quantification_outliers_io.py" />
     <Compile Include="stage02_quantification_outliers_postgresql_models.py" />
     <Compile Include="stage02_quantification_outliers_query.py" />
+    <Compile Include="stage02_quantification_pairWiseCorrelation_execute.py" />
     <Compile Include="stage02_quantification_pairWiseTest_execute.py" />
+    <Compile Include="stage02_quantification_pairWiseCorrelation_io.py" />
     <Compile Include="stage02_quantification_pairWiseTest_io.py" />
+    <Compile Include="stage02_quantification_pairWiseCorrelation_postgresql_models.py" />
     <Compile Include="stage02_quantification_pairWiseTest_postgresql_models.py" />
+    <Compile Include="stage02_quantification_pairWiseCorrelation_query.py" />
     <Compile Include="stage02_quantification_pairWiseTest_query.py" />
     <Compile Include="stage02_quantification_pca_execute.py" />
     <Compile Include="stage02_quantification_pca_io.py" />

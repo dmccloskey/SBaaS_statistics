@@ -416,6 +416,55 @@ class stage02_quantification_normalization_query(sbaas_template_query):
             return component_names_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnits_dataStage02GlogNormalized(self, analysis_id_I,concentration_units_I):
+        """get sample_name_abbreviation and sample_name_short by analysis_id, calculated_concentration_units"""
+        try:
+            data = self.session.query(data_stage02_quantification_analysis.sample_name_abbreviation,
+                                      data_stage02_quantification_analysis.sample_name_short).filter(
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                    data_stage02_quantification_glogNormalized.time_point.like(data_stage02_quantification_analysis.time_point),
+                    data_stage02_quantification_glogNormalized.calculated_concentration_units.like(concentration_units_I),
+                    data_stage02_quantification_glogNormalized.used_.is_(True)).group_by(
+                    data_stage02_quantification_analysis.sample_name_abbreviation,
+                    data_stage02_quantification_analysis.sample_name_short).order_by(
+                    data_stage02_quantification_analysis.sample_name_abbreviation.asc(),
+                    data_stage02_quantification_analysis.sample_name_short.asc()).all();
+            sample_name_abbreviation_O = [];
+            sample_name_short_O = [];
+            for d in data: 
+                sample_name_abbreviation_O.append(d.sample_name_abbreviation);
+                sample_name_short_O.append(d.sample_name_short);
+            return sample_name_short_O,sample_name_short_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(self, analysis_id_I,concentration_units_I,component_name_I):
+        """get sample_name_abbreviation and sample_name_short by analysis_id, calculated_concentration_units"""
+        try:
+            data = self.session.query(data_stage02_quantification_analysis.sample_name_abbreviation,
+                                      data_stage02_quantification_analysis.sample_name_short).filter(
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                    data_stage02_quantification_glogNormalized.time_point.like(data_stage02_quantification_analysis.time_point),
+                    data_stage02_quantification_glogNormalized.calculated_concentration_units.like(concentration_units_I),
+                    data_stage02_quantification_glogNormalized.component_name.like(component_name_I),
+                    data_stage02_quantification_glogNormalized.used_.is_(True)).group_by(
+                    data_stage02_quantification_analysis.sample_name_abbreviation,
+                    data_stage02_quantification_analysis.sample_name_short).order_by(
+                    data_stage02_quantification_analysis.sample_name_abbreviation.asc(),
+                    data_stage02_quantification_analysis.sample_name_short.asc()).all();
+            sample_name_abbreviation_O = [];
+            sample_name_short_O = [];
+            for d in data: 
+                sample_name_abbreviation_O.append(d.sample_name_abbreviation);
+                sample_name_short_O.append(d.sample_name_short);
+            return sample_name_short_O,sample_name_short_O;
+        except SQLAlchemyError as e:
+            print(e);
     def get_sampleNameAbbreviations_analysisIDAndUnits_dataStage02GlogNormalized(self, analysis_id_I,concentration_units_I):
         """get component_names from analysis ID and concentration_units"""
         try:
@@ -450,6 +499,49 @@ class stage02_quantification_normalization_query(sbaas_template_query):
                     data_stage02_quantification_glogNormalized.time_point.like(data_stage02_quantification_analysis.time_point),
                     data_stage02_quantification_glogNormalized.used_.is_(True)).order_by(
                     data_stage02_quantification_glogNormalized.calculated_concentration.asc()).all();
+            data_O = [];
+            for d in data: 
+                data_O.append(d.calculated_concentration);
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(self, analysis_id_I,concentration_units_I,sample_name_short_I):
+        """get calculated_calculated concentrations by analysis_id, calculated_concentration_units, and sample_name_short"""
+        #Tested
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_glogNormalized.calculated_concentration).filter(
+                    data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.calculated_concentration_units.like(concentration_units_I),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(sample_name_short_I),
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                    data_stage02_quantification_glogNormalized.time_point.like(data_stage02_quantification_analysis.time_point),
+                    data_stage02_quantification_glogNormalized.used_.is_(True)).order_by(
+                    data_stage02_quantification_glogNormalized.component_name.asc()).all();
+            data_O = [];
+            for d in data: 
+                data_O.append(d.calculated_concentration);
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameShort_dataStage02GlogNormalized(self, analysis_id_I,concentration_units_I,component_name_I,sample_name_short_I):
+        """get calculated_calculated concentrations by analysis_id, calculated_concentration_units, component_name, and sample_name_short"""
+        #Tested
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_glogNormalized.calculated_concentration).filter(
+                    data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.calculated_concentration_units.like(concentration_units_I),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(sample_name_short_I),
+                    data_stage02_quantification_glogNormalized.component_name.like(component_name_I),
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                    data_stage02_quantification_glogNormalized.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                    data_stage02_quantification_glogNormalized.time_point.like(data_stage02_quantification_analysis.time_point),
+                    data_stage02_quantification_glogNormalized.used_.is_(True)).order_by(
+                    data_stage02_quantification_glogNormalized.component_name.asc()).all();
             data_O = [];
             for d in data: 
                 data_O.append(d.calculated_concentration);
@@ -1204,12 +1296,26 @@ class stage02_quantification_normalization_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
-    def get_rows_analysisID_dataStage02GlogNormalized(selfanalysis_id_I,used__I=True):
+    def get_rows_analysisID_dataStage02GlogNormalized(self,analysis_id_I,used__I=True):
         """get rows by analysis ID"""
         #Tested
         try:
             data = self.session.query(data_stage02_quantification_glogNormalized).filter(
                     data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.used_.is_(used__I)).all();
+            data_O = [];
+            for d in data: 
+                data_O.append(d.__repr__dict__());
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02GlogNormalized(self,analysis_id_I,concentration_units_I,used__I=True):
+        """get rows by analysis ID"""
+        #Tested
+        try:
+            data = self.session.query(data_stage02_quantification_glogNormalized).filter(
+                    data_stage02_quantification_glogNormalized.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_glogNormalized.calculated_concentration_units.like(concentration_units_I),
                     data_stage02_quantification_glogNormalized.used_.is_(used__I)).all();
             data_O = [];
             for d in data: 

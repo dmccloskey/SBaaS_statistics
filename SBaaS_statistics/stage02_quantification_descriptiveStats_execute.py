@@ -5,8 +5,6 @@ from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from matplotlib_utilities.matplot import matplot
 from math import sqrt
-# TODO: remove after making add methods
-from .stage02_quantification_descriptiveStats_postgresql_models import *
 
 class stage02_quantification_descriptiveStats_execute(stage02_quantification_descriptiveStats_io):
     def execute_descriptiveStats(self,analysis_id_I,experiment_ids_I=[],time_points_I=[],concentration_units_I=[],component_names_I=[],r_calc_I=None):

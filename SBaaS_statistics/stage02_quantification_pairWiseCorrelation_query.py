@@ -14,8 +14,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
     def initialize_supportedTables(self):
         '''Set the supported tables dict for 
         '''
-        tables_supported = {'data_stage02_quantification_pairWiseTable':data_stage02_quantification_pairWiseTable,
-                            'data_stage02_quantification_pairWiseTable_replicates':data_stage02_quantification_pairWiseTable_replicates,
+        tables_supported = {
                             'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
                             'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
                         };
@@ -105,7 +104,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
             querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
             for table in tables_I:
                 query = {};
-                query['delete_from'] = table;
+                query['delete_from'] = [{'table_name':table}];
                 query['where'] = [{
                         'table_name':table,
                         'column_name':'analysis_id',

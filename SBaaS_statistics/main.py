@@ -127,10 +127,18 @@ svd01 = stage02_quantification_svd_execute(session,engine,pg_settings.datadir_se
 svd01.initialize_supportedTables();
 svd01.initialize_tables();
 
+#make the pairWiseTable tables
+from SBaaS_statistics.stage02_quantification_pairWiseTable_execute import stage02_quantification_pairWiseTable_execute
+pairWiseTable01 = stage02_quantification_pairWiseTable_execute(session,engine,pg_settings.datadir_settings);
+#pairWiseTable01.drop_dataStage02_quantification_pairWiseTable();
+pairWiseTable01.initialize_supportedTables();
+pairWiseTable01.initialize_tables();
+#pairWiseTable01.initialize_dataStage02_quantification_pairWiseTable();
+
 #make the pairWiseCorrelation tables
 from SBaaS_statistics.stage02_quantification_pairWiseCorrelation_execute import stage02_quantification_pairWiseCorrelation_execute
 pairWiseCorrelation01 = stage02_quantification_pairWiseCorrelation_execute(session,engine,pg_settings.datadir_settings);
-pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
+#pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
 pairWiseCorrelation01.initialize_supportedTables();
 pairWiseCorrelation01.initialize_tables();
 #pairWiseCorrelation01.initialize_dataStage02_quantification_pairWiseCorrelation();
@@ -228,6 +236,14 @@ for analysis_id in analysis_ids_run:
     #        crossValidation_type="krzanowski",
     #        );
     ## perform a pair-wise comparison of each sample in the normalized data set
+    #pairWiseTable01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = [], 
+    #        analysis_id_I = analysis_id);
+    #pairWiseTable01.execute_pairwiseTableReplicates(analysis_id);
+    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = [], 
+    #        analysis_id_I = analysis_id);
+    #pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id);
     #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id);
     #pwt01.execute_pairwiseWilcoxonRankSumTest(analysis_id,
     #    concentration_units_I=[
@@ -369,4 +385,5 @@ for analysis_id in analysis_ids_run:
 #svd01.export_dataStage02QuantificationSVDScoresAndLoadingsAndMethods_js("ALEsKOs01_0-1-2-3-11_evo04pgiEvo02");
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
-norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
+#norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
+pairWiseTable01.stage02_quantification_pairWiseTableReplicates_scatterPlot_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",single_plot_I=True)

@@ -66,6 +66,10 @@
     <Compile Include="stage02_quantification_outliers_postgresql_models.py" />
     <Compile Include="stage02_quantification_outliers_query.py" />
     <Compile Include="stage02_quantification_pairWiseCorrelation_execute.py" />
+    <Compile Include="stage02_quantification_pairWiseTable_execute.py" />
+    <Compile Include="stage02_quantification_pairWiseTable_io.py" />
+    <Compile Include="stage02_quantification_pairWiseTable_postgresql_models.py" />
+    <Compile Include="stage02_quantification_pairWiseTable_query.py" />
     <Compile Include="stage02_quantification_pairWiseTest_execute.py" />
     <Compile Include="stage02_quantification_pairWiseCorrelation_io.py" />
     <Compile Include="stage02_quantification_pairWiseTest_io.py" />

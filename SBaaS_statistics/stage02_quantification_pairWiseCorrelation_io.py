@@ -10,15 +10,11 @@ from io_utilities.base_exportData import base_exportData
 from ddt_python.ddt_container import ddt_container
 
 class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairWiseCorrelation_query,sbaas_template_io):
-    def stage02_quantification_pairWiseCorrelation_scatterPlot_js(self,):
-        '''pairwise scatter plot'''
-        pass;
+
     def stage02_quantification_pairWiseCorrelation_correlation_js(self,):
         '''table of correlations'''
         pass;
-    def stage02_quantification_pairWiseCorrelationReplicates_scatterPlot_js(self,):
-        '''pairwise scatter plot'''
-        pass;
+
     def stage02_quantification_pairWiseCorrelationReplicates_correlation_js(self,):
         '''table of correlations'''
         pass;

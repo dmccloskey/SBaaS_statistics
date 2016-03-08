@@ -1,13 +1,11 @@
 
 from .stage02_quantification_pairWiseCorrelation_io import stage02_quantification_pairWiseCorrelation_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
+from .stage02_quantification_pairWiseTable_query import stage02_quantification_pairWiseTable_query
 # resources
 from python_statistics.calculate_correlation import calculate_correlation
-# TODO: remove after making add methods
-from .stage02_quantification_pairWiseCorrelation_postgresql_models import *
 
 class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_pairWiseCorrelation_io,
-                                         stage02_quantification_normalization_query):
+                                         stage02_quantification_pairWiseTable_query):
     def execute_pairwiseCorrelation(self,analysis_id_I,
             sample_name_abbreviations_I=[],
             concentration_units_I=[],
@@ -108,28 +106,6 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                                 'used_':True,
                                 'comment_':None};
                             data_pairwise_O.append(tmp);
-        #                    row2 = data_stage02_quantification_pairWiseCorrelation(
-        #                            analysis_id_I,
-        #                            sna_1,
-        #                            sna_2,
-        #                            component_group_names[cnt_cn],
-        #                            cn,
-        #                            data_pairwiseCorrelation['mean'],
-        #                            data_pairwiseCorrelation['test_stat'],
-        #                            data_pairwiseCorrelation['test_description'],
-        #                            data_pairwiseCorrelation['pvalue'],
-        #                            data_pairwiseCorrelation['pvalue_corrected'],
-        #                            data_pairwiseCorrelation['pvalue_corrected_description'],
-        #                            data_pairwiseCorrelation['ci_lb'],
-        #                            data_pairwiseCorrelation['ci_ub'],
-        #                            data_pairwiseCorrelation['ci_level'],
-        #                            foldChange,
-        #                            cu,
-        #                            True,
-        #                            None
-        #                            );
-        #                    self.session.add(row2);
-        #self.session.commit();
         self.add_dataStage02QuantificationPairWiseTest(data_pairwise_O);
     def execute_pairwiseCorrelationReplicates_fromGLogNormalized(self,analysis_id_I,
             sample_name_abbreviations_I=[],
@@ -208,83 +184,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
 
         #self.session.commit();
         self.add_dataStage02QuantificationPairWiseCorrelation('data_stage02_quantification_pairWiseCorrelation_replicates',data_pairwise_O);
-    def execute_pairwiseTableReplicates(self,analysis_id_I,
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            concentration_units_I=[],
-            component_names_I=[],
-            redundancy_I=True,):
-        '''execute pairwiseCorrelation
-        INPUT:
-        analysis_id_I = string
-        concentration_units_I = [] of strings
-        component_names_I = [] of strings
-        redundancy_I = boolean, default=True
-        '''
-
-        print('execute_pairwiseTableReplicates...')
-
-        data_pairwise_O = [];
-        # query metabolomics data from glogNormalization
-        # get concentration units
-        if concentration_units_I:
-            concentration_units = concentration_units_I;
-        else:
-            concentration_units = [];
-            concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
-        for cu_cnt,cu in enumerate(concentration_units):
-            print('calculating pairwiseCorrelation for concentration_units ' + cu);
-            # get component_names:
-            component_names, component_group_names = [],[];
-            component_names, component_group_names = self.get_componentNames_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I, cu);
-            if component_names_I:
-                component_names_ind = [i for i,x in enumerate(component_names) if x in component_names_I];
-                component_names_cpy = copy.copy(component_names);
-                component_group_names = copy.copy(component_group_names);
-                component_names = [x for i,x in enumerate(component_names) if i in component_names_ind]
-                component_group_names = [x for i,x in enumerate(component_group_names) if i in component_names_ind]
-            for cnt_cn,cn in enumerate(component_names):
-                print('calculating pairwiseCorrelation for component_names ' + cn);
-                # get sample_name_abbreviations and sample_name_shorts:
-                sample_name_abbreviations,sample_name_shorts = [];
-                sample_name_abbreviations,sample_name_shorts = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(analysis_id_I,cu,cn)
-                for sn_1_cnt,sn_1 in enumerate(sample_name_abbreviations):
-                    if redundancy_I: list_2 = sample_name_abbreviations;
-                    else: list_2 = sample_name_abbreviations[sn_1+1:];
-                    for cnt,sn_2 in enumerate(list_2):
-                        if redundancy_I: sn_2_cnt = cnt;
-                        else: sn_2_cnt = sn_1_cnt+cnt+1;
-                        if sn_1 != sn_2:
-                            print('calculating pairwiseCorrelation for sample_name_short ' + sn_1 + ' vs. ' + sn_2);
-                            # get the calculated concentrations in ordered by component name:
-                            data_1,data_2 = [],[];
-                            data_1 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,cn,sn_1);
-                            data_2 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,cn,sn_2);
-
-                            if len(data_1)!=len(data_2):
-                                print('the number of components in sn_1 and sn_2 are not equal.');
-                            elif len(data_1)>1:
-                                print('more than 1 value found for sn_1.');
-                            elif len(data_2)>1:
-                                print('more than 1 value found for sn_2.');
-                            # add data to database
-                            tmp = {'analysis_id':analysis_id_I,
-                                'sample_name_abbreviation_1':sample_name_abbreviations[sn_1_cnt],
-                                'sample_name_abbreviation_2':sample_name_abbreviations[sn_2_cnt],
-                                'sample_name_short_1':sn_1,
-                                'sample_name_short_2':sn_2,
-                                'component_group_name':component_group_names[cnt_cn],
-                                'component_name':cn,
-                                'calculated_concentration_1':data_1[0],
-                                'calculated_concentration_2':data_2[0],
-                                'calculated_concentration_units':cu,
-                                'used_':True,
-                                'comment_':None};
-                            data_pairwise_O.append(tmp);
-
-        #self.session.commit();
-        self.add_dataStage02QuantificationPairWiseCorrelation('data_stage02_quantification_pairWiseTable_replicates',data_pairwise_O);
-    def execute_pairwiseCorrelationReplicates_fromGLogNormalized(self,analysis_id_I,
+    def execute_pairwiseCorrelationReplicates(self,analysis_id_I,
             sample_name_abbreviations_I=[],
             sample_name_shorts_I=[],
             concentration_units_I=[],
@@ -309,20 +209,18 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I);
         for cu_cnt,cu in enumerate(concentration_units):
             print('calculating pairwiseCorrelation for concentration_units ' + cu);
             # get sample_name_abbreviations and sample_name_shorts:
-            sample_name_abbreviations_1,sample_name_abbreviations_2,sample_name_shorts_1,sample_name_shorts_2 = [];
-            #sample_name_abbreviations_1,sample_name_abbreviations_2,sample_name_shorts_1,sample_name_shorts_2 = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu)
-            for sn_1_cnt,sn_1 in enumerate(sample_name_shorts):
-                print('calculating pairwiseCorrelation for sample_name_short ' + sn_1 + ' vs. ' + sn_2);
+            sample_name_abbreviations_1,sample_name_shorts_1,sample_name_abbreviations_2,sample_name_shorts_2 = [],[],[],[];
+            sample_name_abbreviations_1,sample_name_shorts_1,sample_name_abbreviations_2,sample_name_shorts_2 = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,cu)
+            for sn_1_cnt,sn_1 in enumerate(sample_name_shorts_1):
+                print('calculating pairwiseCorrelation for sample_name_short ' + sn_1 + ' vs. ' + sample_name_shorts_2[sn_1_cnt]);
                 # get the calculated concentrations in ordered by component name:
                 data_1,data_2 = [],[];
-                #data_1 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sn_1);
-                #data_2 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sample_name_shorts_2[sn_1_cnt]);
+                data_1,data_2 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,cu,sn_1,sample_name_shorts_2[sn_1_cnt]);
                 # call R
-                data_pairwiseCorrelation = {};
                 if len(data_1)==len(data_2):
                     #calculate the correlation coefficient
                     if distance_measure_I=='pearson':
@@ -334,12 +232,10 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                         return;
                 else:
                     print('the number of components in sn_1 and sn_2 are not equal.');
-                if data_pairwiseCorrelation is None:
-                    continue;
                 # add data to database
                 tmp = {'analysis_id':analysis_id_I,
-                    'sample_name_abbreviation_1':sample_name_abbreviations[sn_1_cnt],
-                    'sample_name_abbreviation_2':sample_name_abbreviations[sn_1_cnt],
+                    'sample_name_abbreviation_1':sample_name_abbreviations_1[sn_1_cnt],
+                    'sample_name_abbreviation_2':sample_name_abbreviations_2[sn_1_cnt],
                     'sample_name_short_1':sn_1,
                     'sample_name_short_2':sample_name_shorts_2[sn_1_cnt],
                     'distance_measure':distance_measure_I,

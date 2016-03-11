@@ -11,7 +11,6 @@ from SBaaS_base.sbaas_template_query import sbaas_template_query
 from .stage02_quantification_svd_postgresql_models import *
 
 class stage02_quantification_svd_query(sbaas_template_query,
-                                        #sbaas_base,
                                        ):
     def initialize_supportedTables(self):
         '''Set the supported tables dict for stage02_quantification_svd
@@ -92,7 +91,7 @@ class stage02_quantification_svd_query(sbaas_template_query,
             querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
             for table in tables_I:
                 query = {};
-                query['delete_from'] = table;
+                query['delete_from'] = [{'table_name':table}];
                 query['where'] = [{
                         'table_name':table,
                         'column_name':'analysis_id',

@@ -143,6 +143,13 @@ pairWiseCorrelation01.initialize_supportedTables();
 pairWiseCorrelation01.initialize_tables();
 #pairWiseCorrelation01.initialize_dataStage02_quantification_pairWiseCorrelation();
 
+#make the dataPreProcessing tables
+from SBaaS_statistics.stage02_quantification_dataPreProcessing_replicates_execute import stage02_quantification_dataPreProcessing_replicates_execute
+dpprep01 = stage02_quantification_dataPreProcessing_replicates_execute(session,engine,pg_settings.datadir_settings);
+dpprep01.initialize_supportedTables();
+#dpprep01.drop_tables();
+dpprep01.initialize_tables();
+
 analysis_ids_run = [
         "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0',
@@ -386,4 +393,22 @@ for analysis_id in analysis_ids_run:
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
-pairWiseTable01.stage02_quantification_pairWiseTableReplicates_scatterPlot_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",single_plot_I=True)
+pairWiseTable01.stage02_quantification_pairWiseTableReplicates_scatterPlot_js(
+    "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
+    query_I = {'where':[
+        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+        'column_name':'sample_name_abbreviation_1',
+        'value':'OxicEvo04EcoliGlc',
+        'operator':'LIKE',
+        'connector':'AND'
+            },
+        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+        'column_name':'sample_name_abbreviation_2',
+        'value':'OxicEvo04EcoliGlc',
+        'operator':'LIKE',
+        'connector':'AND'
+            },
+    ]
+    },
+    single_plot_I=True
+    );

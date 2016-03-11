@@ -8,16 +8,22 @@ class data_stage02_quantification_analysis(Base):
     sample_name_abbreviation = Column(String(100))
     time_point = Column(String(10))
     #time_point_units = Column(String(50))
+    experiment_type = Column(String(50))
     analysis_type = Column(String(100)); # time-course (i.e., multiple time points), paired (i.e., control compared to multiple replicates), group (i.e., single grouping of samples).
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
     __table_args__ = (
             UniqueConstraint(
-                'experiment_id','sample_name_short','sample_name_abbreviation',
+                'experiment_id',
+                'sample_name_short',
+                'sample_name_abbreviation',
                 'time_point',
                 #'time_point_units',
-                'analysis_type','analysis_id'),
+                'analysis_type',
+                'analysis_id',
+                'experiment_type'
+                ),
             )
 
     def __init__(self,
@@ -28,6 +34,7 @@ class data_stage02_quantification_analysis(Base):
         self.sample_name_short=row_dict_I['sample_name_short']
         self.sample_name_abbreviation=row_dict_I['sample_name_abbreviation']
         self.time_point=row_dict_I['time_point']
+        self.experiment_type=row_dict_I['experiment_type']
         #self.time_point_units=row_dict_I['time_point_units']
         self.analysis_type=row_dict_I['analysis_type']
         self.used_=row_dict_I['used_']
@@ -39,6 +46,7 @@ class data_stage02_quantification_analysis(Base):
             sample_name_abbreviation_I,
             time_point_I,
             #time_point_units_I,
+                 experiment_type_I,
             analysis_type_I,
             used__I,
             comment__I):
@@ -48,6 +56,7 @@ class data_stage02_quantification_analysis(Base):
         self.sample_name_abbreviation=sample_name_abbreviation_I
         self.time_point=time_point_I
         #self.time_point_units=time_point_units_I
+        self.experiment_type=experiment_type_I
         self.analysis_type=analysis_type_I
         self.used_=used__I
         self.comment_=comment__I
@@ -60,6 +69,7 @@ class data_stage02_quantification_analysis(Base):
             'sample_name_abbreviation':self.sample_name_abbreviation,
             'time_point':self.time_point,
             #'time_point_units':self.time_point_units,
+            'experiment_type':self.experiment_type,
             'analysis_type':self.analysis_type,
             'used_':self.used_,
             'comment_':self.comment_}

@@ -14,13 +14,14 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
         '''pairwise scatter plot'''
         pass;
     def stage02_quantification_pairWiseTableReplicates_scatterPlot_js(self,analysis_id_I,
+                        query_I=None,
                         single_plot_I=False,
                         data_dir_I='tmp'):
         '''pairwise scatter plot
         '''
 
-        
-        data_O = self.get_rows_analysisID_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I);
+        data_O = self.get_rows_analysisID_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,
+                query_I = query_I);
 
         # get the dictColumn
         data_dict_O = {};
@@ -28,6 +29,7 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
             dictColumn = 'sample_name_short_1';
             data_dict_O = self.get_rows_analysisID_dataStage02QuantificationPairWiseTableReplicates(
                 analysis_id_I,
+                query_I = query_I,
                 output_O='dictColumn',
                 dictColumn_I=dictColumn);
         # make the tile objects  
@@ -62,8 +64,9 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
             'xdata':'calculated_concentration_1',
             'ydata':'calculated_concentration_2',
             #'serieslabel':'singular_value_index',
-            'serieslabel':'sample_name_short_1',
+            'serieslabel':'calculated_concentration_units',
             'featureslabel':'component_name',
+            #'tooltiplabel':'component_name',
             };
         
         nsvgtable = ddt_container_filterMenuAndChart2dAndTable();
@@ -114,7 +117,7 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                 svgx1axislabel='',
                 svgy1axislabel='',
                 tablekeymap = [data1_keymap],
-                svgkeymap = [], #calculated on the fly
+                svgkeymap = [data2_keymap],
                 formtile2datamap=[0],
                 tabletile2datamap=[0],
                 svgtile2datamap=[0], #calculated on the fly

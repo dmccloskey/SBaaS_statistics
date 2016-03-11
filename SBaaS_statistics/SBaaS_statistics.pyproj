@@ -22,6 +22,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="stage02_quantification_dataPreProcessing_replicates_execute.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_replicates_io.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_replicates_postgresql_models.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_replicates_query.py" />
     <Compile Include="main.py" />
     <Compile Include="stage02_quantification_analysis_execute.py" />
     <Compile Include="stage02_quantification_analysis_io.py" />
@@ -85,9 +89,6 @@
     <Compile Include="stage02_quantification_pls_io.py" />
     <Compile Include="stage02_quantification_pls_postgresql_models.py" />
     <Compile Include="stage02_quantification_pls_query.py" />
-    <Compile Include="stage02_quantification_svd_dependencies.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="stage02_quantification_svd_execute.py" />
     <Compile Include="stage02_quantification_svd_io.py" />
     <Compile Include="stage02_quantification_svd_postgresql_models.py" />

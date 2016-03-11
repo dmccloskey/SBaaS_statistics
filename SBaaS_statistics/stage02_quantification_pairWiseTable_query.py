@@ -172,6 +172,7 @@ class stage02_quantification_pairWiseTable_query(sbaas_template_query):
             print(e);
     def get_rows_analysisID_dataStage02QuantificationPairWiseTableReplicates(self,
                 analysis_id_I,
+                query_I={},
                 output_O='listDict',
                 dictColumn_I=None):
         '''Query rows by analysis_id from data_stage02_quantification_pairWiseTable_replicates
@@ -179,6 +180,8 @@ class stage02_quantification_pairWiseTable_query(sbaas_template_query):
         analysis_id_I = string
         output_O = string
         dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
         OUTPUT:
         data_O = output specified by output_O and dictColumn_I
         '''
@@ -221,6 +224,10 @@ class stage02_quantification_pairWiseTable_query(sbaas_template_query):
             'order':'ASC',
             },
         ];
+        #additional blocks
+        for k,v in query_I.items():
+            for r in v:
+                query[k].append(r);
         
         data_O = self.get_rows_tables(
             tables_I=tables,

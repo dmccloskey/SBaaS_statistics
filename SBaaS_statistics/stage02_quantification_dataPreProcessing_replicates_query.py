@@ -291,7 +291,574 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
-   
+    def delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(self,
+            analysis_id_I,
+            calculated_concentration_units_I,
+            value_I,operator_I,
+            warn_I=True):
+        '''delete rows from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string,
+        value_I = float,
+        operator_I = string, e.g. "="
+        OUTPUT:
+        '''
+        try:
+            table = 'data_stage02_quantification_dataPreProcessing_replicates';
+            querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            query = {};
+            query['delete_from'] = [{'table_name':table}];
+            query['where'] = [{
+                    'table_name':table,
+                    'column_name':'analysis_id',
+                    'value':analysis_id_I,
+		            'operator':'LIKE',
+                    'connector':'AND'
+                    },{
+                    'table_name':table,
+                    'column_name':'calculated_concentration',
+                    'value':value_I,
+		            'operator':operator_I,
+                    'connector':'AND'
+                    },
+                    {"table_name":table,
+                    'column_name':'calculated_concentration_units',
+                    'value':calculated_concentration_units_I,
+                    'operator':'LIKE',
+                    'connector':'AND'
+                    },
+	            ];
+            table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+            query = querydelete.make_queryFromString(table_model,query);
+            querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
+            print(e);
+    def getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_dataPreProcessing_replicates'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [
+            {"table_name":tables[0],
+             "column_name":'component_name',
+             },
+             {"table_name":tables[0],
+             "column_name":'component_group_name',
+             },
+            ];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'value':calculated_concentration_units_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['group_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            },
+            {"table_name":tables[0],
+            'column_name':'component_group_name',
+            },
+        ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'component_group_name',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def getGroup_analysisIDAndExperimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_dataPreProcessing_replicates'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [
+            {"table_name":tables[0],
+             "column_name":'analysis_id',
+             },
+             {"table_name":tables[0],
+             "column_name":'experiment_id',
+             },
+             {"table_name":tables[0],
+             "column_name":'sample_name_short',
+             },
+             {"table_name":tables[0],
+             "column_name":'time_point',
+             },
+            ];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'value':calculated_concentration_units_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['group_by'] = [
+            {"table_name":tables[0],
+             "column_name":'analysis_id',
+             },
+             {"table_name":tables[0],
+             "column_name":'experiment_id',
+             },
+             {"table_name":tables[0],
+             "column_name":'sample_name_short',
+             },
+             {"table_name":tables[0],
+             "column_name":'time_point',
+             },
+        ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+             "column_name":'analysis_id',
+            'order':'ASC',
+             },
+             {"table_name":tables[0],
+             "column_name":'experiment_id',
+            'order':'ASC',
+             },
+             {"table_name":tables[0],
+             "column_name":'sample_name_short',
+            'order':'ASC',
+             },
+             {"table_name":tables[0],
+             "column_name":'time_point',
+            'order':'ASC',
+             },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndSampleNameShortAndTimePoint_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_id_I,
+                sample_name_short_I,
+                time_point_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_dataPreProcessing_replicates'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [
+            {"table_name":tables[0],
+             "column_name":'component_name',
+             },
+             {"table_name":tables[0],
+             "column_name":'component_group_name',
+             },
+            ];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'value':calculated_concentration_units_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'experiment_id',
+            'value':experiment_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'sample_name_short',
+            'value':sample_name_short_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'time_point',
+            'value':time_point_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['group_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            },
+            {"table_name":tables[0],
+            'column_name':'component_group_name',
+            },
+        ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'component_group_name',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    
+    def getGroup_analysisIDAndExperimentIDAndSampleNameShortAndTimePointAndComponentNameArray_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_dataPreProcessing_replicates'];
+        # get the listDict data
+        data_O = [];
+        query_cmd = 'SELECT analysis_id, experiment_id, sample_name_short, time_point, ';
+        query_cmd += ('array(select component_name from "%s" group by component_name) ' %(tables[0]));
+        query_cmd += ('FROM "%s" ' %(tables[0]));
+        query_cmd += ("WHERE analysis_id LIKE '%s' " %(analysis_id_I));
+        query_cmd += ("AND calculated_concentration_units LIKE '%s'" %(calculated_concentration_units_I));
+        query_cmd += 'GROUP BY analysis_id, experiment_id, sample_name_short, time_point;';
+        
+        try:
+            queryselect = sbaas_base_query_select(self.session,self.engine,self.settings);
+            data_tmp = queryselect.execute_select(query_cmd);
+            data_O = queryselect.convert_listKeyedTuple2ListDict(data_tmp);
+        except Exception as e:
+            print(e);
+
+        return data_O;   
+
+    #Joins with data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates
+    def get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndSampleNameShortsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I=[],
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                time_points_I=[],
+            ):
+        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
+        try:
+            data = self.session.query(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_analysis.sample_name_abbreviation,
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
+                data_stage02_quantification_analysis.time_point,
+                ).filter(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_stage02_quantification_analysis.time_point),
+                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_analysis.sample_name_abbreviation,
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
+                data_stage02_quantification_analysis.time_point).order_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
+                data_stage02_quantification_analysis.sample_name_abbreviation.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
+                data_stage02_quantification_analysis.time_point.asc()).all();
+            data_O=[];
+            for d in data:
+                add_row = True
+                if calculated_concentration_units_I and not d.calculated_concentration_units in calculated_concentration_units_I:
+                    add_row = False;
+                elif experiment_ids_I and not d.experiment_id in experiment_ids_I:
+                    add_row = False;
+                elif sample_name_abbreviations_I and not d.sample_name_abbreviation in sample_name_abbreviations_I:
+                    add_row = False;
+                elif time_points_I and not d.time_point in time_points_I:
+                    add_row = False;
+                if add_row:
+                    data_O.append({
+                    'analysis_id':d.analysis_id,
+                    'calculated_concentration_units':d.calculated_concentration_units,
+                    'experiment_id':d.calculated_concentration_units,
+                    'sample_name_abbreviation':d.sample_name_abbreviation,
+                    'sample_name_short':d.sample_name_short,
+                    'time_point':d.time_point,
+                    })
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndSampleNameShortsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I=[],
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                time_points_I=[],
+            ):
+        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
+        try:
+            data = self.session.query(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_analysis.sample_name_abbreviation,
+                data_stage02_quantification_analysis.time_point,
+                ).filter(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_stage02_quantification_analysis.time_point),
+                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_analysis.sample_name_abbreviation,
+                data_stage02_quantification_analysis.time_point).order_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
+                data_stage02_quantification_analysis.sample_name_abbreviation.asc(),
+                data_stage02_quantification_analysis.time_point.asc()).all();
+            data_O=[];
+            for d in data:
+                add_row = True
+                if calculated_concentration_units_I and not d.calculated_concentration_units in calculated_concentration_units_I:
+                    add_row = False;
+                elif experiment_ids_I and not d.experiment_id in experiment_ids_I:
+                    add_row = False;
+                elif sample_name_abbreviations_I and not d.sample_name_abbreviation in sample_name_abbreviations_I:
+                    add_row = False;
+                elif time_points_I and not d.time_point in time_points_I:
+                    add_row = False;
+                if add_row:
+                    data_O.append({
+                    'analysis_id':d.analysis_id,
+                    'calculated_concentration_units':d.calculated_concentration_units,
+                    'experiment_id':d.experiment_id,
+                    'sample_name_abbreviation':d.sample_name_abbreviation,
+                    'time_point':d.time_point,
+                    })
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    
+    def get_analysisIDAndExperimentIDsAndSampleNameShortsAndTimePoints_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_ids_I=[],
+                sample_name_shorts_I=[],
+                time_points_I=[],
+            ):
+        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
+        try:
+            data = self.session.query(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
+                data_stage02_quantification_dataPreProcessing_replicates.time_point,
+                ).filter(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
+                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
+                data_stage02_quantification_dataPreProcessing_replicates.time_point).order_by(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.asc()).all();
+            data_O=[];
+            for d in data:
+                add_row = True
+                if experiment_ids_I and not d.experiment_id in experiment_ids_I:
+                    add_row = False;
+                elif sample_name_shorts_I and not d.sample_name_short in sample_name_shorts_I:
+                    add_row = False;
+                elif time_points_I and not d.time_point in time_points_I:
+                    add_row = False;
+                if add_row:
+                    data_O.append({
+                    'analysis_id':d.analysis_id,
+                    'calculated_concentration_units':d.calculated_concentration_units,
+                    'experiment_id':d.calculated_concentration_units,
+                    'sample_name_short':d.sample_name_short,
+                    'time_point':d.time_point,
+                    })
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_id_I,
+                sample_name_abbreviation_I,
+                time_point_I,
+            ):
+        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates
+                ).filter(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(experiment_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(time_point_I),
+                data_stage02_quantification_analysis.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_stage02_quantification_analysis.time_point),
+                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
+                data_stage02_quantification_dataPreProcessing_replicates.component_name.asc(),
+                ).all();
+            data_O=[];
+            for d in data:
+                data_O.append(d.__repr__dict__())
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+
+    #Querys to be called by other classes
+    def get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingReplicates(self, analysis_id_I,concentration_units_I):
+        """get all calculated_calculated concentrations by analysis_id and calculated_concentration_units from analysis ID"""
+        #Tested
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration).filter(
+                    data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
+                    data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration.asc()).all();
+            data_O = [];
+            for d in data: 
+                data_O.append(d.calculated_concentration);
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
     def get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self, analysis_id_I):
         """query calculated_concentration_units by analysis id from """
         try:
@@ -306,10 +873,9 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             return units_O;
         except SQLAlchemyError as e:
             print(e);
-    def get_calculatedConcentrationUnits_analysisIDAndImputationMethodAndNormalizationMethod_dataStage02QuantificationDataPreProcessingReplicates(self,
+    def get_calculatedConcentrationUnits_analysisIDAndImputationMethod_dataStage02QuantificationDataPreProcessingReplicates(self,
                 analysis_id_I,
-                imputation_method_I,
-                normalization_method_I):
+                imputation_method_I):
         """query calculated_concentration_units from data_stage02_quantification_dataPreProcessing_replicates
         INPUT:
         OUTPUT:
@@ -317,8 +883,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
         try:
             data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units).filter(
                     data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method==imputation_method_I,
-                    data_stage02_quantification_dataPreProcessing_replicates.normalization_method==normalization_method_I,
+                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method.like(imputation_method_I),
                     data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units).order_by(
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.asc()).all();
@@ -326,34 +891,6 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             for d in data: 
                 units_O.append(d.calculated_concentration_units);
             return units_O;
-        except SQLAlchemyError as e:
-            print(e);
-    def get_normalizationMethods_analysisIDAndImputationMethod_dataStage02QuantificationDataPreProcessingReplicates(self,
-                analysis_id_I,
-                imputation_method_I,
-                ):
-        """query normalization_methods from data_stage02_quantification_dataPreProcessing_replicates
-        INPUT:
-        OUTPUT:
-        """
-        try:
-            data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates.normalization_method,
-                    #data_stage02_quantification_dataPreProcessing_replicates.normalization_options
-                    ).filter(
-                    data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method==imputation_method_I,
-                    data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
-                    data_stage02_quantification_dataPreProcessing_replicates.normalization_method,
-                    #data_stage02_quantification_dataPreProcessing_replicates.normalization_options
-                    ).order_by(
-                    data_stage02_quantification_dataPreProcessing_replicates.normalization_method.asc()).all();
-            normalization_method_O = [];
-            normalization_options_O = [];
-            for d in data: 
-                normalization_method_O.extend(d.normalization_method);
-                #normalization_options_O.append(d.normalization_options);
-            return normalization_method_O;
-            #return normalization_method_O, normalization_options_O;
         except SQLAlchemyError as e:
             print(e);
     def get_imputationMethods_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self,
@@ -376,13 +913,12 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             imputation_method_O = [];
             #imputation_options_O = [];
             for d in data: 
-                imputation_method_O.extend(d.imputation_method);
+                imputation_method_O.append(d.imputation_method);
                 #imputation_options_O.append(d.imputation_options);
             return imputation_method_O;
             #return imputation_method_O,imputation_options_O;
         except SQLAlchemyError as e:
-            print(e);
-   
+            print(e);   
     def getCount_componentNames_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self, analysis_id_I):
         """query row count of unique component_names by analysis id from """
         try:
@@ -408,25 +944,22 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             return data;
         except SQLAlchemyError as e:
             print(e);
-    def getCount_componentNames_analysisIDAndImputationMethodAndNormalizationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
+    def getCount_componentNames_analysisIDAndImputationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,
                 analysis_id_I,
                 imputation_method_I,
-                normalization_method_I,
                 calculated_concentration_units_I):
         """query row count of unique component_names from """
         try:
             data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates.component_name).filter(
                     data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method==imputation_method_I,
-                    data_stage02_quantification_dataPreProcessing_replicates.normalization_method==normalization_method_I,
+                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method.like(imputation_method_I),
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
                     data_stage02_quantification_dataPreProcessing_replicates.component_name).order_by(
                     data_stage02_quantification_dataPreProcessing_replicates.component_name.asc()).count();
             return data;
         except SQLAlchemyError as e:
-            print(e);
-   
+            print(e);   
     def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self, analysis_id_I):
         """query row count of unique experiment_id/sample_name_short/time_point by analysis id from """
         try:
@@ -464,9 +997,8 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
             return data;
         except SQLAlchemyError as e:
             print(e);   
-    def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndImputationMethodAndNormalizationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,analysis_id_I,
+    def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndImputationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,analysis_id_I,
                 imputation_method_I,
-                normalization_method_I,
                 calculated_concentration_units_I):
         """query row count of unique experiment_id/sample_name_short/time_point from """
         try:
@@ -474,8 +1006,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                     data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
                     data_stage02_quantification_dataPreProcessing_replicates.time_point).filter(
                     data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method==imputation_method_I,
-                    data_stage02_quantification_dataPreProcessing_replicates.normalization_method==normalization_method_I,
+                    data_stage02_quantification_dataPreProcessing_replicates.imputation_method.like(imputation_method_I),
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
                     data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
@@ -485,90 +1016,5 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                     data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
                     data_stage02_quantification_dataPreProcessing_replicates.time_point.asc()).count();
             return data;
-        except SQLAlchemyError as e:
-            print(e);
-    #Joins with data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates
-    def get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(self,
-                analysis_id_I,
-                calculated_concentration_units_I=[],
-                experiment_ids_I=[],
-                sample_name_abbreviations_I=[],
-                time_points_I=[],
-            ):
-        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
-        try:
-            data = self.session.query(
-                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
-                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
-                data_preProcessing_analysis.sample_name_abbreviation,
-                data_preProcessing_analysis.time_point,
-                ).filter(
-                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                data_preProcessing_analysis.analysis_id.like(analysis_id_I),
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_preProcessing_analysis.experiment_id),
-                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_preProcessing_analysis.sample_name_short),
-                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_preProcessing_analysis.time_point),
-                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).group_by(
-                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
-                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
-                data_preProcessing_analysis.sample_name_abbreviation,
-                data_preProcessing_analysis.time_point).order_by(
-                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.asc(),
-                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.asc(),
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
-                data_preProcessing_analysis.sample_name_abbreviation.asc(),
-                data_preProcessing_analysis.time_point.asc()).all();
-            data_O=[];
-            for d in data_O:
-                add_row = True
-                if calculated_concentration_units_I and not d.calculated_concentration_units in calculated_concentration_units_I:
-                    add_row = False;
-                elif experiment_ids_I and not d.experiment_id in experiment_ids_I:
-                    add_row = False;
-                elif sample_name_abbreviations_I and not d.sample_name_abbreviation in sample_name_abbreviations_I:
-                    add_row = False;
-                elif time_points_I and not d.time_point in time_points_I:
-                    add_row = False;
-                if add_row:
-                    data_O.append({
-                    'analysis_id':d.analysis_id,
-                    'calculated_concentration_units':d.calculated_concentration_units,
-                    'experiment_id':d.calculated_concentration_units,
-                    'sample_name_abbreviation':d.sample_name_abbreviation,
-                    'time_point':d.time_point,
-                    })
-            return data_O;
-        except SQLAlchemyError as e:
-            print(e);
-    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(self,
-                analysis_id_I,
-                calculated_concentration_units_I,
-                experiment_id_I,
-                sample_name_abbreviation_I,
-                time_point_I,
-            ):
-        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
-        try:
-            data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates
-                ).filter(
-                data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
-                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(experiment_id_I),
-                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(time_point_I),
-                data_preProcessing_analysis.analysis_id.like(analysis_id_I),
-                data_preProcessing_analysis.sample_name_abbreviation.like(sample_name_abbreviation_I),
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_preProcessing_analysis.experiment_id),
-                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_preProcessing_analysis.sample_name_short),
-                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_preProcessing_analysis.time_point),
-                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
-                data_preProcessing_analysis.sample_name_short.asc(),
-                data_preProcessing_analysis.component_name.asc(),
-                ).all();
-            data_O=[];
-            for d in data_O:
-                data_O.append(d.__repr_dict__())
-            return data_O;
         except SQLAlchemyError as e:
             print(e);

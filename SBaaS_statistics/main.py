@@ -151,7 +151,8 @@ dpprep01.initialize_supportedTables();
 dpprep01.initialize_tables();
 
 analysis_ids_run = [
-        "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
+        'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
+        #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0',
         #"rpomut02",
         #"chemoCLim01",
@@ -184,12 +185,28 @@ distance_measures=[
     ];
 correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient > 0.88 = pvalue < 0.05
 
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+    #dpprep01.execute_deleteMissingValues(
+    #    analysis_id_I = analysis_id,
+    #    calculated_concentration_units_I = [],
+    #    value_I = 0.0,
+    #    operator_I = "="
+    #    );
+    dpprep01.execute_imputeMissingValues_replicatesPerCondition(
+        analysis_id_I = analysis_id,
+        imputation_method_I = 'ameliaII',
+        imputation_options_I = {'n_imputations':1000},
+        r_calc_I=r_calc);
+    dpprep01.execute_imputeMissingValues(
+        analysis_id,
+        imputation_method_I = 'value',
+        imputation_options_I = {'value':1e-6},
+        );
     ## normalize the data using a glog normalization
     #norm01.reset_dataStage02_quantification_glogNormalized(analysis_id);
     #norm01.execute_glogNormalization(analysis_id,r_calc_I=r_calc);

@@ -15,13 +15,13 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                 analysis_id_I,
                 geneShortName2componentName_I = {},
                 geneShortName2componentGroupName_I = {},
-                snsPreProcessing2snRNASequencing_I = {}
+                sns2snsRNASequencing_I = {}
                 ):
         '''get the the genes.fpkm_tracking data from SBaaS_rnasequencing
         INPUT:
         geneShortName2componentName_I = {}, mapping of gene_short_name to component_name
         geneShortName2componentGroupName_I = {}, mapping of gene_short_name to component_group_name
-        sns2snRNASequencing_I = {
+        sns2snsRNASequencing_I = {
                                 'OxicEvo04Ecoli13CGlc':'OxicEvo04EcoliGlc',
                                 'OxicEvo04gndEcoli13CGlc':'OxicEvo04gndEcoliGlc',
                                 'OxicEvo04pgiEcoli13CGlc':'OxicEvo04pgiEcoliGlc',
@@ -37,7 +37,7 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
         for analysis_row in analysis_rows:
             # query fpkm data:
             fpkms = [];
-            if snsPreProcessing2snRNASequencing_I: sample_name = snsPreProcessing2snRNASequencing_I[analysis_row['sample_name_short']];
+            if sns2snsRNASequencing_I: sample_name = sns2snsRNASequencing_I[analysis_row['sample_name_short']];
             else: sample_name = analysis_row['sample_name_short'];
             fpkms = rnasequencing_genesFpkmTracking_query.get_rows_experimentIDAndSampleName_dataStage01RNASequencingGenesFpkmTracking(analysis_row['experiment_id'],sample_name);
             # map the data

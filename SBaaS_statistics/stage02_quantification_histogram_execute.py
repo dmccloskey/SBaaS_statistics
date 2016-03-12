@@ -4,6 +4,8 @@ from .stage02_quantification_histogram_dependencies import stage02_quantificatio
 from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 #sbaas models
 from .stage02_quantification_histogram_postgresql_models import *
 #resources
@@ -14,7 +16,8 @@ class stage02_quantification_histogram_execute(
             stage02_quantification_normalization_query,
             stage02_quantification_descriptiveStats_query,
             stage02_quantification_analysis_query,
-            stage02_quantification_histogram_dependencies
+            stage02_quantification_histogram_dependencies,
+            stage02_quantification_dataPreProcessing_replicates_query
             ):
     def execute_binFeatures(self,analysis_id_I,features_I=[],feature_units_I=[],n_bins_I=[]):
         '''bin features of continuous data from the normalized data
@@ -39,7 +42,8 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    data_hist = self.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,feature_units);
+                    data_hist = self.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,feature_units);
+                    #data_hist = self.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
                         x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);

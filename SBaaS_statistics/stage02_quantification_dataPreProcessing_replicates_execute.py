@@ -53,7 +53,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 ncols = None;
                 ncols = self.getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
                 nvalues = nrows*ncols;
-                mv = ntablerows - nvalues;
+                mv = nvalues - ntablerows;
             else:
                 mv = None;
                 mv = self.getCount_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
@@ -229,7 +229,8 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
     def execute_imputeMissingValues_replicatesPerCondition(self,
             analysis_id_I,
             imputation_method_I = 'ameliaII',
-            imputation_options_I = {'n_imputations':1000},
+            imputation_options_I = {'n_imputations':1000,
+                                'geometric_imputation':True},
             calculated_concentration_units_I=[],
             experiment_ids_I=[],
             sample_name_abbreviations_I=[],
@@ -256,8 +257,8 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             time_points_I=time_points_I,
             );
         for row in unique_groups:
-            data = [];
-            data = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(
+            data_mv = [];
+            data_mv = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,
                 row['calculated_concentration_units'],
                 row['experiment_id'],
@@ -266,22 +267,25 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 );
             # compute missing values
             if imputation_method_I == 'ameliaII':
-                dataListUpdated = [];
-                sns_NA = [];
-                cn_NA = [];
-                cc_NA = [];
-                sns_NA, cn_NA, cc_NA = r_calc.calculate_missingValues(
-                    data,
-                    imputation_options_I['n_imputations']
+                data_update = [];
+                data_update = r_calc.calculate_missingValues(
+                    data_mv,
+                    imputation_options_I['n_imputations'],
+                    imputation_options_I['geometric_imputation']
                     );
-                for n in range(len(sns_NA)):
-                    component_group_name = None;
-                    # update data_stage01_quantification_replicatesMI
-                    row = data_stage01_quantification_replicatesMI(experiment_id_I,sns_NA[n],tp,component_group_name,cn_NA[n],"AmeliaII",None,cc_NA[n],calculated_concentration_units,True,None);
+                if data_update:
+                    data_new_unique = list(set([(y['experiment_id'],y['sample_name_short'],y['time_point'],y['component_name']) for y in data_update])-set([(x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) for x in data_mv]));
+                    data_new = [x for x in data_update if (x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) in data_new_unique];
+                    data_O.extend(data_new);
             elif imputation_method_I == 'mean_row_condition':
                 pass;
             elif imputation_method_I == 'mean_condition':
                 pass;
+            else:
+                print('imputation_method_I not recognized.');
+        #add the data to the DB
+        if data_O:
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
             # record data imputation method
             tmp = {
                 "analysis_id":analysis_id_I,
@@ -289,13 +293,12 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 "imputation_options":imputation_options_I,
                 "normalization_method":None,
                 "normalization_options":None,
-                'calculated_concentration_units':cu,
+                'calculated_concentration_units':row['calculated_concentration_units'],
                 "used_":True,
                 'comment_I':None
                 }
             data_imputations.append(tmp);
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
     def execute_imputeMissingValues(self,
             analysis_id_I,
             calculated_concentration_units_I=[],

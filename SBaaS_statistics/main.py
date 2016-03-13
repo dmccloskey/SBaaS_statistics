@@ -185,23 +185,86 @@ distance_measures=[
     ];
 correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient > 0.88 = pvalue < 0.05
 
+mv_value_operator = [
+    {'value':None,'operator':'NA'},
+    {'value':0.0,'operator':'<='},
+    ]
+
 # Load R once
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    #dpprep01.execute_deleteMissingValues(
-    #    analysis_id_I = analysis_id,
-    #    calculated_concentration_units_I = [],
-    #    value_I = 0.0,
-    #    operator_I = "="
-    #    );
+    ##get the replicate data and check for missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #       tables_I = [
+    #                   'data_stage02_quantification_dataPreProcessing_replicates',
+    #                   'data_stage02_quantification_dataPreProcessing_replicates_im',
+    #                   'data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                   ],
+    #       analysis_id_I = analysis_id,
+    #       warn_I=False);
+    #dpprep01.import_dataStage01RNASequencingGenesFpkmTracking(
+    #   analysis_id,
+    #   sns2snsRNASequencing_I={
+    #        'OxicEvo04EcoliGlcM9_Broth-4':'140818_0_OxicEvo04EcoliGlcM9_Broth-4',
+    #        'OxicEvo04EcoliGlcM9_Broth-5':'140818_0_OxicEvo04EcoliGlcM9_Broth-5',
+    #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-1':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-1',
+    #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-2':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-2',
+    #        },
+    #   );
+    #count the number of missing values
+    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+                        ],
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    for row in mv_value_operator:
+        dpprep01.execute_countMissingValues(
+            analysis_id,
+            value_I = row['value'],
+            operator_I = row['operator'],
+        );
+    #remove 0.0 values
+    dpprep01.execute_deleteMissingValues(
+        analysis_id_I = analysis_id,
+        calculated_concentration_units_I = [],
+        value_I = 0.0,
+        operator_I = "<="
+        );
+    #count the number of missing values
+    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+                        ],
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    for row in mv_value_operator:
+        dpprep01.execute_countMissingValues(
+            analysis_id,
+            value_I = row['value'],
+            operator_I = row['operator'],
+        );
+    #impute missing values
     dpprep01.execute_imputeMissingValues_replicatesPerCondition(
         analysis_id_I = analysis_id,
         imputation_method_I = 'ameliaII',
-        imputation_options_I = {'n_imputations':1000},
+        imputation_options_I = {'n_imputations':1000,
+                                'geometric_imputation':True},
         r_calc_I=r_calc);
+    #count the number of missing values
+    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+                        ],
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    for row in mv_value_operator:
+        dpprep01.execute_countMissingValues(
+            analysis_id,
+            value_I = row['value'],
+            operator_I = row['operator'],
+        );
+    #fill in any remaining missing values with a low number
     dpprep01.execute_imputeMissingValues(
         analysis_id,
         imputation_method_I = 'value',

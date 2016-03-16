@@ -11,11 +11,11 @@ from ddt_python.ddt_container import ddt_container
 
 class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairWiseCorrelation_query,sbaas_template_io):
 
-    def stage02_quantification_pairWiseCorrelation_correlation_js(self,):
+    def export_dataStage02QuantificationPairWiseCorrelation_js(self,):
         '''table of correlations'''
         pass;
 
-    def stage02_quantification_pairWiseCorrelationReplicates_correlation_js(self,):
+    def export_dataStage02QuantificationPairWiseCorrelationReplicates_js(self,):
         '''table of correlations'''
         pass;
    

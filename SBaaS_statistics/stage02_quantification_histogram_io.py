@@ -49,6 +49,7 @@ class stage02_quantification_histogram_io(stage02_quantification_histogram_query
         # visualization parameters
         data1_keys = ['feature_id',
                       'feature_units',
+                      'bin',
                       ];
         data1_nestkeys = [
             'bin'
@@ -122,6 +123,7 @@ class stage02_quantification_histogram_io(stage02_quantification_histogram_query
                 svgtileparameters1_O.update(svgparameters1_O);
                 parametersobject_O.append(svgtileparameters1_O);
                 tile2datamap_O.update({svgtileid:[iter]});
+                #tile2datamap_O["filtermenu1"].append(iter);
                 cnt+=1;
         else:
             cnt = 0;
@@ -151,6 +153,7 @@ class stage02_quantification_histogram_io(stage02_quantification_histogram_query
             svgtileparameters1_O.update(svgparameters1_O);
             parametersobject_O.append(svgparameters1_O);
             tile2datamap_O.update({svgtileid:[1]});
+            #tile2datamap_O["filtermenu1"].append(1);
             
         # make the table object
         tableparameters1_O = {

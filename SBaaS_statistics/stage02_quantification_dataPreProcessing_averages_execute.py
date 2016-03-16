@@ -24,22 +24,22 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             # query the number of rows
             ntablerows = None;
-            ntablerows = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+            ntablerows = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,
                 column_name_I = 'analysis_id',
                 aggregate_function_I='count',
                 query_I={'where':[
-                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                    {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                     'column_name':'analysis_id',
                     'value':analysis_id_I,
                     'operator':'LIKE',
                     'connector':'AND'
                     },
-                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                    {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                     'column_name':'calculated_concentration_units',
                     'value':cu,
                     'operator':'LIKE',
@@ -50,32 +50,32 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             if value_I is None:
                 # query the number of unique component_name
                 nrows = None;
-                nrows = self.getCount_componentNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+                nrows = self.getCount_componentNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
                 # query the number of unique sample_name_short/experiment_id/time_point
                 ncols = None;
-                ncols = self.getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+                ncols = self.getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
                 nvalues = nrows*ncols;
                 mv = nvalues - ntablerows;
             else:
                 mv = None;
-                mv = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                mv = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingAverages(
                     analysis_id_I,
                     column_name_I = 'analysis_id',
                     aggregate_function_I='count',
                     query_I={'where':[
-                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                         'column_name':'analysis_id',
                         'value':analysis_id_I,
                         'operator':'LIKE',
                         'connector':'AND'
                         },
-                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                         'column_name':'calculated_concentration_units',
                         'value':cu,
                         'operator':'LIKE',
                         'connector':'AND'
                         },
-                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                         'column_name':'calculated_concentration',
                         'value':value_I,
                         'operator':operator_I,
@@ -96,7 +96,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 'comment_I':None}
             data_O.append(tmp);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_mv',data_O);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages_mv',data_O);
     def execute_deleteMissingValues(self,
                 analysis_id_I,
                 calculated_concentration_units_I=[],
@@ -116,9 +116,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
         for cu_cnt,cu in enumerate(calculated_concentration_units):
-            self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(
+            self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I = analysis_id_I,
                 calculated_concentration_units_I = cu,
                 value_I = value_I,
@@ -151,12 +151,12 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
         for cu in calculated_concentration_units:
             print('calculating normalization for concentration_units ' + cu);
             # get the data set
             data = [];
-            data = self.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            data = self.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,
                 cu,
                 query_I={},
@@ -194,8 +194,8 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 'comment_I':None
                 };
             data_normalizations.append(tmp);
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_normalized);
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_normalizations);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_normalized);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages_im',data_normalizations);
         
     def execute_normalization_rowWise(self,
             analysis_id_I,
@@ -256,7 +256,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
         data_imputations = [];
         # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points that are unique
         unique_groups = [];
-        unique_groups = self.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndSampleNameShortsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+        unique_groups = self.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages(
             analysis_id_I,
             calculated_concentration_units_I=calculated_concentration_units_I,
             experiment_ids_I=experiment_ids_I,
@@ -265,7 +265,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             );
         for row in unique_groups:
             data_mv = [];
-            data_mv = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(
+            data_mv = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,
                 row['calculated_concentration_units'],
                 row['experiment_id'],
@@ -306,8 +306,8 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 data_imputations.append(tmp);
         #add the data to the DB
         if data_O:
-            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
-            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages_im',data_imputations);
         else:
             print('no missing values found.');
     def execute_imputeMissingValues(self,
@@ -330,21 +330,17 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
         for cu in calculated_concentration_units:
             print('calculating normalization for concentration_units ' + cu);
             #get all component_names and component_group_names for the analysis
             all_components = [];
-            all_components = self.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            all_components = self.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,cu);
             all_components_dict =  {row['component_name']:row['component_group_name'] for row in all_components};
             #get the components for each column (i.e., replicate)
             unique_groups = [];
-            ##split1:
-            #unique_groups = self.getGroup_analysisIDAndExperimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-            #    analysis_id_I,cu);
-            #split2
-            unique_groups = self.get_analysisIDAndExperimentIDsAndSampleNameShortsAndTimePoints_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            unique_groups = self.get_analysisIDAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,cu,
                 experiment_ids_I,
                 sample_name_shorts_I,
@@ -384,19 +380,19 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                             pass;
                         elif imputation_method_I == 'min_data':
                             value_new = None;
-                            value_new = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                            value_new = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingAverages(
                                 analysis_id_I,
                                 column_name_I = 'calculated_concentration',
                                 aggregate_function_I='min',
                                 aggregate_label_I='min_1',
                                 query_I={'where':[
-                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                                     'column_name':'analysis_id',
                                     'value':analysis_id_I,
                                     'operator':'LIKE',
                                     'connector':'AND'
                                     },
-                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                                     'column_name':'calculated_concentration_units',
                                     'value':cu,
                                     'operator':'LIKE',
@@ -433,7 +429,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 data_imputations.append(tmp);
         # add the data to the DB
         if data_O:
-            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
-            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages_im',data_imputations);
         else:
             print('no missing values found.');

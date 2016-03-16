@@ -22,6 +22,10 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="stage02_quantification_dataPreProcessing_averages_execute.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_averages_io.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_averages_postgresql_models.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_averages_query.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_execute.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_io.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_postgresql_models.py" />

@@ -185,14 +185,18 @@ distance_measures=[
     ];
 correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient > 0.88 = pvalue < 0.05
 
+#RNAsequencing
 mv_value_operator = [
     {'value':None,'operator':'NA'},
     {'value':0.0,'operator':'<='},
     ]
+features_histogram = ['calculated_concentration'];
+feature_units = ['FPKM','FPKM_log2_normalized'];
+n_bins_histogram = [];
 
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();
+## Load R once
+#from r_statistics.r_interface import r_interface
+#r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
@@ -212,64 +216,89 @@ for analysis_id in analysis_ids_run:
     #        'OxicEvo04EcoliGlcM9_Broth-5':'140818_0_OxicEvo04EcoliGlcM9_Broth-5',
     #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-1':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-1',
     #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-2':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-2',
+    #        'OxicEvo04Evo02EPEcoliGlcM9_Broth-1':'140815_11_OxicEvo04Evo02EPEcoliGlcM9_Broth-1',
+    #        'OxicEvo04Evo02EPEcoliGlcM9_Broth-2':'140815_11_OxicEvo04Evo02EPEcoliGlcM9_Broth-2',
     #        },
     #   );
-    #count the number of missing values
-    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-                        ],
-            analysis_id_I = analysis_id,
-            warn_I=False);
-    for row in mv_value_operator:
-        dpprep01.execute_countMissingValues(
-            analysis_id,
-            value_I = row['value'],
-            operator_I = row['operator'],
-        );
-    #remove 0.0 values
-    dpprep01.execute_deleteMissingValues(
-        analysis_id_I = analysis_id,
-        calculated_concentration_units_I = [],
-        value_I = 0.0,
-        operator_I = "<="
-        );
-    #count the number of missing values
-    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-                        ],
-            analysis_id_I = analysis_id,
-            warn_I=False);
-    for row in mv_value_operator:
-        dpprep01.execute_countMissingValues(
-            analysis_id,
-            value_I = row['value'],
-            operator_I = row['operator'],
-        );
-    #impute missing values
-    dpprep01.execute_imputeMissingValues_replicatesPerCondition(
-        analysis_id_I = analysis_id,
-        imputation_method_I = 'ameliaII',
-        imputation_options_I = {'n_imputations':1000,
-                                'geometric_imputation':True},
-        r_calc_I=r_calc);
-    #count the number of missing values
-    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-            tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-                        ],
-            analysis_id_I = analysis_id,
-            warn_I=False);
-    for row in mv_value_operator:
-        dpprep01.execute_countMissingValues(
-            analysis_id,
-            value_I = row['value'],
-            operator_I = row['operator'],
-        );
-    #fill in any remaining missing values with a low number
-    dpprep01.execute_imputeMissingValues(
-        analysis_id,
-        imputation_method_I = 'value',
-        imputation_options_I = {'value':1e-6},
-        );
+    ##count the number of missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                    ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #for row in mv_value_operator:
+    #    dpprep01.execute_countMissingValues(
+    #        analysis_id,
+    #        value_I = row['value'],
+    #        operator_I = row['operator'],
+    #    );
+    ##remove 0.0 values
+    #dpprep01.execute_deleteMissingValues(
+    #    analysis_id_I = analysis_id,
+    #    calculated_concentration_units_I = [],
+    #    value_I = 0.0,
+    #    operator_I = "<="
+    #    );
+    ##count the number of missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                    ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #for row in mv_value_operator:
+    #    dpprep01.execute_countMissingValues(
+    #        analysis_id,
+    #        value_I = row['value'],
+    #        operator_I = row['operator'],
+    #    );
+    ##impute missing values
+    #dpprep01.execute_imputeMissingValues_replicatesPerCondition(
+    #    analysis_id_I = analysis_id,
+    #    imputation_method_I = 'ameliaII',
+    #    imputation_options_I = {'n_imputations':1000,
+    #                            'geometric_imputation':True},
+    #    r_calc_I=r_calc);
+    ##count the number of missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                    ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #for row in mv_value_operator:
+    #    dpprep01.execute_countMissingValues(
+    #        analysis_id,
+    #        value_I = row['value'],
+    #        operator_I = row['operator'],
+    #    );
+    ##fill in any remaining missing values with a low number
+    #dpprep01.execute_imputeMissingValues(
+    #    analysis_id,
+    #    imputation_method_I = 'min_data',
+    #    imputation_options_I = {'scale':1.0},
+    #    #imputation_method_I = 'value',
+    #    #imputation_options_I = {'value':1e-6},
+    #    );
+    ##count the number of missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                    ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #for row in mv_value_operator:
+    #    dpprep01.execute_countMissingValues(
+    #        analysis_id,
+    #        value_I = row['value'],
+    #        operator_I = row['operator'],
+    #    );
+    ##normalize the data
+    #dpprep01.execute_normalization(
+    #        analysis_id,
+    #        calculated_concentration_units_I=[],
+    #        normalization_method_I='log2',
+    #        normalization_options_I={},
+    #        r_calc_I=r_calc
+    #        );
+
     ## normalize the data using a glog normalization
     #norm01.reset_dataStage02_quantification_glogNormalized(analysis_id);
     #norm01.execute_glogNormalization(analysis_id,r_calc_I=r_calc);
@@ -323,7 +352,7 @@ for analysis_id in analysis_ids_run:
     #        crossValidation_type="krzanowski",
     #        );
     ## perform a pair-wise comparison of each sample in the normalized data set
-    #pairWiseTable01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
     #        tables_I = [], 
     #        analysis_id_I = analysis_id);
     #pairWiseTable01.execute_pairwiseTableReplicates(analysis_id);
@@ -350,6 +379,7 @@ for analysis_id in analysis_ids_run:
     #        'height_ratio',
     #    ],
     #    r_calc_I=r_calc);
+
     ## bin the data
     #hist01.reset_dataStage02_quantification_histogram(analysis_id_I = analysis_id);
     #hist01.execute_binFeatures(
@@ -358,6 +388,7 @@ for analysis_id in analysis_ids_run:
     #    feature_units_I = feature_units,
     #    n_bins_I = n_bins_histogram,
     #    );
+
     ## count the data
     #count01.reset_dataStage02_quantification_countCorrelationProfile(analysis_id_I = analysis_id);
     #count01.execute_countElementsInFeatures_correlationProfile(
@@ -473,22 +504,29 @@ for analysis_id in analysis_ids_run:
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
-pairWiseTable01.stage02_quantification_pairWiseTableReplicates_scatterPlot_js(
-    "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
-    query_I = {'where':[
-        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-        'column_name':'sample_name_abbreviation_1',
-        'value':'OxicEvo04EcoliGlc',
-        'operator':'LIKE',
-        'connector':'AND'
-            },
-        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-        'column_name':'sample_name_abbreviation_2',
-        'value':'OxicEvo04EcoliGlc',
-        'operator':'LIKE',
-        'connector':'AND'
-            },
-    ]
-    },
+pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
+    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+    query_I = {},
+    #{'where':[
+    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+    #    'column_name':'sample_name_abbreviation_1',
+    #    'value':'OxicEvo04EcoliGlc',
+    #    'operator':'LIKE',
+    #    'connector':'AND'
+    #        },
+    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+    #    'column_name':'sample_name_abbreviation_2',
+    #    'value':'OxicEvo04EcoliGlc',
+    #    'operator':'LIKE',
+    #    'connector':'AND'
+    #        },
+    #    #{"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+    #    #'column_name':'calculated_concentration_units',
+    #    #'value':'FPKM_log2_normalized',
+    #    #'operator':'LIKE',
+    #    #'connector':'AND'
+    #    #    },
+    #]
+    #},
     single_plot_I=True
     );

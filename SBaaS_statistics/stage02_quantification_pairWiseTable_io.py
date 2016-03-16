@@ -10,14 +10,15 @@ from io_utilities.base_exportData import base_exportData
 from ddt_python.ddt_container_filterMenuAndChart2dAndTable import ddt_container_filterMenuAndChart2dAndTable
 
 class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTable_query,sbaas_template_io):
-    def stage02_quantification_pairWiseTable_scatterPlot_js(self,):
+    def export_dataStage02QuantificationPairWiseTable_js(self,):
         '''pairwise scatter plot'''
         pass;
-    def stage02_quantification_pairWiseTableReplicates_scatterPlot_js(self,analysis_id_I,
-                        query_I=None,
-                        single_plot_I=False,
+    def export_dataStage02QuantificationPairWiseTableReplicates_js(self,analysis_id_I,
+                        query_I={},
+                        single_plot_I=True,
                         data_dir_I='tmp'):
-        '''pairwise scatter plot
+        '''
+        pairwise scatter plot
         '''
 
         data_O = self.get_rows_analysisID_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,
@@ -35,6 +36,8 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
         # make the tile objects  
         #data1 = filter menu and table    
         data1_keys = ['analysis_id',
+                      'sample_name_abbreviation_1',
+                      'sample_name_abbreviation_2',
                       'sample_name_short_1',
                       'sample_name_short_2',
                       'component_name',

@@ -267,3 +267,90 @@ class stage02_quantification_count_execute(
                 print("feature not yet supported");
         #add the data to the database
         self.add_dataStage02QuantificationCountCorrelationPattern(data_O);
+
+    def execute_countElementsInFeatures_replicates(self,
+            analysis_id_I,
+            features_I=['calculated_concentrations','experiment_id','time_point','sample_name_short'],
+            feature_units_I=['umol*gDW-1_glog_normalized','umol*gDW-1','height','height_glog_normalized','ratio','ratio_glog_normalized'],
+            value_I=0.0,
+            operator_I = '<'):
+        '''count unique features of discrete or categorical data from data_stage02_correlation_pattern
+        INPUT:
+        analysis_id_I = string,
+        features_I = [] of string, e.g. ['pattern_match', 'component_match', 'pattern_match_description']
+
+        feature_units_I = [] of string, e.g. ['umol*gDW-1_glog_normalized','umol*gDW-1','height','height_glog_normalized','ratio','ratio_glog_normalized']'
+
+        OUTPUT:
+
+        TODO:...
+        '''
+        supported_comparators = ['>','<']
+        data_O = [];
+        calculatecount = calculate_count();
+        #count each element of eachfeature
+        for features_cnt,features in enumerate(features_I):
+            if features == 'pattern_match':
+                for feature_units in feature_units_I:
+                    for distance in distance_measures_I:
+                        for k,v in correlation_coefficient_thresholds_I.items():
+                            if not k in supported_comparators:
+                                print(k + " not yet supported");
+                                continue;
+                            #get all the data for the analysis
+                            data_count = [];
+                            data_count= self.get_allPatternMatch_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnitsAndComparatorAndCorrelationCoefficient_dataStage02QuantificationCorrelationPattern(analysis_id_I,feature_units,distance,k,v);
+                            #count the elements of each feature
+                            if data_count:
+                                elements_unqiue,elements_count ,elements_count_fraction = calculatecount.count_elements(data_count);
+                                correlationCoefficient_threshold_string = self.make_correlationCoefficientThresholdStr(k,v);
+                                data_O.extend(
+                                    self.record_count_correlation(analysis_id_I,
+                                        features,feature_units,
+                                        distance,correlationCoefficient_threshold_string,
+                                        elements_unqiue,elements_count,elements_count_fraction)) ;
+            elif features == 'pattern_match_description':
+                for feature_units in feature_units_I:
+                    for distance in distance_measures_I:
+                        for k,v in correlation_coefficient_thresholds_I.items():
+                            if not k in supported_comparators:
+                                print(k + " not yet supported");
+                                continue;
+                            #get all the data for the analysis
+                            data_count = [];
+                            data_count= self.get_allPatternMatchDescription_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnitsAndComparatorAndCorrelationCoefficient_dataStage02QuantificationCorrelationPattern(analysis_id_I,feature_units,distance,k,v);
+                            #count the elements of each feature
+                            if data_count:
+                                elements_unqiue,elements_count ,elements_count_fraction = calculatecount.count_elements(data_count);
+                                correlationCoefficient_threshold_string = self.make_correlationCoefficientThresholdStr(k,v);
+                                data_O.extend(
+                                    self.record_count_correlation(analysis_id_I,
+                                        features,feature_units,
+                                        distance,correlationCoefficient_threshold_string,
+                                        elements_unqiue,elements_count,elements_count_fraction)) ;
+            elif features == 'component_match':
+                for feature_units in feature_units_I:
+                    for distance in distance_measures_I:
+                        for k,v in correlation_coefficient_thresholds_I.items():
+                            if not k in supported_comparators:
+                                print(k + " not yet supported");
+                                continue;
+                            #get all the data for the analysis
+                            data_count = [];
+                            data_count= self.get_allComponentMatch_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnitsAndComparatorAndCorrelationCoefficient_dataStage02QuantificationCorrelationPattern(analysis_id_I,feature_units,distance,k,v);
+                            #count the elements of each feature
+                            if data_count:
+                                elements_unqiue,elements_count ,elements_count_fraction = calculatecount.count_elements(data_count);
+                                correlationCoefficient_threshold_string = self.make_correlationCoefficientThresholdStr(k,v);
+                                data_O.extend(
+                                    self.record_count_correlation(analysis_id_I,
+                                        features,feature_units,
+                                        distance,correlationCoefficient_threshold_string,
+                                        elements_unqiue,elements_count,elements_count_fraction)) ;
+            else:
+                print("feature not yet supported");
+        #add the data to the database
+        self.add_dataStage02QuantificationCountCorrelationPattern(data_O);
+
+    def execute_countElementsInFeatures_descriptiveStats(self,):
+        ''' '''

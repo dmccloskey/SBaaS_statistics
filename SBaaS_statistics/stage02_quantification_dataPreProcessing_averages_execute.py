@@ -1,10 +1,10 @@
-﻿from .stage02_quantification_dataPreProcessing_replicates_io import stage02_quantification_dataPreProcessing_replicates_io
+﻿from .stage02_quantification_dataPreProcessing_averages_io import stage02_quantification_dataPreProcessing_averages_io
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 #resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_statisticsDescriptive import calculate_statisticsDescriptive
 
-class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quantification_dataPreProcessing_replicates_io,
+class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantification_dataPreProcessing_averages_io,
                                            stage02_quantification_analysis_query):
     def execute_countMissingValues(self,
                 analysis_id_I,

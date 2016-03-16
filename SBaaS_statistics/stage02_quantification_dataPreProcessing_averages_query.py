@@ -8,9 +8,9 @@ from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
-from .stage02_quantification_dataPreProcessing_replicates_postgresql_models import *
+from .stage02_quantification_dataPreProcessing_averages_postgresql_models import *
 
-class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_query,
+class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_query,
                                        ):
     def initialize_supportedTables(self):
         '''Set the supported tables dict for data_stage02_quantification_dataPreProcessing_averages
@@ -58,7 +58,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 queryupdate.update_rows_sqlalchemyModel(model_I,data_I);
             except Exception as e:
                 print(e);
-    def initialize_stage02_quantification_dataPreProcessing_replicates(self,
+    def initialize_stage02_quantification_dataPreProcessing_averages(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -69,7 +69,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 queryinitialize.initialize_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def drop_stage02_quantification_dataPreProcessing_replicates(self,
+    def drop_stage02_quantification_dataPreProcessing_averages(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -80,7 +80,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 querydrop.drop_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def reset_stage02_quantification_dataPreProcessing_replicates(self,
+    def reset_stage02_quantification_dataPreProcessing_averages(self,
             tables_I = [],
             analysis_id_I = None,
             warn_I=True):

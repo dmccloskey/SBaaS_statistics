@@ -150,6 +150,13 @@ dpprep01.initialize_supportedTables();
 #dpprep01.drop_tables();
 dpprep01.initialize_tables();
 
+#make the dataPreProcessing tables
+from SBaaS_statistics.stage02_quantification_dataPreProcessing_averages_execute import stage02_quantification_dataPreProcessing_averages_execute
+dpprep01 = stage02_quantification_dataPreProcessing_averages_execute(session,engine,pg_settings.datadir_settings);
+dpprep01.initialize_supportedTables();
+#dpprep01.drop_tables();
+dpprep01.initialize_tables();
+
 analysis_ids_run = [
         'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",

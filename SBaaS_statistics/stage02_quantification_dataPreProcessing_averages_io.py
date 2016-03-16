@@ -1,7 +1,7 @@
 # System
 import json
 # SBaaS
-from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # SBaaS_resequencing
 from SBaaS_resequencing.stage01_resequencing_mutationsAnnotated_query import stage01_resequencing_mutationsAnnotated_query
@@ -11,7 +11,7 @@ from SBaaS_rnasequencing.stage01_rnasequencing_geneExpDiff_query import stage01_
 # Resources
 from python_statistics.calculate_interface import calculate_interface
 
-class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantification_dataPreProcessing_replicates_query,
+class stage02_quantification_dataPreProcessing_averages_io(stage02_quantification_dataPreProcessing_averages_query,
                                     sbaas_template_io #abstract io methods
                                     ):
     #Query data from Requencing:
@@ -108,14 +108,14 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
     #Query data from RNASequencing:
     def import_dataStage01RNASequencingGeneExpDiff(self,
                 analysis_id_I,
-                geneShortName2componentName_I = {},
-                geneShortName2componentGroupName_I = {},
+                geneID2componentName_I = {},
+                gene2componentGroupName_I = {},
                 sna2snaRNASequencing_I = {}
                 ):
         '''get the the genes.fpkm_tracking data from SBaaS_rnasequencing
         INPUT:
-        geneShortName2componentName_I = {}, mapping of gene_short_name to component_name
-        geneShortName2componentGroupName_I = {}, mapping of gene_short_name to component_group_name
+        geneID2componentName_I = {}, mapping of gene_short_name to component_name
+        gene2componentGroupName_I = {}, mapping of gene_short_name to component_group_name
         sna2snaRNASequencing_I = {}
         OUTPUT:
         TODO:...
@@ -124,10 +124,6 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
         # get the analysis information
         analysis_rows = [];
         analysis_rows = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
-        # get the # of replicates per sample_name_abbreviation
-        sample_name_dict = {};
-        #sample_name_dict = self.(analysis_id_I);
-
         data_O = [];
         for sample_name_abbreviation_cnt_1,sample_name_abbreviation_1 in enumerate(sample_name_abbreviations):
             for sample_name_abbreviation_cnt_2,sample_name_abbreviation_2 in enumerate(sample_name_abbreviations):
@@ -141,19 +137,19 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                     for fpkm in geneExpDiff_tmp:
                         row = {};
                         row['analysis_id']=analysis_id_I;
-                        row['experiment_id']=('%s/%s' %(analysis_row_1['experiment_id']),analysis_row_2['experiment_id']);
-                        row['time_point']=('%s/%s' %(analysis_row_1['time_point_1']),analysis_row_2['time_point']);
-                        row['sample_name_abbreviation']=('%s/%s' %(analysis_row_1['sample_name_abbreviation']),analysis_row_2['sample_name_abbreviation']);
+                        row['experiment_id']=('%s/%s' %(analysis_row_2['experiment_id']),analysis_row_1['experiment_id']);
+                        row['time_point']=('%s/%s' %(analysis_row_2['time_point']),analysis_row_1['time_point']);
+                        row['sample_name_abbreviation']=('%s/%s' %(analysis_row_2['sample_name_abbreviation']),analysis_row_1['sample_name_abbreviation']);
                         row['used_']=fpkm['used_']
                         row['comment_']=fpkm['comment_'];  
-                        if geneShortName2componentName_I:
-                            row['component_name']=geneShortName2componentName_I[fpkm['gene_id']];
+                        if geneID2componentName_I:
+                            row['component_name']=geneID2componentName_I[fpkm['gene_id']];
                         else:
-                            row['component_name']=fpkm['gene_short_name'] + '_' + fpkm['gene_id'];
-                        if geneShortName2componentGroupName_I:
-                            row['component_group_name']=geneShortName2componentGroupName_I[fpkm['gene_short_name']];
+                            row['component_name']=fpkm['gene'] + '_' + fpkm['gene_id'];
+                        if gene2componentGroupName_I:
+                            row['component_group_name']=gene2componentGroupName_I[fpkm['gene']];
                         else:
-                            row['component_group_name']=fpkm['gene_short_name'];
+                            row['component_group_name']=fpkm['gene'];
                         row['calculated_concentration_units']='log2(FC)';
                         #descriptive statistics map
                         data_mean,data_median = fpkm['fold_change_log2'],fpkm['fold_change_log2'];
@@ -169,7 +165,7 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                         row['mean']=mean;
                         row['var']=var;
                         row['cv']=data_cv;
-                        row['n']=1;
+                        row['n']=None;
                         row['ci_lb']=data_lb;
                         row['ci_ub']=data_ub;
                         row['ci_level']=0.95;

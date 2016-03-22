@@ -797,9 +797,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
                 data_stage02_quantification_dataPreProcessing_replicates.component_name.asc(),
                 ).all();
-            data_O=[];
-            for d in data:
-                data_O.append(d.__repr__dict__())
+            data_O=[d.__repr__dict__() for d in data];
             return data_O;
         except SQLAlchemyError as e:
             print(e);

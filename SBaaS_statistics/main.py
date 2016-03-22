@@ -152,10 +152,10 @@ dpprep01.initialize_tables();
 
 #make the dataPreProcessing tables
 from SBaaS_statistics.stage02_quantification_dataPreProcessing_averages_execute import stage02_quantification_dataPreProcessing_averages_execute
-dpprep01 = stage02_quantification_dataPreProcessing_averages_execute(session,engine,pg_settings.datadir_settings);
-dpprep01.initialize_supportedTables();
-#dpprep01.drop_tables();
-dpprep01.initialize_tables();
+dppave01 = stage02_quantification_dataPreProcessing_averages_execute(session,engine,pg_settings.datadir_settings);
+dppave01.initialize_supportedTables();
+#dppave01.drop_tables();
+dppave01.initialize_tables();
 
 analysis_ids_run = [
         'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
@@ -201,9 +201,9 @@ features_histogram = ['calculated_concentration'];
 feature_units = ['FPKM','FPKM_log2_normalized'];
 n_bins_histogram = [];
 
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
@@ -336,6 +336,11 @@ for analysis_id in analysis_ids_run:
     #        r_calc_I=r_calc,
     #        svd_method_I = k,
     #        );
+    ## check for outliers using oneClassSVM
+    outliers01.execute_calculateOutliersOneClassSVM(
+        analysis_id,
+        calculated_concentration_units_I = ['FPKM_log2_normalized'],
+        );
     ## check for groupings of samples and outliers in the normalized data set using PCA
     #pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
     #pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);
@@ -511,29 +516,29 @@ for analysis_id in analysis_ids_run:
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
-pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
-    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
-    query_I = {},
-    #{'where':[
-    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-    #    'column_name':'sample_name_abbreviation_1',
-    #    'value':'OxicEvo04EcoliGlc',
-    #    'operator':'LIKE',
-    #    'connector':'AND'
-    #        },
-    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-    #    'column_name':'sample_name_abbreviation_2',
-    #    'value':'OxicEvo04EcoliGlc',
-    #    'operator':'LIKE',
-    #    'connector':'AND'
-    #        },
-    #    #{"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-    #    #'column_name':'calculated_concentration_units',
-    #    #'value':'FPKM_log2_normalized',
-    #    #'operator':'LIKE',
-    #    #'connector':'AND'
-    #    #    },
-    #]
-    #},
-    single_plot_I=True
-    );
+#pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
+#    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+#    query_I = {},
+#    #{'where':[
+#    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#    #    'column_name':'sample_name_abbreviation_1',
+#    #    'value':'OxicEvo04EcoliGlc',
+#    #    'operator':'LIKE',
+#    #    'connector':'AND'
+#    #        },
+#    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#    #    'column_name':'sample_name_abbreviation_2',
+#    #    'value':'OxicEvo04EcoliGlc',
+#    #    'operator':'LIKE',
+#    #    'connector':'AND'
+#    #        },
+#    #    #{"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#    #    #'column_name':'calculated_concentration_units',
+#    #    #'value':'FPKM_log2_normalized',
+#    #    #'operator':'LIKE',
+#    #    #'connector':'AND'
+#    #    #    },
+#    #]
+#    #},
+#    single_plot_I=True
+#    );

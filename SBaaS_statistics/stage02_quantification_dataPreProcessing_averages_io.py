@@ -4,7 +4,7 @@ import json
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # SBaaS_resequencing
-from SBaaS_resequencing.stage01_resequencing_mutationsAnnotated_query import stage01_resequencing_mutationsAnnotated_query
+from SBaaS_resequencing.stage01_resequencing_gd_query import stage01_resequencing_gd_query
 from sequencing_analysis.genome_diff import genome_diff
 #SBaaS_rnasequencing
 from SBaaS_rnasequencing.stage01_rnasequencing_geneExpDiff_query import stage01_rnasequencing_geneExpDiff_query
@@ -34,7 +34,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
         OUTPUT:
         TODO:...
         '''
-        resequencing_mutationsAnnotated_query = stage01_resequencing_mutationsAnnotated_query(self.session,self.engine,self.settings);
+        resequencing_gd_query = stage01_resequencing_gd_query(self.session,self.engine,self.settings);
         genomediff = genome_diff();
         calc = calculate_interface();
         # get the analysis information
@@ -46,7 +46,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
             mutation_frequencies = [];
             if sna2snRequencing_I: sample_name = sna2snRequencing_I[analysis_row['sample_name_abbreviation']];
             else: sample_name = analysis_row['sample_name_abbreviation'];
-            mutation_frequencies = resequencing_mutationsAnnotated_query.get_mutations_experimentIDAndSampleName_dataStage01ResequencingMutationsAnnotated(analysis_row['experiment_id'],sample_name);
+            mutation_frequencies = resequencing_gd_query.get_mutations_experimentIDAndSampleName_dataStage01ResequencingMutationsAnnotated(analysis_row['experiment_id'],sample_name);
             # map the data
             for mutation_frequency in mutation_frequencies:
                 row = {};

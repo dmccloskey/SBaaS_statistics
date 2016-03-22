@@ -210,6 +210,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
         sum
         mean
         mode
+        median
         component
         component_pool
         sample_specific
@@ -225,10 +226,20 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             ):
         '''row-wise normalization of the data
         (all samples for a specific metabolite)
-        auto-scaling
-        pareto-scaling
-        range-scaling
-        log[x]-scaling
+        http://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-7-142
+        Class I: can be applied with Class II and Class III
+        centering xij-xihat
+
+        Class II:
+        auto-scaling (xij-xihat)/si
+        pareto-scaling (xij-xihat)/sqrt(si)
+        range-scaling (xij-xihat)/(ximax-ximin)
+        vast-scaling (xij-xihat)/si * xihat/si
+        level-scaling xij-xihat/xi
+
+        Class III:
+        log transformation
+        power transformation 
         '''
         pass;
 

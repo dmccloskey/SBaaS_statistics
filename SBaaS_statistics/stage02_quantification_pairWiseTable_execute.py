@@ -129,8 +129,8 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
-            concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            #concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu_cnt,cu in enumerate(concentration_units):
             print('calculating pairwiseTable for concentration_units ' + cu);
 
@@ -151,8 +151,8 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             #sample_name_abbreviations,sample_name_shorts = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(analysis_id_I,cu,cn)
 
             #TODO: add in filter for component_names when return the data from the query
-            #sample_name_abbreviations,sample_name_shorts = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu)
-            sample_name_abbreviations,sample_name_shorts = dataPreProcessing_replicates_query.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu)
+            sample_name_abbreviations,sample_name_shorts = self.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu)
+            #sample_name_abbreviations,sample_name_shorts = dataPreProcessing_replicates_query.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu)
             for sn_1_cnt,sn_1 in enumerate(sample_name_shorts):
                 if redundancy_I: list_2 = sample_name_shorts;
                 else: list_2 = sample_name_shorts[sn_1+1:];
@@ -165,10 +165,10 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                         data_1,data_2 = [],[];
                         #data_1 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,cn,sn_1);
                         #data_2 = self.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,cn,sn_2);
-                        #data_1 = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sn_1);
-                        #data_2 = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sn_2);
-                        data_1 = dataPreProcessing_replicates_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu,sn_1);
-                        data_2 = dataPreProcessing_replicates_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu,sn_2);
+                        data_1 = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sn_1);
+                        data_2 = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02GlogNormalized(analysis_id_I,cu,sn_2);
+                        #data_1 = dataPreProcessing_replicates_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu,sn_1);
+                        #data_2 = dataPreProcessing_replicates_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameShort_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu,sn_2);
 
                         if len(data_1)!=len(data_2):
                             print('the number of components in sn_1 and sn_2 are not equal.');

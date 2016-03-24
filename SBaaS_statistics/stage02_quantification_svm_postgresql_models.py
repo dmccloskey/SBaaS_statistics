@@ -3,7 +3,7 @@ class data_stage02_quantification_svm(Base):
     #TODO
     __tablename__ = 'data_stage02_quantification_svm'
     id = Column(Integer, Sequence('data_stage02_quantification_svm_id_seq'), primary_key=True)
-    #analysis_id = Column(String(500))
+    analysis_id = Column(String(500))
     experiment_id = Column(String(50))
     sample_name_short = Column(String(100))
     time_point = Column(String(10))

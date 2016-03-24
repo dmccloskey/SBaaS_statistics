@@ -96,7 +96,6 @@ class stage02_quantification_svd_query(sbaas_template_query,
                         'table_name':table,
                         'column_name':'analysis_id',
                         'value':analysis_id_I,
-                        #'value':self.convert_string2StringString(analysis_id_I),
 		                'operator':'LIKE',
                         'connector':'AND'
                         }

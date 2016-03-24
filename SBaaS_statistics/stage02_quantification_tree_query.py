@@ -7,16 +7,16 @@ from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
-from .stage02_quantification_svm_postgresql_models import *
+from .stage02_quantification_tree_postgresql_models import *
 
-class stage02_quantification_svm_query(sbaas_template_query,
+class stage02_quantification_tree_query(sbaas_template_query,
                                        ):
     def initialize_supportedTables(self):
-        '''Set the supported tables dict for stage02_quantification_svm
+        '''Set the supported tables dict for stage02_quantification_tree
         '''
-        tables_supported = {'data_stage02_quantification_svm_u':data_stage02_quantification_svm_u,
-                        'data_stage02_quantification_svm_d':data_stage02_quantification_svm_d,
-                        'data_stage02_quantification_svm_v':data_stage02_quantification_svm_v
+        tables_supported = {'data_stage02_quantification_tree_u':data_stage02_quantification_tree_u,
+                        'data_stage02_quantification_tree_d':data_stage02_quantification_tree_d,
+                        'data_stage02_quantification_tree_v':data_stage02_quantification_tree_v
                         };
         self.set_supportedTables(tables_supported);
 
@@ -26,7 +26,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
                 query_I,
                 output_O,
                 dictColumn_I=None):
-        """get rows by analysis ID from data_stage02_quantification_svm"""
+        """get rows by analysis ID from data_stage02_quantification_tree"""
         data_O = [];
         try:
             table_model = self.convert_tableStringList2SqlalchemyModelDict(tables_I);
@@ -40,7 +40,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
             print(e);
         return data_O;
     def add_dataStage02QuantificationSVM(self,table_I,data_I):
-        '''add rows of data_stage02_quantification_svm'''
+        '''add rows of data_stage02_quantification_tree'''
         if data_I:
             try:
                 model_I = self.convert_tableString2SqlalchemyModel(table_I);
@@ -49,7 +49,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
             except Exception as e:
                 print(e);
     def update_dataStage02QuantificationSVM(self,table_I,data_I):
-        '''update rows of data_stage02_quantification_svm'''
+        '''update rows of data_stage02_quantification_tree'''
         if data_I:
             try:
                 model_I = self.convert_tableString2SqlalchemyModel(table_I);
@@ -58,7 +58,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
             except Exception as e:
                 print(e);
 
-    def initialize_dataStage02_quantification_svm(self,
+    def initialize_dataStage02_quantification_tree(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -69,7 +69,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
                 queryinitialize.initialize_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def drop_dataStage02_quantification_svm(self,
+    def drop_dataStage02_quantification_tree(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -80,7 +80,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
                 querydrop.drop_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def reset_dataStage02_quantification_svm(self,
+    def reset_dataStage02_quantification_tree(self,
             tables_I = [],
             analysis_id_I = None,
             warn_I=True):

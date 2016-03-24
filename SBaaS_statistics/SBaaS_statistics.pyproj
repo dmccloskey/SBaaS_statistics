@@ -93,9 +93,13 @@
     <Compile Include="stage02_quantification_pls_io.py" />
     <Compile Include="stage02_quantification_pls_postgresql_models.py" />
     <Compile Include="stage02_quantification_pls_query.py" />
+    <Compile Include="stage02_quantification_covariance_execute.py" />
     <Compile Include="stage02_quantification_svd_execute.py" />
+    <Compile Include="stage02_quantification_covariance_io.py" />
     <Compile Include="stage02_quantification_svd_io.py" />
+    <Compile Include="stage02_quantification_covariance_postgresql_models.py" />
     <Compile Include="stage02_quantification_svd_postgresql_models.py" />
+    <Compile Include="stage02_quantification_covariance_query.py" />
     <Compile Include="stage02_quantification_svd_query.py" />
     <Compile Include="stage02_quantification_svm_execute.py" />
     <Compile Include="stage02_quantification_svm_io.py" />

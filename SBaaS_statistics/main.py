@@ -157,6 +157,13 @@ dppave01.initialize_supportedTables();
 #dppave01.drop_tables();
 dppave01.initialize_tables();
 
+#make the covariance tables
+from SBaaS_statistics.stage02_quantification_covariance_execute import stage02_quantification_covariance_execute
+covariance01 = stage02_quantification_covariance_execute(session,engine,pg_settings.datadir_settings);
+covariance01.initialize_supportedTables();
+covariance01.drop_tables();
+covariance01.initialize_tables();
+
 analysis_ids_run = [
         'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
@@ -200,6 +207,13 @@ mv_value_operator = [
 features_histogram = ['calculated_concentration'];
 feature_units = ['FPKM','FPKM_log2_normalized'];
 n_bins_histogram = [];
+
+covariance_model = [
+    {'data_matrix_shape':'featuresBySamples','model':"MinCovDet",'method':"MinCovDet",'options':None},
+    {'data_matrix_shape':'featuresBySamples','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
+    #{'data_matrix_shape':'samplesByFeatures','model':"MinCovDet",'method':"MinCovDet",'options':None},
+    #{'data_matrix_shape':'samplesByFeatures','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
+    ];
 
 # Load R once
 from r_statistics.r_interface import r_interface
@@ -336,11 +350,38 @@ for analysis_id in analysis_ids_run:
     #        r_calc_I=r_calc,
     #        svd_method_I = k,
     #        );
-    ## check for outliers using oneClassSVM
-    outliers01.execute_calculateOutliersOneClassSVM(
-        analysis_id,
-        calculated_concentration_units_I = ['FPKM_log2_normalized'],
-        );
+    ### check for outliers using oneClassSVM
+    #outliers01.execute_calculateOutliersOneClassSVM(
+    #    analysis_id,
+    #    calculated_concentration_units_I = ['FPKM_log2_normalized'],
+    #    );
+    ## calculate the covariance of the dataset
+    covariance01.reset_dataStage02_quantification_covariance(
+            tables_I = [
+                'data_stage02_quantification_covariance_samples',
+                'data_stage02_quantification_covariance_features',
+                'data_stage02_quantification_covariance_samples_mahalanobis',
+                'data_stage02_quantification_covariance_features_mahalanobis',
+                'data_stage02_quantification_covariance_samples_score',
+                'data_stage02_quantification_covariance_features_score',
+                ],
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    for row in covariance_model:
+        covariance01.execute_covariance(
+            analysis_id,
+            data_matrix_shape_I=row['data_matrix_shape'],
+            covariance_model_I=row['model'],
+            covariance_method_I=row['method'],
+            covariance_options_I=row['options'],
+            calculated_concentration_units_I=['FPKM_log2_normalized'],
+            experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            sample_name_shorts_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            time_points_I=[],
+            );
     ## check for groupings of samples and outliers in the normalized data set using PCA
     #pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
     #pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);

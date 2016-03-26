@@ -1,3 +1,4 @@
+#SBaaS base classes
 from SBaaS_base.sbaas_base import sbaas_base
 from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
 from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
@@ -5,11 +6,14 @@ from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
 from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
-
+#SBaaS base templates
 from SBaaS_base.sbaas_template_query import sbaas_template_query
-
+#postgresql objects
 from .stage02_quantification_dataPreProcessing_replicates_postgresql_models import *
 from .stage02_quantification_analysis_postgresql_models import * #required for sample_name_abbreviation joins
+#resources
+import pandas as pd
+from listDict.listDict import listDict
 
 class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_query,
                                        ):
@@ -765,32 +769,42 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration,
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units).all();
             data_O = [];
-            for d in data:
-                add_row = True
-                if experiment_ids_I and not d.experiment_id in experiment_ids_I:
-                    add_row = False;
-                elif sample_name_abbreviations_I and not d.sample_name_abbreviation in sample_name_abbreviations_I:
-                    add_row = False;
-                elif sample_name_shorts_I and not d.sample_name_short in sample_name_shorts_I:
-                    add_row = False;
-                elif component_names_I and not d.component_name in component_names_I:
-                    add_row = False;
-                elif component_group_names_I and not d.component_group_name in component_group_names_I:
-                    add_row = False;
-                elif time_points_I and not d.time_point in time_points_I:
-                    add_row = False;
-                if add_row:
-                    data_O.append({
-                    'analysis_id':d.analysis_id,
-                    'calculated_concentration_units':d.calculated_concentration_units,
-                    'experiment_id':d.calculated_concentration_units,
-                    'sample_name_abbreviation':d.sample_name_abbreviation,
-                    'sample_name_short':d.sample_name_short,
-                    'time_point':d.time_point,
-                    'component_group_name':d.component_group_name,
-                    'component_name':d.component_name,
-                    'calculated_concentration':d.calculated_concentration,
-                    })
+            #for d in data:
+            #    add_row = True
+            #    if experiment_ids_I and not d.experiment_id in experiment_ids_I:
+            #        add_row = False;
+            #    elif sample_name_abbreviations_I and not d.sample_name_abbreviation in sample_name_abbreviations_I:
+            #        add_row = False;
+            #    elif sample_name_shorts_I and not d.sample_name_short in sample_name_shorts_I:
+            #        add_row = False;
+            #    elif component_names_I and not d.component_name in component_names_I:
+            #        add_row = False;
+            #    elif component_group_names_I and not d.component_group_name in component_group_names_I:
+            #        add_row = False;
+            #    elif time_points_I and not d.time_point in time_points_I:
+            #        add_row = False;
+            #    if add_row:
+            #        data_O.append({
+            #        'analysis_id':d.analysis_id,
+            #        'calculated_concentration_units':d.calculated_concentration_units,
+            #        'experiment_id':d.calculated_concentration_units,
+            #        'sample_name_abbreviation':d.sample_name_abbreviation,
+            #        'sample_name_short':d.sample_name_short,
+            #        'time_point':d.time_point,
+            #        'component_group_name':d.component_group_name,
+            #        'component_name':d.component_name,
+            #        'calculated_concentration':d.calculated_concentration,
+            #        })
+            if data:
+                data_O = listDict(record_I=data);
+                data_O.convert_record2DataFrame();
+                data_O.filterIn_byDictList({'experiment_id':experiment_ids_I,
+                                            'sample_name_abbreviation':sample_name_abbreviations_I,
+                                           'sample_name_short':sample_name_shorts_I,
+                                           'component_name':component_names_I,
+                                           'component_group_name':component_group_names_I,
+                                           'time_point':time_points_I,
+                                           });
             return data_O;
         except SQLAlchemyError as e:
             print(e);

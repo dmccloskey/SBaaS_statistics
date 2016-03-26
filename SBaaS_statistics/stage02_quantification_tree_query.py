@@ -14,14 +14,14 @@ class stage02_quantification_tree_query(sbaas_template_query,
     def initialize_supportedTables(self):
         '''Set the supported tables dict for stage02_quantification_tree
         '''
-        tables_supported = {'data_stage02_quantification_tree_u':data_stage02_quantification_tree_u,
-                        'data_stage02_quantification_tree_d':data_stage02_quantification_tree_d,
-                        'data_stage02_quantification_tree_v':data_stage02_quantification_tree_v
+        tables_supported = {
+            'data_stage02_quantification_tree_impfeat':data_stage02_quantification_tree_impfeat,
+            'data_stage02_quantification_tree_responseClassification':data_stage02_quantification_tree_responseClassification,
                         };
         self.set_supportedTables(tables_supported);
 
     #Query rows
-    def get_rows_dataStage02QuantificationSVM(self,
+    def get_rows_dataStage02QuantificationTree(self,
                 tables_I,
                 query_I,
                 output_O,
@@ -39,7 +39,7 @@ class stage02_quantification_tree_query(sbaas_template_query,
         except Exception as e:
             print(e);
         return data_O;
-    def add_dataStage02QuantificationSVM(self,table_I,data_I):
+    def add_dataStage02QuantificationTree(self,table_I,data_I):
         '''add rows of data_stage02_quantification_tree'''
         if data_I:
             try:
@@ -48,7 +48,7 @@ class stage02_quantification_tree_query(sbaas_template_query,
                 queryinsert.add_rows_sqlalchemyModel(model_I,data_I);
             except Exception as e:
                 print(e);
-    def update_dataStage02QuantificationSVM(self,table_I,data_I):
+    def update_dataStage02QuantificationTree(self,table_I,data_I):
         '''update rows of data_stage02_quantification_tree'''
         if data_I:
             try:

@@ -161,8 +161,22 @@ dppave01.initialize_tables();
 from SBaaS_statistics.stage02_quantification_covariance_execute import stage02_quantification_covariance_execute
 covariance01 = stage02_quantification_covariance_execute(session,engine,pg_settings.datadir_settings);
 covariance01.initialize_supportedTables();
-covariance01.drop_tables();
+#covariance01.drop_tables();
 covariance01.initialize_tables();
+
+#make the tree tables
+from SBaaS_statistics.stage02_quantification_tree_execute import stage02_quantification_tree_execute
+tree01 = stage02_quantification_tree_execute(session,engine,pg_settings.datadir_settings);
+tree01.initialize_supportedTables();
+#tree01.drop_tables();
+tree01.initialize_tables();
+
+##make the svm tables
+#from SBaaS_statistics.stage02_quantification_svm_execute import stage02_quantification_svm_execute
+#svm01 = stage02_quantification_svm_execute(session,engine,pg_settings.datadir_settings);
+#svm01.initialize_supportedTables();
+##svm01.drop_tables();
+#svm01.initialize_tables();
 
 analysis_ids_run = [
         'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
@@ -213,6 +227,51 @@ covariance_model = [
     {'data_matrix_shape':'featuresBySamples','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
     #{'data_matrix_shape':'samplesByFeatures','model':"MinCovDet",'method':"MinCovDet",'options':None},
     #{'data_matrix_shape':'samplesByFeatures','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
+    ];
+
+tree_model = [
+    {'model':"AdaBoostClassifier",'method':"scikit-learn",
+     'parameters':{'base_estimator':None, 'n_estimators':50, 'learning_rate':1.0, 'algorithm':'SAMME.R', 'random_state':None},
+     'impfeat_methods':[
+         {'impfeat_method':'feature_importance','impfeat_options':None},
+         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+        ],
+     'response_class_methods':[
+         {'response_class_method':'class_probability','response_class_options':None},
+         #{'response_class_method':'decision_function','response_class_options':None},
+         ],
+     },
+    {'model':"RandomForestClassifier",'method':"scikit-learn",
+     'parameters':{'n_estimators':100, 'criterion':'gini', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':'auto', 'max_leaf_nodes':None, 'bootstrap':True, 'oob_score':False, 'n_jobs':1, 'random_state':None, 'verbose':0, 'warm_start':False, 'class_weight':None},
+     'impfeat_methods':[
+         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+         {'impfeat_method':'feature_importance','impfeat_options':None},
+        ],
+     'response_class_methods':[
+         {'response_class_method':'class_probability','response_class_options':None},
+         {'response_class_method':'decision_function','response_class_options':None},
+         ],
+     },
+    {'model':"DecisionTreeClassifier",'method':"scikit-learn",'parameters':{'criterion':'gini', 'splitter':'best', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':None, 'random_state':None, 'max_leaf_nodes':None, 'class_weight':None, 'presort':False},
+     'impfeat_methods':[
+         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+         #{'impfeat_method':'feature_importance','impfeat_options':None},
+        ],
+     'response_class_methods':[
+         {'response_class_method':'class_probability','response_class_options':None},
+         #{'response_class_method':'decision_function','response_class_options':None},
+         ],
+     },
+    {'model':"ExtraTreesClassifier",'method':"scikit-learn",'parameters':{'n_estimators':100, 'criterion':'gini', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':'auto', 'max_leaf_nodes':None, 'bootstrap':False, 'oob_score':False, 'n_jobs':1, 'random_state':None, 'verbose':0, 'warm_start':False, 'class_weight':None},
+     'impfeat_methods':[
+         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+         {'impfeat_method':'feature_importance','impfeat_options':None},
+        ],
+     'response_class_methods':[
+         {'response_class_method':'class_probability','response_class_options':None},
+         #{'response_class_method':'decision_function','response_class_options':None},
+         ],
+     },
     ];
 
 # Load R once
@@ -355,25 +414,50 @@ for analysis_id in analysis_ids_run:
     #    analysis_id,
     #    calculated_concentration_units_I = ['FPKM_log2_normalized'],
     #    );
+
     ## calculate the covariance of the dataset
-    covariance01.reset_dataStage02_quantification_covariance(
+    #covariance01.reset_dataStage02_quantification_covariance(
+    #        tables_I = [
+    #            'data_stage02_quantification_covariance_samples',
+    #            'data_stage02_quantification_covariance_features',
+    #            'data_stage02_quantification_covariance_samples_mahalanobis',
+    #            'data_stage02_quantification_covariance_features_mahalanobis',
+    #            'data_stage02_quantification_covariance_samples_score',
+    #            'data_stage02_quantification_covariance_features_score',
+    #            ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #for row in covariance_model:
+    #    covariance01.execute_covariance(
+    #        analysis_id,
+    #        data_matrix_shape_I=row['data_matrix_shape'],
+    #        covariance_model_I=row['model'],
+    #        covariance_method_I=row['method'],
+    #        covariance_options_I=row['options'],
+    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        );
+    #apply a tree classifer
+    tree01.reset_dataStage02_quantification_tree(
             tables_I = [
-                'data_stage02_quantification_covariance_samples',
-                'data_stage02_quantification_covariance_features',
-                'data_stage02_quantification_covariance_samples_mahalanobis',
-                'data_stage02_quantification_covariance_features_mahalanobis',
-                'data_stage02_quantification_covariance_samples_score',
-                'data_stage02_quantification_covariance_features_score',
+                'data_stage02_quantification_tree_impfeat',
                 ],
             analysis_id_I = analysis_id,
             warn_I=False);
-    for row in covariance_model:
-        covariance01.execute_covariance(
+
+    for row in tree_model:
+        tree01.execute_tree(
             analysis_id,
-            data_matrix_shape_I=row['data_matrix_shape'],
-            covariance_model_I=row['model'],
-            covariance_method_I=row['method'],
-            covariance_options_I=row['options'],
+            model_I=row['model'],
+            method_I=row['method'],
+            parameters_I=row['parameters'],
+            impfeat_methods_I=row['impfeat_methods'],
+            response_class_methods_I=row['response_class_methods'],
             calculated_concentration_units_I=['FPKM_log2_normalized'],
             experiment_ids_I=[],
             sample_name_abbreviations_I=[],

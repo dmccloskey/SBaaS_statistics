@@ -100,9 +100,11 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                 factor_label = 'sample_name_short'
             else:
                 print('data_matrix_shape_I not recongnized.');
-            data_listDict = listDict(data);
-            data_listDict.set_listDict_dataFrame();
-            data_listDict.set_listDict_pivotTable(
+            #data_listDict = listDict(data);
+            #data_listDict.convert_listDict2DataFrame();
+            data_listDict = listDict();
+            data_listDict.set_dataFrame(data);
+            data_listDict.set_pivotTable(
                 value_label_I=value_label,
                 row_labels_I=row_labels,
                 column_labels_I=column_labels

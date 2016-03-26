@@ -14,9 +14,8 @@ class stage02_quantification_svm_query(sbaas_template_query,
     def initialize_supportedTables(self):
         '''Set the supported tables dict for stage02_quantification_svm
         '''
-        tables_supported = {'data_stage02_quantification_svm_u':data_stage02_quantification_svm_u,
-                        'data_stage02_quantification_svm_d':data_stage02_quantification_svm_d,
-                        'data_stage02_quantification_svm_v':data_stage02_quantification_svm_v
+        tables_supported = {
+            'data_stage02_quantification_svm_impfeat':data_stage02_quantification_svm_impfeat,
                         };
         self.set_supportedTables(tables_supported);
 

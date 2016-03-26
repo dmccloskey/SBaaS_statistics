@@ -105,6 +105,10 @@
     <Compile Include="stage02_quantification_svm_io.py" />
     <Compile Include="stage02_quantification_svm_postgresql_models.py" />
     <Compile Include="stage02_quantification_svm_query.py" />
+    <Compile Include="stage02_quantification_tree_execute.py" />
+    <Compile Include="stage02_quantification_tree_io.py" />
+    <Compile Include="stage02_quantification_tree_postgresql_models.py" />
+    <Compile Include="stage02_quantification_tree_query.py" />
     <Compile Include="__init__.py">
       <SubType>Code</SubType>
     </Compile>

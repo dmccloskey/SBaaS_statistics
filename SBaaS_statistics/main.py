@@ -230,8 +230,7 @@ covariance_model = [
     ];
 
 tree_model = [
-    {'model':"AdaBoostClassifier",'method':"scikit-learn",
-     'parameters':{'base_estimator':None, 'n_estimators':100, 'learning_rate':1.0, 'algorithm':'SAMME.R', 'random_state':None},
+    {'pipeline_id':"AdaBoostClassifier_scikit-learn_centerAndScale",
      'impfeat_methods':[
          {'impfeat_method':'feature_importance','impfeat_options':None},
          {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
@@ -241,8 +240,7 @@ tree_model = [
          #{'response_class_method':'decision_function','response_class_options':None},
          ],
      },
-    {'model':"RandomForestClassifier",'method':"scikit-learn",
-     'parameters':{'n_estimators':100, 'criterion':'gini', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':'auto', 'max_leaf_nodes':None, 'bootstrap':True, 'oob_score':False, 'n_jobs':1, 'random_state':None, 'verbose':0, 'warm_start':False, 'class_weight':None},
+    {'pipeline_id':"RandomForestClassifier_scikit-learn_centerAndScale",
      'impfeat_methods':[
          {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
          {'impfeat_method':'feature_importance','impfeat_options':None},
@@ -252,7 +250,7 @@ tree_model = [
          #{'response_class_method':'decision_function','response_class_options':None},
          ],
      },
-    {'model':"DecisionTreeClassifier",'method':"scikit-learn",'parameters':{'criterion':'gini', 'splitter':'best', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':None, 'random_state':None, 'max_leaf_nodes':None, 'class_weight':None, 'presort':False},
+    {'pipeline_id':"DecisionTreeClassifier_scikit-learn_centerAndScale",
      'impfeat_methods':[
          {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
          {'impfeat_method':'feature_importance','impfeat_options':None},
@@ -262,25 +260,29 @@ tree_model = [
          #{'response_class_method':'decision_function','response_class_options':None},
          ],
      },
-    {'model':"ExtraTreesClassifier",'method':"scikit-learn",'parameters':{'n_estimators':100, 'criterion':'gini', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':'auto', 'max_leaf_nodes':None, 'bootstrap':False, 'oob_score':False, 'n_jobs':1, 'random_state':None, 'verbose':0, 'warm_start':False, 'class_weight':None},
-     'impfeat_methods':[
-         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
-         {'impfeat_method':'feature_importance','impfeat_options':None},
-        ],
-     'response_class_methods':[
-         {'response_class_method':'class_probability','response_class_options':None},
-         #{'response_class_method':'decision_function','response_class_options':None},
-         ],
-     },
+    #{'model':"ExtraTreesClassifier",'method':"scikit-learn",'parameters':{'n_estimators':100, 'criterion':'gini', 'max_depth':None, 'min_samples_split':2, 'min_samples_leaf':1, 'min_weight_fraction_leaf':0.0, 'max_features':'auto', 'max_leaf_nodes':None, 'bootstrap':False, 'oob_score':False, 'n_jobs':1, 'random_state':None, 'verbose':0, 'warm_start':False, 'class_weight':None},
+    # 'impfeat_methods':[
+    #     {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+    #     {'impfeat_method':'feature_importance','impfeat_options':None},
+    #    ],
+    # 'response_class_methods':[
+    #     {'response_class_method':'class_probability','response_class_options':None},
+    #     #{'response_class_method':'decision_function','response_class_options':None},
+    #     ],
+    # },
     ];
 tree_hyperparameters = [
-    #{'model':"AdaBoostClassifier",'method':"scikit-learn",
-    # },
-    {'pipeline_id':'RandomForestClassifier_scikit-learn_centerAndScale',
-     'param_dist':{"max_depth": [3, None],"max_features": [1, 10],"min_samples_split": [1, 10],"min_samples_leaf": [1, 10],"bootstrap": [True, False],"criterion": ["gini", "entropy"]},
+    {'pipeline_id':'AdaBoostClassifier_scikit-learn_centerAndScale',
+     'param_dist':{"AdaBoostClassifier__n_estimators": [25,50,100],"AdaBoostClassifier__learning_rate": [.1, 1, 10]},
      'metric_method':'accuracy','metric_options':None,
-     'crossval_method':'LabelKFold','crossval_options':{'n_folds':2, 'shuffle':False, 'random_state':None},
-     'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':4, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
+     'crossval_method':'LabelKFold','crossval_options':{'n_folds':2},
+     'hyperparameter_method':'GridSearchCV','hyperparameter_options':{'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0, 'error_score':'raise'},
+     },
+    {'pipeline_id':'RandomForestClassifier_scikit-learn_centerAndScale',
+     'param_dist':{"RandomForestClassifier__max_depth": [3, None],"RandomForestClassifier__max_features": [1, 10],"RandomForestClassifier__min_samples_split": [1, 10],"RandomForestClassifier__min_samples_leaf": [1, 10],"RandomForestClassifier__bootstrap": [True, False],"RandomForestClassifier__criterion": ["gini", "entropy"]},
+     'metric_method':'accuracy','metric_options':None,
+     'crossval_method':'LabelKFold','crossval_options':{'n_folds':2},
+     'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
      },
     ];
 
@@ -482,16 +484,15 @@ for analysis_id in analysis_ids_run:
             tables_I = [
                 'data_stage02_quantification_tree_impfeat',
                 'data_stage02_quantification_tree_responseClassification',
+                'data_stage02_quantification_tree_hyperparameter',
                 ],
             analysis_id_I = analysis_id,
             warn_I=False);
-
+    
     for row in tree_hyperparameters:
         tree01.execute_treeHyperparameter(
             analysis_id,
-            model_I=row['model'],
-            method_I=row['method'],
-            parameters_I=row['parameters'],
+            pipeline_id_I=row['pipeline_id'],
             param_dist_I=row['param_dist'],
             test_size_I = 0.,
             metric_method_I = row['metric_method'],
@@ -511,9 +512,7 @@ for analysis_id in analysis_ids_run:
     for row in tree_model:
         tree01.execute_tree(
             analysis_id,
-            model_I=row['model'],
-            method_I=row['method'],
-            parameters_I=row['parameters'],
+            pipeline_id_I=row['pipeline_id'],
             test_size_I = 0.,
             impfeat_methods_I=row['impfeat_methods'],
             response_class_methods_I=row['response_class_methods'],

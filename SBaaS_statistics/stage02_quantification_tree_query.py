@@ -18,10 +18,10 @@ class stage02_quantification_tree_query(sbaas_template_query,
         '''Set the supported tables dict for stage02_quantification_tree
         '''
         tables_supported = {
-            #'data_stage02_quantification_tree_impfeat':data_stage02_quantification_tree_impfeat,
-            #'data_stage02_quantification_tree_responseClassification':data_stage02_quantification_tree_responseClassification,
+            'data_stage02_quantification_tree_impfeat':data_stage02_quantification_tree_impfeat,
+            'data_stage02_quantification_tree_responseClassification':data_stage02_quantification_tree_responseClassification,
             'data_stage02_quantification_tree_pipeline':data_stage02_quantification_tree_pipeline,
-            #'data_stage02_quantification_tree_hyperparameter':data_stage02_quantification_tree_hyperparameter,
+            'data_stage02_quantification_tree_hyperparameter':data_stage02_quantification_tree_hyperparameter,
             #'data_stage02_quantification_tree_validation':data_stage02_quantification_tree_validation,
                         };
         self.set_supportedTables(tables_supported);
@@ -139,9 +139,9 @@ class stage02_quantification_tree_query(sbaas_template_query,
             if data: 
                 data_i = listDict(record_I=data);
                 data_i.convert_record2DataFrame();
-                models_O=data_i.dataFame['pipeline_model'].get_values();
-                methods_O=data_i.dataFame['pipeline_method'].get_values();
-                parameters_O=data_i.dataFame['pipeline_parameters'].get_values();
+                models_O=data_i.dataFrame['pipeline_model'].get_values();
+                methods_O=data_i.dataFrame['pipeline_method'].get_values();
+                parameters_O=data_i.dataFrame['pipeline_parameters'].get_values();
             return models_O,methods_O,parameters_O;
         except SQLAlchemyError as e:
             print(e);

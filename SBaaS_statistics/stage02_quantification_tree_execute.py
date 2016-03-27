@@ -79,7 +79,7 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                 time_points_I=time_points_I,);
 
             # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline();
+            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
 
             # make the data matrix
             #dim: [nsamples,nfeatures]
@@ -109,8 +109,10 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
             data_O_listDict = listDict();
 
             # call the tree method
-            calculateinterface.make_dataModel(model_I,parameters_I);
-            parameters_I = calculateinterface.data_model.get_params(); #update the parameters
+            calculateinterface.make_dataPipeline(models,parameters);
+            calculateinterface.fit_data2Model();
+            #calculateinterface.make_dataModel(model_I,parameters_I);
+            #parameters_I = calculateinterface.data_model.get_params(); #update the parameters
             # score the model on the test data
 
             # extract out the response information
@@ -148,12 +150,11 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                 data_O_listDict.add_column2DataFrame('sample_name_short',sample_names_short);
                 data_O_listDict.add_column2DataFrame('response_name',response_label);
                 data_O_listDict.add_column2DataFrame('test_size',test_size_I);
+                data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
                 data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
                 data_O_listDict.add_column2DataFrame('used_',True);
                 data_O_listDict.add_column2DataFrame('comment_',None);
-                data_O_listDict.add_column2DataFrame('model',model_I);
-                data_O_listDict.add_column2DataFrame('method',method_I);
-                data_O_listDict.add_column2DataFrame('parameters',parameters_I);
+                data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
                 data_O_listDict.add_column2DataFrame('response_class_value',response_value);
                 data_O_listDict.add_column2DataFrame('response_class_method',row['response_class_method']);
                 data_O_listDict.add_column2DataFrame('response_class_options',row['response_class_options']);
@@ -175,8 +176,8 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                     data_O_listDict.set_dictList({'n':impfeat_n,'std':impfeat_std,'zscore':impfeat_zscore,'pvalue':impfeat_pvalue});
                 elif row['impfeat_method'] in ['RFE','RFECV']:
                     dataFeatureSelection = calculateinterface.make_dataFeatureSelection(
-                            model_I,parameters_I,
                             row['impfeat_method'],row['impfeat_options']);
+                    calculateinterface.fit_data2FeatureSelection();
                     impfeat_options_I = calculateinterface.data_model.get_params(); #update the parameters
                     impfeat_value,impfeat_score = calculateinterface.extract_dataFeatureSelection_ranking();
                     response_name='all';
@@ -190,13 +191,12 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                 data_O_listDict.add_column2DataFrame('component_name',calculateinterface.data['column_labels']['component_name'].ravel());
                 data_O_listDict.add_column2DataFrame('component_group_name',calculateinterface.data['column_labels']['component_group_name'].ravel());
                 data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
+                data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
                 data_O_listDict.add_column2DataFrame('test_size',test_size_I);
                 data_O_listDict.add_column2DataFrame('response_name',response_name);
                 data_O_listDict.add_column2DataFrame('used_',True);
                 data_O_listDict.add_column2DataFrame('comment_',None);
-                data_O_listDict.add_column2DataFrame('model',model_I);
-                data_O_listDict.add_column2DataFrame('method',method_I);
-                data_O_listDict.add_column2DataFrame('parameters',parameters_I);
+                data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
                 data_O_listDict.add_column2DataFrame('impfeat_value',impfeat_value);
                 data_O_listDict.add_column2DataFrame('impfeat_method',row['impfeat_method']);
                 data_O_listDict.add_column2DataFrame('impfeat_options',row['impfeat_options']);
@@ -217,9 +217,7 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
         self.add_rows_table('data_stage02_quantification_tree_responseClassification',data_response_class_O);
 
     def execute_treeHyperparameter(self,analysis_id_I,
-                model_I='RandomForestClassifier',
-                method_I="scikit-learn",
-                parameters_I={'scale':True,'center':True},
+                pipeline_id_I=None,
                 param_dist_I={"max_depth": [3, None],
                               "max_features": [1, 10],
                               "min_samples_split": [1, 10],
@@ -244,9 +242,8 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
         '''execute tree using sciKit-learn
         INPUT:
         analysis_id
-        model_I = string, 'DecisionTreeClassifier', 'RandomForestClassifier', 'ExtraTreesClassifier', or 'AdaBoostClassifier'
-        method_I = string, 'scikit-learn'
-        parameters_I = {}, parameters to search over
+        pipeline_id_I = 
+        param_dist_I = {}, parameters to search over
         OPTIONAL INPUT:
         ...
             
@@ -261,10 +258,8 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
         dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         
         # instantiate data lists
-        data_O=[]; #samples/features cov_matrix and precision_matrix
-        data_validation_O=[]; #samples/features mahal_dist
+        data_O=[];
 
-        # query metabolomics data from glogNormalization
         # get concentration units
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
@@ -286,6 +281,10 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                 component_names_I=component_names_I,
                 component_group_names_I=component_group_names_I,
                 time_points_I=time_points_I,);
+
+            # get the model pipeline:
+            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
+
             # make the data matrix
             #dim: [nsamples,nfeatures]
             value_label = 'calculated_concentration';
@@ -312,10 +311,11 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                 );
             # instantiate the output dicts
             data_O_listDict = listDict();
-
+            
+            # call the tree method
+            calculateinterface.make_dataPipeline(models,parameters);
             # call the hyper parmaeter CV method
-            calculateinterface.make_dataModelAndHyperparameterCV(
-                    model_I=model_I,
+            calculateinterface.make_dataHyperparameterCV(
                     param_dist_I=param_dist_I,
                     hyperparameter_method_I=hyperparameter_method_I,
                     hyperparameter_options_I=hyperparameter_options_I,
@@ -325,27 +325,39 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                     metric_method_I=metric_method_I,
                     metric_options_I=metric_options_I,
                     raise_I=False);
-            # score the model on the test data
-
-            # extract out the cross validation information
-            
+            calculateinterface.fit_data2HyperparameterCV();
+            # extract out the hyper parmaeter CV information
+            grid_scores = calculateinterface.data_hyperparameterCV.grid_scores_;
+            data_O_listDict.set_listDict(grid_scores)
+            data_O_listDict.convert_listDict2DataFrame()
+            data_O_listDict.dataFrame.rename(
+                columns={1: 'metric_score',
+                         2: 'cv_scores',
+                         0:'pipeline_parameters'}, inplace=True)
+            #convert bounds to metric_statistics:
+            cv_scores = data_O_listDict.dataFrame['cv_scores'].get_values();
+            metric_statistics = [{'std':np.std(cv_score)} for cv_score in cv_scores];
+            hyperparameter_id = list(range(len(grid_scores)));
+            hyperparameter_options = [hyperparameter_options_I for id in hyperparameter_id];
+            crossval_options = [crossval_options_I for id in hyperparameter_id];
             # add in additional rows to the output data object
-            data_O_listDict.add_column2DataFrame('sample_name_short',sample_names_short);
-            data_O_listDict.add_column2DataFrame('response_name',response_label);
             data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
             data_O_listDict.add_column2DataFrame('test_size',test_size_I);
+            data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
             data_O_listDict.add_column2DataFrame('used_',True);
             data_O_listDict.add_column2DataFrame('comment_',None);
-            data_O_listDict.add_column2DataFrame('model',model_I);
-            data_O_listDict.add_column2DataFrame('method',method_I);
-            data_O_listDict.add_column2DataFrame('parameters',parameters_I);
-            data_O_listDict.add_column2DataFrame('response_class_value',response_value);
-            data_O_listDict.add_column2DataFrame('response_class_method',row['response_class_method']);
-            data_O_listDict.add_column2DataFrame('response_class_options',row['response_class_options']);
-            data_O_listDict.add_column2DataFrame('response_class_statistics',None);
+            data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
+            data_O_listDict.add_column2DataFrame('metric_statistics',metric_statistics);
+            data_O_listDict.add_column2DataFrame('metric_method',metric_method_I);
+            data_O_listDict.add_column2DataFrame('metric_options',metric_options_I);
+            data_O_listDict.add_column2DataFrame('crossval_method',crossval_method_I);
+            data_O_listDict.add_column2DataFrame('crossval_options',crossval_options);
+            data_O_listDict.add_column2DataFrame('hyperparameter_id',hyperparameter_id);
+            data_O_listDict.add_column2DataFrame('hyperparameter_method',hyperparameter_method_I);
+            data_O_listDict.add_column2DataFrame('hyperparameter_options',hyperparameter_options);
             # add data to the database
             data_O_listDict.convert_dataFrame2ListDict();
-            data_response_class_O.extend(data_O_listDict.get_listDict());
+            data_O.extend(data_O_listDict.get_listDict());
             data_O_listDict.clear_allData();
 
             # reset calculate_interface

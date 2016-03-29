@@ -113,7 +113,11 @@ class stage02_quantification_tree_query(sbaas_template_query,
 
     #Safe calls by other classes
     def get_rows_analysisID_dataStage02QuantificationTreePipeline(self,analysis_id_I):
-        '''Query rows that are used by the analysis_id'''
+        '''Query rows that are used by the analysis_id
+        INPUT:
+        analysis_id_I = string
+        OUTPUT:
+        rows_O = listDict'''
         try:
             data = self.session.query(data_stage02_quantification_tree_pipeline).filter(
                     data_stage02_quantification_tree_pipeline.analysis_id.like(analysis_id_I),
@@ -126,7 +130,13 @@ class stage02_quantification_tree_query(sbaas_template_query,
         except SQLAlchemyError as e:
             print(e);
     def get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(self,pipeline_id_I):
-        '''Query rows that are used by the pipeline_id in order'''
+        '''Query models, methods, and parameters that are used by the pipeline_id in order
+        INPUT:
+        pipeline_id_I = string
+        OUTPUT:
+        models_O = list, pipeline models
+        methods_O = list, pipeline methods
+        parameters_O = list, pipeline parameters'''
         try:
             data = self.session.query(
                 data_stage02_quantification_tree_pipeline.pipeline_model,

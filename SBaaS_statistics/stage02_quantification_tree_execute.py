@@ -137,14 +137,6 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
                     data_O_listDict.convert_dictList2DataFrame();
                     sample_names_short, response_label = data_O_listDict.get_flattenedDataAndColumnLabels();
                     data_O_listDict.clear_allData();
-                elif row['response_class_method'] == 'decision_function':
-                    response_value, response_label = calculateinterface.extract_decisionFunction(
-                        response_method_I=row['response_class_method'],
-                        response_options_I=row['response_class_options']);
-                    data_O_listDict.set_dictList(dictList);
-                    data_O_listDict.convert_dictList2DataFrame();
-                    data_O_listDict.convert_dataFrame2ListDict();
-                    response_class_statistics = data_O_listDict.get_listDict();
                 data_O_listDict.clear_allData();
                 # add in additional rows to the output data object
                 data_O_listDict.add_column2DataFrame('sample_name_short',sample_names_short);

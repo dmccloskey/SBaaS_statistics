@@ -171,12 +171,12 @@ tree01.initialize_supportedTables();
 #tree01.drop_tables();
 tree01.initialize_tables();
 
-##make the svm tables
-#from SBaaS_statistics.stage02_quantification_svm_execute import stage02_quantification_svm_execute
-#svm01 = stage02_quantification_svm_execute(session,engine,pg_settings.datadir_settings);
-#svm01.initialize_supportedTables();
-##svm01.drop_tables();
-#svm01.initialize_tables();
+#make the svm tables
+from SBaaS_statistics.stage02_quantification_svm_execute import stage02_quantification_svm_execute
+svm01 = stage02_quantification_svm_execute(session,engine,pg_settings.datadir_settings);
+svm01.initialize_supportedTables();
+#svm01.drop_tables();
+svm01.initialize_tables();
 
 analysis_ids_run = [
         'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
@@ -287,29 +287,56 @@ tree_hyperparameters = [
     ];
 
 svm_model = [
-    {'model':"SVC",'method':"scikit-learn",
-     'parameters':{'C':1.0, 'kernel':'linear', 'degree':3, 'gamma':'auto', 'coef0':0.0, 'shrinking':True, 'probability':False, 'tol':0.001, 'cache_size':200, 'class_weight':None, 'verbose':False, 'max_iter':-1, 'decision_function_shape':'ovr', 'random_state':None},
+    {'pipeline_id':"SVC_scikit-learn_centerAndScale",
      'impfeat_methods':[
          {'impfeat_method':'coefficients','impfeat_options':None},
          {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+        ],
+     'response_class_methods':[
+         {'response_class_method':'decision_function','response_class_options':None},
+         ],
+     },
+    #Fails:
+    #{'pipeline_id':"BaggingClassifier_scikit-learn_centerAndScale",
+    # 'impfeat_methods':[
+    #     {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+    #     {'impfeat_method':'coefficients','impfeat_options':None},
+    #    ],
+    # 'response_class_methods':[
+    #     {'response_class_method':'class_probability','response_class_options':None},
+    #     {'response_class_method':'decision_function','response_class_options':None},
+    #     ],
+    # },
+    {'pipeline_id':"SGDClassifier_scikit-learn_centerAndScale",
+     'impfeat_methods':[
+         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
+         {'impfeat_method':'coefficients','impfeat_options':None},
         ],
      'response_class_methods':[
          {'response_class_method':'class_probability','response_class_options':None},
          {'response_class_method':'decision_function','response_class_options':None},
          ],
      },
-    {'model':"BaggingClassifier",'method':"scikit-learn",
-     'parameters':{'base_estimator':'LinearSVC', 'n_estimators':10, 'max_samples':1.0, 'max_features':1.0, 'bootstrap':True, 'bootstrap_features':False, 'oob_score':False, 'warm_start':False, 'n_jobs':1, 'random_state':None, 'verbose':0},
-     'impfeat_methods':[
-         {'impfeat_method':'feature_importance','impfeat_options':None},
-         {'impfeat_method':'RFECV','impfeat_options':{'step':1, 'cv':2, 'scoring':None, 'estimator_params':None, 'verbose':0}},
-         {'impfeat_method':'coefficients','impfeat_options':None},
-        ],
-     'response_class_methods':[
-         {'response_class_method':'class_probability','response_class_options':None},
-         {'response_class_method':'decision_function','response_class_options':None},
-         ],
+    ];
+svm_hyperparameters = [
+    {'pipeline_id':'SVC_scikit-learn_centerAndScale',
+     'param_dist':{"SVC__C": [.1, 1, 10]},
+     'metric_method':'accuracy','metric_options':None,
+     'crossval_method':'LabelKFold','crossval_options':{'n_folds':2},
+     'hyperparameter_method':'GridSearchCV','hyperparameter_options':{'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0, 'error_score':'raise'},
      },
+    #{'pipeline_id':'BaggingClassifier_scikit-learn_centerAndScale',
+    # 'param_dist':{},
+    # 'metric_method':'accuracy','metric_options':None,
+    # 'crossval_method':'LabelKFold','crossval_options':{'n_folds':2},
+    # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
+    # },
+    #{'pipeline_id':'SGDClassifier_scikit-learn_centerAndScale',
+    # 'param_dist':{},
+    # 'metric_method':'accuracy','metric_options':None,
+    # 'crossval_method':'LabelKFold','crossval_options':{'n_folds':2},
+    # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
+    # },
     ];
 # Load R once
 from r_statistics.r_interface import r_interface
@@ -479,38 +506,87 @@ for analysis_id in analysis_ids_run:
     #        component_group_names_I=[],
     #        time_points_I=[],
     #        );
-    #apply a tree classifer
-    tree01.reset_dataStage02_quantification_tree(
-            tables_I = [
-                'data_stage02_quantification_tree_impfeat',
-                'data_stage02_quantification_tree_responseClassification',
-                'data_stage02_quantification_tree_hyperparameter',
-                ],
-            analysis_id_I = analysis_id,
-            warn_I=False);
+    ##apply a tree classifer
+    #tree01.reset_dataStage02_quantification_tree(
+    #        tables_I = [
+    #            'data_stage02_quantification_tree_impfeat',
+    #            'data_stage02_quantification_tree_responseClassification',
+    #            'data_stage02_quantification_tree_hyperparameter',
+    #            ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
     
-    for row in tree_hyperparameters:
-        tree01.execute_treeHyperparameter(
-            analysis_id,
-            pipeline_id_I=row['pipeline_id'],
-            param_dist_I=row['param_dist'],
-            test_size_I = 0.,
-            metric_method_I = row['metric_method'],
-            metric_options_I = row['metric_options'],
-            crossval_method_I = row['crossval_method'],
-            crossval_options_I = row['crossval_options'],
-            hyperparameter_method_I = row['hyperparameter_method'],
-            hyperparameter_options_I = row['hyperparameter_options'],
-            calculated_concentration_units_I=['FPKM_log2_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            );
-    for row in tree_model:
-        tree01.execute_tree(
+    #for row in tree_hyperparameters:
+    #    tree01.execute_treeHyperparameter(
+    #        analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        param_dist_I=row['param_dist'],
+    #        test_size_I = 0.,
+    #        metric_method_I = row['metric_method'],
+    #        metric_options_I = row['metric_options'],
+    #        crossval_method_I = row['crossval_method'],
+    #        crossval_options_I = row['crossval_options'],
+    #        hyperparameter_method_I = row['hyperparameter_method'],
+    #        hyperparameter_options_I = row['hyperparameter_options'],
+    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        );
+    #for row in tree_model:
+    #    tree01.execute_tree(
+    #        analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        test_size_I = 0.,
+    #        impfeat_methods_I=row['impfeat_methods'],
+    #        response_class_methods_I=row['response_class_methods'],
+    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        );
+    ##apply a svm classifer
+    #svm01.reset_dataStage02_quantification_svm(
+    #        tables_I = [
+    #            'data_stage02_quantification_svm_hyperparameter',
+    #            ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);    
+    #for row in svm_hyperparameters:
+    #    svm01.execute_svmHyperparameter(
+    #        analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        param_dist_I=row['param_dist'],
+    #        test_size_I = 0.,
+    #        metric_method_I = row['metric_method'],
+    #        metric_options_I = row['metric_options'],
+    #        crossval_method_I = row['crossval_method'],
+    #        crossval_options_I = row['crossval_options'],
+    #        hyperparameter_method_I = row['hyperparameter_method'],
+    #        hyperparameter_options_I = row['hyperparameter_options'],
+    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        );
+    #svm01.reset_dataStage02_quantification_svm(
+    #        tables_I = [
+    #            'data_stage02_quantification_svm_impfeat',
+    #            'data_stage02_quantification_svm_responseClassification',
+    #            ],
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    for row in svm_model:
+        svm01.execute_svm(
             analysis_id,
             pipeline_id_I=row['pipeline_id'],
             test_size_I = 0.,

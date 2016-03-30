@@ -133,7 +133,6 @@ pairWiseTable01 = stage02_quantification_pairWiseTable_execute(session,engine,pg
 #pairWiseTable01.drop_dataStage02_quantification_pairWiseTable();
 pairWiseTable01.initialize_supportedTables();
 pairWiseTable01.initialize_tables();
-#pairWiseTable01.initialize_dataStage02_quantification_pairWiseTable();
 
 #make the pairWiseCorrelation tables
 from SBaaS_statistics.stage02_quantification_pairWiseCorrelation_execute import stage02_quantification_pairWiseCorrelation_execute
@@ -141,7 +140,6 @@ pairWiseCorrelation01 = stage02_quantification_pairWiseCorrelation_execute(sessi
 #pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
 pairWiseCorrelation01.initialize_supportedTables();
 pairWiseCorrelation01.initialize_tables();
-#pairWiseCorrelation01.initialize_dataStage02_quantification_pairWiseCorrelation();
 
 #make the dataPreProcessing tables
 from SBaaS_statistics.stage02_quantification_dataPreProcessing_replicates_execute import stage02_quantification_dataPreProcessing_replicates_execute
@@ -338,9 +336,9 @@ svm_hyperparameters = [
     # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
     # },
     ];
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();
+## Load R once
+#from r_statistics.r_interface import r_interface
+#r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
@@ -585,21 +583,21 @@ for analysis_id in analysis_ids_run:
     #            ],
     #        analysis_id_I = analysis_id,
     #        warn_I=False);
-    for row in svm_model:
-        svm01.execute_svm(
-            analysis_id,
-            pipeline_id_I=row['pipeline_id'],
-            test_size_I = 0.,
-            impfeat_methods_I=row['impfeat_methods'],
-            response_class_methods_I=row['response_class_methods'],
-            calculated_concentration_units_I=['FPKM_log2_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            );
+    #for row in svm_model:
+    #    svm01.execute_svm(
+    #        analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        test_size_I = 0.,
+    #        impfeat_methods_I=row['impfeat_methods'],
+    #        response_class_methods_I=row['response_class_methods'],
+    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        );
     ## check for groupings of samples and outliers in the normalized data set using PCA
     #pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
     #pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);
@@ -801,3 +799,52 @@ for analysis_id in analysis_ids_run:
 #    #},
 #    single_plot_I=True
 #    );
+#pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_chordDiagram_js(
+#    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+#    query_I = 
+#    {'where':[
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'sample_name_abbreviation_1',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'sample_name_abbreviation_2',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'calculated_concentration_units',
+#        'value':'FPKM_log2_normalized',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#    ]
+#    },
+#    );
+pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_heatmap_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+    query_I = 
+    {'where':[
+        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+        #'column_name':'sample_name_abbreviation_1',
+        #'value':'OxicEvo04EcoliGlc',
+        #'operator':'LIKE',
+        #'connector':'AND'
+        #    },
+        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+        #'column_name':'sample_name_abbreviation_2',
+        #'value':'OxicEvo04EcoliGlc',
+        #'operator':'LIKE',
+        #'connector':'AND'
+        #    },
+        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+        'column_name':'calculated_concentration_units',
+        'value':'FPKM_log2_normalized',
+        'operator':'LIKE',
+        'connector':'AND'
+            },
+    ]
+    },
+    );

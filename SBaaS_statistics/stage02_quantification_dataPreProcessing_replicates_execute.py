@@ -1,5 +1,9 @@
 ﻿from .stage02_quantification_dataPreProcessing_replicates_io import stage02_quantification_dataPreProcessing_replicates_io
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+#required for missing components LLOQ
+from .stage01_quantification_QCs_query import stage01_quantification_QCs_query
+from SBaaS_LIMS.lims_biologicalMaterial_query import lims_biologicalMaterial_query
+from SBaaS_LIMS.lims_experiment_query import lims_experiment_query
 #resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_statisticsDescriptive import calculate_statisticsDescriptive
@@ -376,7 +380,14 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                         if imputation_method_I == 'value':
                             row_tmp['calculated_concentration'] = imputation_options_I['value'];
                         elif imputation_method_I == 'lloq':
-                            pass;
+                            conc,units = self._impute_missingComponents_replicates(
+                                        sample_name_short_I=unique_group['sample_name_short'],
+                                        component_name_I=mcn,
+                                        experiment_id_I=unique_group['experiment_id'],
+                                        biological_material_I=imputation_options_I['biological_material'],
+                                        conversion_name_I=imputation_options_I['conversion_name']
+                                        );
+                            row_tmp['calculated_concentration'] = conc;
                         elif imputation_method_I == 'mean_row':
                             pass;
                         elif imputation_method_I == 'mean_column':
@@ -448,3 +459,57 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
         else:
             print('no missing values found.');
+    def _impute_missingComponents_replicates(self,
+                    sample_name_short_I,
+                    component_name_I,
+                    experiment_id_I,
+                    biological_material_I=None,
+                    conversion_name_I=None
+                    ):
+        '''Calculate missing components using the LLOQ of the analytical assay
+        INPUT:
+        experiment_id_I = string
+        biological_material_I = string,
+        conversion_name_I = string
+        '''
+        stage01quantificationQCsquery = stage01_quantification_QCs_query(self.session,self.engine,self.settings);
+        limsbiologicalMaterialquery = lims_biologicalMaterial_query(self.session,self.engine,self.settings);
+        limsexperimentquery = lims_experiment_query(self.session,self.engine,self.settings);
+        calc = calculate_interface();
+        # get the lloq
+        lloq = None;
+        conc_units = None;
+        lloq, conc_units = stage01quantificationQCsquery.get_lloq_ExperimentIDAndComponentName_dataStage01LLOQAndULOQ(experiment_id_I,component_name_I);
+        if not lloq:
+            print('lloq not found'); 
+            return None, None;
+        # normalize the lloq
+        if (biological_material_I and conversion_name_I):
+            # get physiological parameters
+            cvs = None;
+            cvs_units = None;
+            od600 = None;
+            dil = None;
+            dil_units = None;
+            conversion = None;
+            conversion_units = None;
+            cvs, cvs_units, od600, dil,dil_units = limsexperimentquery.get_CVSAndCVSUnitsAndODAndDilAndDilUnits_sampleNameShort(experiment_id_I,sample_name_short_I);
+            conversion, conversion_units = limsbiologicalMaterialquery.get_conversionAndConversionUnits_biologicalMaterialAndConversionName(biological_material_I,conversion_name_I);
+            if not(cvs and cvs_units and od600 and dil and dil_units):
+                print('cvs, cvs_units, or od600 are missing from physiological parameters');
+                print('or dil and dil_units are missing from sample descripton');
+                exit(-1);
+            elif not(conversion and conversion_units):
+                print('biological_material or conversion name is incorrect');
+                exit(-1);  
+            else:
+                #calculate the cell volume
+                cell_volume, cell_volume_units = calc.calculate_biomass_CVSAndCVSUnitsAndODAndConversionAndConversionUnits(cvs,cvs_units,od600,conversion,conversion_units);
+                # calculate the normalized concentration
+                norm_conc, norm_conc_units = calc.calculate_conc_concAndConcUnitsAndDilAndDilUnitsAndConversionAndConversionUnits(lloq,conc_units,dil,dil_units,cell_volume, cell_volume_units);
+                #if norm_conc:
+                norm_conc = norm_conc/2;
+                return norm_conc,norm_conc_units;
+        else:
+            calc_conc = lloq/2;
+            return calc_conc,conc_units;

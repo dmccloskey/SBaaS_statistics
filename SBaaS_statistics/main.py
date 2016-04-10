@@ -177,9 +177,10 @@ svm01.initialize_supportedTables();
 svm01.initialize_tables();
 
 analysis_ids_run = [
-        'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
+        #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0',
+        'ALEsKOs01',
         #"rpomut02",
         #"chemoCLim01",
         #"chemoNLim01",
@@ -214,7 +215,7 @@ correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient 
 #RNAsequencing
 mv_value_operator = [
     {'value':None,'operator':'NA'},
-    {'value':0.0,'operator':'<='},
+    #{'value':0.0,'operator':'<='},
     ]
 features_histogram = ['calculated_concentration'];
 feature_units = ['FPKM','FPKM_log2_normalized'];
@@ -342,15 +343,16 @@ svm_hyperparameters = [
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    ##get the replicate data and check for missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #       tables_I = [
-    #                   'data_stage02_quantification_dataPreProcessing_replicates',
-    #                   'data_stage02_quantification_dataPreProcessing_replicates_im',
-    #                   'data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                   ],
-    #       analysis_id_I = analysis_id,
-    #       warn_I=False);
+    #get the replicate data and check for missing values
+    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+           tables_I = [
+                       'data_stage02_quantification_dataPreProcessing_replicates',
+                       'data_stage02_quantification_dataPreProcessing_replicates_im',
+                       'data_stage02_quantification_dataPreProcessing_replicates_mv',
+                       ],
+           analysis_id_I = analysis_id,
+           warn_I=False);
+    dpprep01.import_dataStage01QuantificationReplicates(analysis_id);
     #dpprep01.import_dataStage01RNASequencingGenesFpkmTracking(
     #   analysis_id,
     #   sns2snsRNASequencing_I={
@@ -824,27 +826,27 @@ for analysis_id in analysis_ids_run:
 #    ]
 #    },
 #    );
-pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_heatmap_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
-    query_I = 
-    {'where':[
-        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-        #'column_name':'sample_name_abbreviation_1',
-        #'value':'OxicEvo04EcoliGlc',
-        #'operator':'LIKE',
-        #'connector':'AND'
-        #    },
-        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-        #'column_name':'sample_name_abbreviation_2',
-        #'value':'OxicEvo04EcoliGlc',
-        #'operator':'LIKE',
-        #'connector':'AND'
-        #    },
-        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-        'column_name':'calculated_concentration_units',
-        'value':'FPKM_log2_normalized',
-        'operator':'LIKE',
-        'connector':'AND'
-            },
-    ]
-    },
-    );
+#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_heatmap_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+#    query_I = 
+#    {'where':[
+#        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+#        #'column_name':'sample_name_abbreviation_1',
+#        #'value':'OxicEvo04EcoliGlc',
+#        #'operator':'LIKE',
+#        #'connector':'AND'
+#        #    },
+#        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+#        #'column_name':'sample_name_abbreviation_2',
+#        #'value':'OxicEvo04EcoliGlc',
+#        #'operator':'LIKE',
+#        #'connector':'AND'
+#        #    },
+#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+#        'column_name':'calculated_concentration_units',
+#        'value':'FPKM_log2_normalized',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#    ]
+#    },
+#    );

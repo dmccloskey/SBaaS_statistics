@@ -1,13 +1,117 @@
 ﻿
 from .stage02_quantification_descriptiveStats_io import stage02_quantification_descriptiveStats_io
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from matplotlib_utilities.matplot import matplot
 from math import sqrt
+from listDict.listDict import listDict
 
 class stage02_quantification_descriptiveStats_execute(stage02_quantification_descriptiveStats_io):
-    def execute_descriptiveStats(self,analysis_id_I,experiment_ids_I=[],time_points_I=[],concentration_units_I=[],component_names_I=[],r_calc_I=None):
+    def execute_descriptiveStats(self,analysis_id_I,
+            experiment_ids_I=[],
+            time_points_I=[],
+            calculated_concentration_units_I=[],
+            sample_name_abbreviations_I=[],
+            component_names_I=[],
+            r_calc_I=None):
+        '''execute descriptiveStats using R'''
+
+        #print 'execute_descriptiveStats...'
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+        calc = calculate_interface();
+        
+        quantification_dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings)
+
+        data_O = [];
+        # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points/component_names that are unique
+        unique_groups = [];
+        unique_groups = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentNames_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+            analysis_id_I,
+            calculated_concentration_units_I=calculated_concentration_units_I,
+            experiment_ids_I=experiment_ids_I,
+            sample_name_abbreviations_I=sample_name_abbreviations_I,
+            time_points_I=time_points_I,
+            component_names_I=component_names_I,
+            );
+        # will need to refactor in the future...
+        if type(unique_groups)==type(listDict()):
+            unique_groups.convert_dataFrame2ListDict()
+            unique_groups = unique_groups.get_listDict();
+        for row in unique_groups:
+            # get data:
+            all_1,data_1 = [],[];
+            all_1,data_1 = quantification_dataPreProcessing_replicates_query.get_RDataList_analysisIDAndExperimentIDAndTimePointAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameAbbreviation_dataStage02DataPreProcessingReplicates(
+                analysis_id_I,
+                row['experiment_id'],
+                row['time_point'],
+                row['calculated_concentration_units'],
+                row['component_name'],
+                row['sample_name_abbreviation'],
+                );
+            if len(data_1)<2: continue
+            # will need to refactor in the future...
+            if type(all_1)==type(listDict):
+                all_1.convert_dataFrame2ListDict()
+                all_1 = all_1.get_listDict();
+            # call R
+            data_TTest = {};
+            data_TTest = r_calc.calculate_oneSampleTTest(data_1, alternative_I = "two.sided", mu_I = 0, paired_I="FALSE", var_equal_I = "TRUE", ci_level_I = 0.95, padjusted_method_I = "bonferroni");
+            if not data_TTest:
+                # calculate the mean, var, and confidence interval manually
+                data_ave_O, data_var_O, data_lb_O, data_ub_O = None,None,None,None;
+                data_ave_O, data_var_O, data_lb_O, data_ub_O = calc.calculate_ave_var(data_1,confidence_I = 0.95);
+                if data_ave_O:
+                    data_cv = sqrt(data_var_O)/data_ave_O*100;
+                else:
+                    data_cv = None;
+                data_TTest = {};
+                data_TTest['mean']=data_ave_O;
+                data_TTest['var']=data_var_O;
+                data_TTest['ci_lb']=data_lb_O;
+                data_TTest['ci_ub']=data_ub_O;
+                data_TTest['cv']=data_cv;
+                data_TTest['n']=len(data_1);
+                data_TTest['test_stat']=None;
+                data_TTest['test_description']=None;
+                data_TTest['pvalue']=None;
+                data_TTest['pvalue_corrected']=None;
+                data_TTest['pvalue_corrected_description']=None;
+                data_TTest['ci_level']=0.95;
+            # calculate the interquartile range
+            min_O, max_O, median_O, iq_1_O, iq_3_O=calc.calculate_interquartiles(data_1);
+            # add data to database
+            tmp = {'analysis_id':analysis_id_I,
+                    'experiment_id':row['experiment_id'],
+                    'sample_name_abbreviation':row['sample_name_abbreviation'],
+                    'time_point':row['time_point'],
+                    'component_group_name':row['component_group_name'],
+                    'component_name':row['component_name'],
+                    'mean':data_TTest['mean'],
+                    'var':data_TTest['var'],
+                    'cv':data_TTest['cv'],
+                    'n':data_TTest['n'],
+                    'test_stat':data_TTest['test_stat'],
+                    'test_description':data_TTest['test_description'],
+                    'pvalue':data_TTest['pvalue'],
+                    'pvalue_corrected':data_TTest['pvalue_corrected'],
+                    'pvalue_corrected_description':data_TTest['pvalue_corrected_description'],
+                    'ci_lb':data_TTest['ci_lb'],
+                    'ci_ub':data_TTest['ci_ub'],
+                    'ci_level':data_TTest['ci_level'],
+                    'min':min_O,
+                    'max':max_O,
+                    'median':median_O,
+                    'iq_1':iq_1_O,
+                    'iq_3':iq_3_O,
+                    'calculated_concentration_units':row['calculated_concentration_units'],
+                    'used_':True,
+                    'comment_':None};
+            data_O.append(tmp);
+        self.add_dataStage02QuantificationDescriptiveStats(data_O);
+    def execute_descriptiveStats_v1(self,analysis_id_I,experiment_ids_I=[],time_points_I=[],concentration_units_I=[],component_names_I=[],r_calc_I=None):
         '''execute descriptiveStats using R'''
 
         #print 'execute_descriptiveStats...'

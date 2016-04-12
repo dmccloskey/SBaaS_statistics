@@ -179,8 +179,8 @@ svm01.initialize_tables();
 analysis_ids_run = [
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
-        #'ALEsKOs01_0',
-        'ALEsKOs01',
+        'ALEsKOs01_0',
+        #'ALEsKOs01',
         #"rpomut02",
         #"chemoCLim01",
         #"chemoNLim01",
@@ -337,22 +337,22 @@ svm_hyperparameters = [
     # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
     # },
     ];
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    #get the replicate data and check for missing values
-    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-           tables_I = [
-                       'data_stage02_quantification_dataPreProcessing_replicates',
-                       'data_stage02_quantification_dataPreProcessing_replicates_im',
-                       'data_stage02_quantification_dataPreProcessing_replicates_mv',
-                       ],
-           analysis_id_I = analysis_id,
-           warn_I=False);
-    dpprep01.import_dataStage01QuantificationReplicates(analysis_id);
+    ##get the replicate data and check for missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #       tables_I = [
+    #                   'data_stage02_quantification_dataPreProcessing_replicates',
+    #                   'data_stage02_quantification_dataPreProcessing_replicates_im',
+    #                   'data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                   ],
+    #       analysis_id_I = analysis_id,
+    #       warn_I=False);
+    #dpprep01.import_dataStage01QuantificationReplicates(analysis_id);
     #dpprep01.import_dataStage01RNASequencingGenesFpkmTracking(
     #   analysis_id,
     #   sns2snsRNASequencing_I={
@@ -398,6 +398,7 @@ for analysis_id in analysis_ids_run:
     ##impute missing values
     #dpprep01.execute_imputeMissingValues_replicatesPerCondition(
     #    analysis_id_I = analysis_id,
+    #    calculated_concentration_units_I = ['umol*gDW-1'],
     #    imputation_method_I = 'ameliaII',
     #    imputation_options_I = {'n_imputations':1000,
     #                            'geometric_imputation':True},
@@ -414,6 +415,30 @@ for analysis_id in analysis_ids_run:
     #        value_I = row['value'],
     #        operator_I = row['operator'],
     #    );
+    ##fill in any remaining missing values with the LLOQ/2
+    #dpprep01.execute_imputeMissingValues(
+    #    analysis_id,
+    #    calculated_concentration_units_I = ['height_ratio'],
+    #    imputation_method_I = 'mean_feature',
+    #    imputation_options_I = {},
+    #   );
+    #dpprep01.export_rows_tables_csv(
+    #    tables_I=['data_stage02_quantification_dataPreProcessing_replicates'],
+    #    query_I={
+    #        'select':[
+    #        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+    #         },
+    #        ],
+    #        'where':[
+    #        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+    #        'column_name':'analysis_id',
+    #        'value':analysis_id,
+    #        'operator':'LIKE',
+    #        'connector':'AND'
+    #        },],
+    #    },
+    #    filename_O=analysis_id+".csv",
+    #);
     ##fill in any remaining missing values with a low number
     #dpprep01.execute_imputeMissingValues(
     #    analysis_id,
@@ -442,16 +467,24 @@ for analysis_id in analysis_ids_run:
     #        normalization_options_I={},
     #        r_calc_I=r_calc
     #        );
-
+    #dpprep01.execute_normalization(
+    #        analysis_id,
+    #        calculated_concentration_units_I=['umol*gDW-1'],
+    #        normalization_method_I='glog',
+    #        normalization_options_I={
+    #            'mult':"TRUE",
+    #            'lowessnorm':"FALSE"},
+    #        r_calc_I=r_calc
+    #        );
     ## normalize the data using a glog normalization
     #norm01.reset_dataStage02_quantification_glogNormalized(analysis_id);
     #norm01.execute_glogNormalization(analysis_id,r_calc_I=r_calc);
     ## load in quantified data
     #norm01.execute_getDataStage01PhysiologicalRatios(analysis_id);
     #norm01.execute_getDataStage01ReplicatesMI(analysis_id);
-    ## calculate the mean, variance, lb/ub, etc. of the normalized data
-    #descstats01.reset_dataStage02_quantification_descriptiveStats(analysis_id);
-    #descstats01.execute_descriptiveStats(analysis_id,r_calc_I=r_calc);
+    # calculate the mean, variance, lb/ub, etc. of the normalized data
+    descstats01.reset_dataStage02_quantification_descriptiveStats(analysis_id);
+    descstats01.execute_descriptiveStats(analysis_id,r_calc_I=r_calc);
     ## check for outliers
     #outliers01.reset_dataStage02_quantification_outliersDeviation(analysis_id);
     #outliers01.execute_calculateOutliersDeviation(analysis_id,

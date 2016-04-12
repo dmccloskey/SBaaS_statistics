@@ -7,6 +7,8 @@ from SBaaS_LIMS.lims_experiment_query import lims_experiment_query
 #resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_statisticsDescriptive import calculate_statisticsDescriptive
+from python_statistics.calculate_interface import calculate_interface
+from listDict.listDict import listDict
 
 class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quantification_dataPreProcessing_replicates_io,
                                            stage02_quantification_analysis_query):
@@ -134,7 +136,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
     def execute_normalization(self,
             analysis_id_I,
             calculated_concentration_units_I=[],
-            normalization_method_I='gLog',
+            normalization_method_I='glog',
             normalization_options_I={'mult':"TRUE",'lowessnorm':"FALSE"},
             r_calc_I=None
             ):
@@ -160,14 +162,22 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             print('calculating normalization for concentration_units ' + cu);
             # get the data set
             data = [];
-            data = self.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            #data = self.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            #    analysis_id_I,
+            #    cu,
+            #    query_I={},
+            #    output_O='listDict',
+            #    dictColumn_I=None);
+            data = self.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,
-                cu,
-                query_I={},
-                output_O='listDict',
-                dictColumn_I=None);
+                cu
+                );
+            # will need to refactor in the future...
+            if type(data)==type(listDict()):
+                data.convert_dataFrame2ListDict()
+                data = data.get_listDict();
             # normalize the data set
-            if normalization_method_I == 'gLog':
+            if normalization_method_I == 'glog':
                 concentrations = None;
                 concentrations_glog = None;
                 data_glog, concentrations, concentrations_glog = r_calc.calculate_glogNormalization(
@@ -271,13 +281,17 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
         data_imputations = [];
         # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points that are unique
         unique_groups = [];
-        unique_groups = self.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndSampleNameShortsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+        unique_groups = self.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
             analysis_id_I,
             calculated_concentration_units_I=calculated_concentration_units_I,
             experiment_ids_I=experiment_ids_I,
             sample_name_abbreviations_I=sample_name_abbreviations_I,
             time_points_I=time_points_I,
             );
+        # will need to refactor in the future...
+        if type(unique_groups)==type(listDict()):
+            unique_groups.convert_dataFrame2ListDict()
+            unique_groups = unique_groups.get_listDict();
         for row in unique_groups:
             data_mv = [];
             data_mv = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(
@@ -332,9 +346,12 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             sample_name_shorts_I=[],
             time_points_I=[],
             imputation_method_I = 'lloq',
-            imputation_options_I = {'table_name':''},
+            imputation_options_I = {},
             ):
         '''Impute missing values for components that are missing in a replicate
+        NOTES:
+        row variabels are component_names
+        column variabels
         INPUT:
         OUTPUT:
         '''
@@ -380,29 +397,100 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                         if imputation_method_I == 'value':
                             row_tmp['calculated_concentration'] = imputation_options_I['value'];
                         elif imputation_method_I == 'lloq':
-                            conc,units = self._impute_missingComponents_replicates(
+                            value_new,units = self._impute_missingComponents_replicates(
                                         sample_name_short_I=unique_group['sample_name_short'],
                                         component_name_I=mcn,
                                         experiment_id_I=unique_group['experiment_id'],
                                         biological_material_I=imputation_options_I['biological_material'],
                                         conversion_name_I=imputation_options_I['conversion_name']
                                         );
-                            row_tmp['calculated_concentration'] = conc;
-                        elif imputation_method_I == 'mean_row':
-                            pass;
-                        elif imputation_method_I == 'mean_column':
-                            pass;
+                            if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
+                            row_tmp['calculated_concentration'] = value_new;
+                        elif imputation_method_I == 'mean_feature':
+                            value_new = None;
+                            value_new = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,
+                                column_name_I = 'calculated_concentration',
+                                aggregate_function_I='avg',
+                                aggregate_label_I='avg_1',
+                                query_I={
+                                    'where':[
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'calculated_concentration_units',
+                                    'value':cu,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'component_name',
+                                    'value':mcn,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    ],
+                                }
+                                );
+                            if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
+                            row_tmp['calculated_concentration'] = value_new;
+                        elif imputation_method_I == 'mean_sample':
+                            value_new = None;
+                            value_new = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,
+                                column_name_I = 'calculated_concentration',
+                                aggregate_function_I='avg',
+                                aggregate_label_I='avg_1',
+                                query_I={
+                                    'where':[
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'calculated_concentration_units',
+                                    'value':cu,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'experiment_id',
+                                    'value':unique_group['experiment_id'],
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'sample_name_short',
+                                    'value':unique_group['sample_name_short'],
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    ],
+                                }
+                                );
+                            if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
+                            row_tmp['calculated_concentration'] = value_new;
                         elif imputation_method_I == 'mean_data':
+                            value_new = None;
+                            value_new = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,
+                                column_name_I = 'calculated_concentration',
+                                aggregate_function_I='avg',
+                                aggregate_label_I='avg_1',
+                                query_I={'where':[
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'calculated_concentration_units',
+                                    'value':cu,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                ]}
+                                );
+                            if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
+                            row_tmp['calculated_concentration'] = value_new;
+                        elif imputation_method_I == 'median_sample':
                             pass;
-                        elif imputation_method_I == 'median_row':
-                            pass;
-                        elif imputation_method_I == 'median_column':
+                        elif imputation_method_I == 'median_feature':
                             pass;
                         elif imputation_method_I == 'median_data':
                             pass;
-                        elif imputation_method_I == 'min_row':
+                        elif imputation_method_I == 'min_sample':
                             pass;
-                        elif imputation_method_I == 'min_column':
+                        elif imputation_method_I == 'min_feature':
                             pass;
                         elif imputation_method_I == 'min_data':
                             value_new = None;
@@ -508,8 +596,6 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 # calculate the normalized concentration
                 norm_conc, norm_conc_units = calc.calculate_conc_concAndConcUnitsAndDilAndDilUnitsAndConversionAndConversionUnits(lloq,conc_units,dil,dil_units,cell_volume, cell_volume_units);
                 #if norm_conc:
-                norm_conc = norm_conc/2;
                 return norm_conc,norm_conc_units;
         else:
-            calc_conc = lloq/2;
-            return calc_conc,conc_units;
+            return lloq,conc_units;

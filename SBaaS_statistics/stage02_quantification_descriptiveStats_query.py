@@ -1,8 +1,5 @@
-﻿#lims
-from SBaaS_LIMS.lims_experiment_postgresql_models import *
-from SBaaS_LIMS.lims_sample_postgresql_models import *
-
-from .stage02_quantification_descriptiveStats_postgresql_models import *
+﻿from .stage02_quantification_descriptiveStats_postgresql_models import *
+from .stage02_quantification_analysis_postgresql_models import *
 
 from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
 from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
@@ -24,7 +21,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
         self.set_supportedTables(tables_supported);
 
     # data_stage02_quantification_descriptiveStats
-    # query rows from data_stage02_quantification_descriptiveStats
+    # query sample_names from data_stage02_quantification_descriptiveStats
     def get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDescriptiveStats(self,analysis_id_I):
         '''Querry sample_name_abbreviations that are used from the analysis'''
         try:
@@ -60,6 +57,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    # query calculated_concentration_units from data_stage02_quantification_descriptiveStats
     def get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(self,analysis_id_I):
         '''Querry calculated_concentration_units that are used from the analysis'''
         try:
@@ -75,6 +73,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    # query component_names from data_stage02_quantification_descriptiveStats
     def get_componentNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,analysis_id_I,calculated_concentration_units_I):
         '''Querry component_names that are used from the analysis'''
         try:
@@ -89,6 +88,32 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 for d in data:
                     rows_O.append(d.component_name);
             return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_componentNames_analysisIDAndCalculatedConcentrationUnitsAndCVThreshold_dataStage02QuantificationDescriptiveStats(self,
+            analysis_id_I,
+            calculated_concentration_units_I,
+            cv_threshold_I,
+            used__I=True):
+        '''Query rows by analysis_id and calculated_concentration_units that are used
+           and that are greater that cv_threshold_I
+           INPUT:
+           analysis_id_I = string
+           calculated_concentration_units_I = string
+           cv_threshold_I = float, rows > cv_threshold_I will be selected
+           used__I = boolean
+           OUTPUT:
+           component_names_O'''
+        try:
+            data = self.session.query(data_stage02_quantification_descriptiveStats.component_name).filter(
+                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats.cv>cv_threshold_I,
+                    data_stage02_quantification_descriptiveStats.used_.is_(used__I)).group_by(
+                    data_stage02_quantification_descriptiveStats.component_name).order_by(
+                    data_stage02_quantification_descriptiveStats.component_name.asc()).all();
+            component_names_O = [d.component_name for d in data];
+            return component_names_O;
         except SQLAlchemyError as e:
             print(e);
     def get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,analysis_id_I,calculated_concentration_units_I):
@@ -126,6 +151,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    # query data from data_stage02_quantification_descriptiveStats
     def get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,
                                 analysis_id_I,
                                 sample_name_abbreviation_I,
@@ -180,6 +206,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return mean,stdev,ci_lb,ci_ub,calculated_concentration_units;
         except SQLAlchemyError as e:
             print(e);
+    # query rows from data_stage02_quantification_descriptiveStats
     def get_rows_analysisID_dataStage02QuantificationDescriptiveStats(self,analysis_id_I,used__I=True):
         '''Querry rows that are used from the analysis'''
         try:
@@ -263,6 +290,32 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndCVThreshold_dataStage02QuantificationDescriptiveStats(self,
+            analysis_id_I,
+            calculated_concentration_units_I,
+            cv_threshold_I,
+            used__I=True):
+        '''Query rows by analysis_id and calculated_concentration_units that are used
+           and that are greater that cv_threshold_I
+           INPUT:
+           analysis_id_I = string
+           calculated_concentration_units_I = string
+           cv_threshold_I = float, rows > cv_threshold_I will be selected
+           used__I = boolean
+           OUTPUT:
+           rows_O = listDict with columns for sample_name_short from analysis_id
+           '''
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_descriptiveStats).filter(
+                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats.cv>cv_threshold_I,
+                    data_stage02_quantification_descriptiveStats.used_.is_(used__I)).all();
+            rows_O = [d.__repr__dict__() for d in data];
+            return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
     # Query specific columns of data_stage02_quantification_descriptiveStats
     def get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,
             analysis_id_I,
@@ -332,6 +385,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+
     def initialize_dataStage02_quantification_descriptiveStats(self):
         try:
             data_stage02_quantification_descriptiveStats.__table__.create(self.engine,True);
@@ -342,13 +396,18 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             data_stage02_quantification_descriptiveStats.__table__.drop(self.engine,True);
         except SQLAlchemyError as e:
             print(e);
-    def reset_dataStage02_quantification_descriptiveStats(self,analysis_id_I = None):
+    def reset_dataStage02_quantification_descriptiveStats(self,analysis_id_I = None, calculated_concentration_units_I = []):
         try:
-            if analysis_id_I:
+            if analysis_id_I and calculated_concentration_units_I:
+                for ccu in calculated_concentration_units_I:
+                    reset = self.session.query(data_stage02_quantification_descriptiveStats).filter(
+                        data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                        data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(ccu),
+                        ).delete(synchronize_session=False);
+                self.session.commit();
+            elif analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_descriptiveStats).filter(data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_descriptiveStats).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
 

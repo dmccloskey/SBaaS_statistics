@@ -1,5 +1,6 @@
 ﻿from .stage02_quantification_dataPreProcessing_replicates_io import stage02_quantification_dataPreProcessing_replicates_io
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 #required for missing components LLOQ
 from SBaaS_quantification.stage01_quantification_QCs_query import stage01_quantification_QCs_query
 from SBaaS_LIMS.lims_biologicalMaterial_query import lims_biologicalMaterial_query
@@ -9,6 +10,7 @@ from r_statistics.r_interface import r_interface
 from python_statistics.calculate_statisticsDescriptive import calculate_statisticsDescriptive
 from python_statistics.calculate_interface import calculate_interface
 from listDict.listDict import listDict
+import copy
 
 class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quantification_dataPreProcessing_replicates_io,
                                            stage02_quantification_analysis_query):
@@ -131,6 +133,64 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 operator_I = operator_I,
                 warn_I=warn_I,
                 );
+    def execute_deleteOutliers(self,
+                analysis_id_I,
+                calculated_concentration_units_cv_I=['umol*gDW-1'],
+                calculated_concentration_units_delete_I=['umol*gDW-1_glog_normalized'],
+                cv_threshold_I=80,
+                warn_I=False,
+                ):
+        '''Delete outlier metabolites/sample_name_abbreviation pairs
+        INPUT:
+        cv_threshold_I = float
+        OUTPUT:
+        '''
+        quantification_descriptiveStats_query=stage02_quantification_descriptiveStats_query(self.session,self.engine,self.settings);
+        quantification_analysis_query=stage02_quantification_analysis_query(self.session,self.engine,self.settings);
+
+        # pass 1: query all experiment_id/sample_name_short/time_point/component_name that do not meet the threshold for specific calculated_concentration_units
+        delete_rows = [];
+        # query the calculated_concentration_units
+        if calculated_concentration_units_cv_I:
+            calculated_concentration_units = calculated_concentration_units_cv_I;
+        else:
+            calculated_concentration_units = [];
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu_cnt,cu in enumerate(calculated_concentration_units):
+            #query rows with a cv>cv_threshold_I in the analysis
+            desc_rows = [];
+            desc_rows = quantification_descriptiveStats_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndCVThreshold_dataStage02QuantificationDescriptiveStats(
+                analysis_id_I,
+                calculated_concentration_units_I = cu,
+                cv_threshold_I = cv_threshold_I,
+                used__I=True);
+            for desc_row in desc_rows:
+                #query sample_name_shorts for each row
+                experiment_id,sample_name_short,time_point = [],[],[];
+                experiment_id,sample_name_short,time_point = quantification_analysis_query.get_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndSampleNameAbbreviation_dataStage02QuantificationAnalysis(
+                                                    analysis_id_I,
+                                                    desc_row['sample_name_abbreviation']);
+                for sns in sample_name_short:
+                    row = copy.copy(desc_row);
+                    row['sample_name_short'] = sns;
+                    delete_rows.append(row)
+
+        # pass 2: delete all experiment_id/sample_name_short/time_point/component_name that do not meet the threshold for specific calculated_concentration_units
+        # query the calculated_concentration_units
+        if calculated_concentration_units_delete_I:
+            calculated_concentration_units = calculated_concentration_units_delete_I;
+        for cu_cnt,cu in enumerate(calculated_concentration_units):
+            for delete_row in delete_rows:
+                #remove experiment_id/sample_name_short/time_point/component_name from the analysis
+                self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I = analysis_id_I,
+                    calculated_concentration_units_I = cu,
+                    experiment_id_I = delete_row['experiment_id'],
+                    time_point_I = delete_row['time_point'],
+                    sample_name_short_I = delete_row['sample_name_short'],
+                    component_name_I = delete_row['component_name'],
+                    warn_I=warn_I,
+                    );
 
     #normalization methods
     def execute_normalization(self,
@@ -316,6 +376,81 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             elif imputation_method_I == 'mean_row_condition':
                 pass;
             elif imputation_method_I == 'mean_condition':
+                pass;
+            else:
+                print('imputation_method_I not recognized.');
+            # record data imputation method
+            tmp = {
+                "analysis_id":analysis_id_I,
+                "imputation_method":imputation_method_I,
+                "imputation_options":imputation_options_I,
+                "normalization_method":None,
+                "normalization_options":None,
+                'calculated_concentration_units':row['calculated_concentration_units'],
+                "used_":True,
+                'comment_I':None
+                }
+            # avoid duplicate analysis_id/calculated_concentration_units
+            if not tmp in data_imputations:
+                data_imputations.append(tmp);
+        #add the data to the DB
+        if data_O:
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
+            self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates_im',data_imputations);
+        else:
+            print('no missing values found.');
+    def execute_imputeMissingValues_replicatesPerExperiment(self,
+            analysis_id_I,
+            imputation_method_I = 'ameliaII',
+            imputation_options_I = {'n_imputations':1000,
+                                'geometric_imputation':True},
+            calculated_concentration_units_I=[],
+            experiment_ids_I=[],
+            r_calc_I=None):
+        '''calculate estimates for missing replicates values using AmeliaII from R
+        INPUT:
+        experiment_id_I
+        sample_name_abbreviations_I'''
+        
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+
+        print('execute_calculateMissingValues_condition...')
+        data_O = [];
+        data_imputations = [];
+        # get the calculated_concentration_units/experiment_ids that are unique
+        unique_groups = [];
+        unique_groups = self.get_calculatedConcentrationUnitsAndExperimentIDs_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+            analysis_id_I,
+            calculated_concentration_units_I=calculated_concentration_units_I,
+            experiment_ids_I=experiment_ids_I,
+            );
+        # will need to refactor in the future...
+        if type(unique_groups)==type(listDict()):
+            unique_groups.convert_dataFrame2ListDict()
+            unique_groups = unique_groups.get_listDict();
+        for row in unique_groups:
+            data_mv = [];
+            data_mv = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDs_dataStage02QuantificationDataPreProcessingReplicates(
+                analysis_id_I,
+                row['calculated_concentration_units'],
+                row['experiment_id'],
+                );
+            # compute missing values
+            if imputation_method_I == 'ameliaII':
+                data_update = [];
+                data_update = r_calc.calculate_missingValues(
+                    data_mv,
+                    imputation_options_I['n_imputations'],
+                    imputation_options_I['geometric_imputation']
+                    );
+                if data_update:
+                    data_new_unique = list(set([(y['experiment_id'],y['sample_name_short'],y['time_point'],y['component_name']) for y in data_update])-set([(x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) for x in data_mv]));
+                    data_new = [x for x in data_update if (x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) in data_new_unique];
+                    data_O.extend(data_new);
+            elif imputation_method_I == 'mean_row_experiment':
+                pass;
+            elif imputation_method_I == 'mean_experiment':
                 pass;
             else:
                 print('imputation_method_I not recognized.');

@@ -29,9 +29,16 @@ class stage02_quantification_histogram_query(sbaas_template_query):
             print(e);
 
     #data_stage02_quantification_histogram      
-    def reset_dataStage02_quantification_histogram(self,analysis_id_I = None):
+    def reset_dataStage02_quantification_histogram(self,analysis_id_I = None, feature_units_I = []):
         try:
-            if analysis_id_I:
+            if analysis_id_I and feature_units_I:
+                for fu in feature_units_I:
+                    reset = self.session.query(data_stage02_quantification_histogram).filter(
+                        data_stage02_quantification_histogram.analysis_id.like(analysis_id_I),
+                        data_stage02_quantification_histogram.feature_units.like(fu),
+                        ).delete(synchronize_session=False);
+                self.session.commit();
+            elif analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_histogram).filter(data_stage02_quantification_histogram.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
                 self.session.commit();
         except SQLAlchemyError as e:

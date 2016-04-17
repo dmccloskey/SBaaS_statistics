@@ -2,14 +2,14 @@
 from .stage02_quantification_pls_io import stage02_quantification_pls_io
 from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
-# TODO: remove after making add methods
-from .stage02_quantification_pls_postgresql_models import *
+from listDict.listDict import listDict
 
 class stage02_quantification_pls_execute(stage02_quantification_pls_io,
-                                         stage02_quantification_normalization_query,
+                                         #stage02_quantification_normalization_query,
                                          stage02_quantification_analysis_query):
     def execute_plsda(self,analysis_id_I,
                     concentration_units_I=[],
@@ -45,6 +45,8 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io,
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         
+        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        
         data_scores_O = [];
         data_loadings_O = [];
         data_validation_O = [];
@@ -60,12 +62,18 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io,
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
         for cu in concentration_units:
             print('calculating pls for concentration_units ' + cu);
             data = [];
             # get data:
-            data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
+            data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
+            # will need to refactor in the future...
+            if type(data)==type(listDict()):
+                data.convert_dataFrame2ListDict()
+                data = data.get_listDict();
             # call R
             data_scores,data_loadings = [],[];
             #TODO: add option parameters

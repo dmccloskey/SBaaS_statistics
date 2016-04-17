@@ -65,6 +65,34 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             return  experiment_id_O,sample_name_short_O,time_point_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndSampleNameAbbreviation_dataStage02QuantificationAnalysis(self,
+            analysis_id_I,
+            sample_name_abbreviation_I):
+        '''Query experiment_id, sample_name_short and time_point that are used from the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_analysis.experiment_id,
+                    data_stage02_quantification_analysis.sample_name_short,
+                    data_stage02_quantification_analysis.time_point).filter(
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_analysis.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                    data_stage02_quantification_analysis.used_.is_(True)).group_by(
+                    data_stage02_quantification_analysis.experiment_id,
+                    data_stage02_quantification_analysis.sample_name_short,
+                    data_stage02_quantification_analysis.time_point).order_by(
+                    data_stage02_quantification_analysis.experiment_id.asc(),
+                    data_stage02_quantification_analysis.sample_name_short.asc(),
+                    data_stage02_quantification_analysis.time_point.asc()).all();
+            experiment_id_O = []
+            sample_name_short_O = []
+            time_point_O = []
+            if data: 
+                for d in data:
+                    experiment_id_O.append(d.experiment_id);
+                    sample_name_short_O.append(d.sample_name_short); 
+                    time_point_O.append(d.time_point);               
+            return  experiment_id_O,sample_name_short_O,time_point_O;
+        except SQLAlchemyError as e:
+            print(e);
 
     #SPLIT 2:
     def add_dataStage02QuantificationAnalysis(self,table_I,data_I):

@@ -23,7 +23,7 @@ class stage02_quantification_descriptiveStats_execute(stage02_quantification_des
         else: r_calc = r_interface();
         calc = calculate_interface();
         
-        quantification_dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings)
+        quantification_dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
 
         data_O = [];
         # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points/component_names that are unique

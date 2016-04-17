@@ -482,9 +482,40 @@ for analysis_id in analysis_ids_run:
     ## load in quantified data
     #norm01.execute_getDataStage01PhysiologicalRatios(analysis_id);
     #norm01.execute_getDataStage01ReplicatesMI(analysis_id);
-    # calculate the mean, variance, lb/ub, etc. of the normalized data
-    descstats01.reset_dataStage02_quantification_descriptiveStats(analysis_id);
-    descstats01.execute_descriptiveStats(analysis_id,r_calc_I=r_calc);
+    ## calculate the mean, variance, lb/ub, etc. of the normalized data
+    #descstats01.reset_dataStage02_quantification_descriptiveStats(analysis_id);
+    #descstats01.execute_descriptiveStats(analysis_id,r_calc_I=r_calc);
+    ## remove metabolites with a cv>80
+    #dpprep01.execute_deleteOutliers(
+    #            analysis_id_I=analysis_id,
+    #            calculated_concentration_units_cv_I=['umol*gDW-1'],
+    #            calculated_concentration_units_delete_I=['umol*gDW-1'],
+    #            cv_threshold_I=80,
+    #            warn_I=False,
+    #            );
+    ##count the number of missing values
+    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+    #       tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+    #                   ],
+    #       analysis_id_I = analysis_id,
+    #       warn_I=False);
+    #for row in mv_value_operator:
+    #   dpprep01.execute_countMissingValues(
+    #       analysis_id,
+    #       value_I = row['value'],
+    #       operator_I = row['operator'],
+    #   );
+    ## impute missing values
+    #dpprep01.execute_imputeMissingValues_replicatesPerExperiment(
+    #        analysis_id_I=analysis_id,
+    #        imputation_method_I = 'ameliaII',
+    #        imputation_options_I = {'n_imputations':1000,
+    #                            'geometric_imputation':True},
+    #        calculated_concentration_units_I=['umol*gDW-1'],
+    #        experiment_ids_I=[],
+    #        r_calc_I=r_calc);
+
+
     ## check for outliers
     #outliers01.reset_dataStage02_quantification_outliersDeviation(analysis_id);
     #outliers01.execute_calculateOutliersDeviation(analysis_id,

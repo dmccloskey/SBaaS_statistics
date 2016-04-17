@@ -2,12 +2,11 @@
 from .stage02_quantification_svd_io import stage02_quantification_svd_io
 from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
-from matplotlib_utilities.matplot import matplot
-# TODO: remove after making add methods
-from .stage02_quantification_svd_postgresql_models import *
+from listDict.listDict import listDict
 
 class stage02_quantification_svd_execute(stage02_quantification_svd_io,
                                          ):
@@ -21,8 +20,11 @@ class stage02_quantification_svd_execute(stage02_quantification_svd_io,
 
         stage02quantificationnormalizationquery = stage02_quantification_normalization_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
         stage02quantificationnormalizationquery.initialize_supportedTables();
+
         stage02quantificationanalysisquery = stage02_quantification_analysis_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
         stage02quantificationanalysisquery.initialize_supportedTables();
+
+        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         data_U_O = [];
         data_d_O = [];
         data_V_O = [];
@@ -36,14 +38,20 @@ class stage02_quantification_svd_execute(stage02_quantification_svd_io,
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            concentration_units = stage02quantificationnormalizationquery.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            #concentration_units = stage02quantificationnormalizationquery.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
             #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
         for cu in concentration_units:
             #print('calculating svd for concentration_units ' + cu);
             data = [];
             # get data:
-            data = stage02quantificationnormalizationquery.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
+            data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            #data = stage02quantificationnormalizationquery.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
             #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
+            # will need to refactor in the future...
+            if type(data)==type(listDict()):
+                data.convert_dataFrame2ListDict()
+                data = data.get_listDict();
             # call R
             data_U,data_d,data_V = [],[],[];
             data_U,data_d,data_V = r_calc.calculate_svd(data,
@@ -72,6 +80,3 @@ class stage02_quantification_svd_execute(stage02_quantification_svd_io,
         self.add_rows_table('data_stage02_quantification_svd_u',data_U_O);
         self.add_rows_table('data_stage02_quantification_svd_d',data_d_O);
         self.add_rows_table('data_stage02_quantification_svd_v',data_V_O);
-        #self.add_dataStage02QuantificationSVD('data_stage02_quantification_svd_u',data_U_O);
-        #self.add_dataStage02QuantificationSVD('data_stage02_quantification_svd_d',data_d_O);
-        #self.add_dataStage02QuantificationSVD('data_stage02_quantification_svd_v',data_V_O);

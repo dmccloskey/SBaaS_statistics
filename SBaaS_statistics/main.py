@@ -179,7 +179,8 @@ svm01.initialize_tables();
 analysis_ids_run = [
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
-        'ALEsKOs01_0',
+        #'ALEsKOs01_0',
+        'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
         #"chemoCLim01",
@@ -506,14 +507,11 @@ for analysis_id in analysis_ids_run:
     #       operator_I = row['operator'],
     #   );
     ## impute missing values
-    #dpprep01.execute_imputeMissingValues_replicatesPerExperiment(
-    #        analysis_id_I=analysis_id,
-    #        imputation_method_I = 'ameliaII',
-    #        imputation_options_I = {'n_imputations':1000,
-    #                            'geometric_imputation':True},
-    #        calculated_concentration_units_I=['umol*gDW-1'],
-    #        experiment_ids_I=[],
-    #        r_calc_I=r_calc);
+    dpprep01.execute_imputeMissingValues_replicatesPerExperiment(
+            analysis_id_I=analysis_id,
+            calculated_concentration_units_I=['umol*gDW-1'],
+            experiment_ids_I=[],
+            r_calc_I=r_calc);
 
 
     ## check for outliers
@@ -664,28 +662,28 @@ for analysis_id in analysis_ids_run:
     #        component_group_names_I=[],
     #        time_points_I=[],
     #        );
-    ## check for groupings of samples and outliers in the normalized data set using PCA
-    #pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
-    #pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);
-    #pca01.reset_dataStage02_quantification_pca_validation(analysis_id);
-    #for k,v in pca_model_method.items():
-    #    pca01.execute_pca(analysis_id,
-    #        #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        concentration_units_I=['mM_glog_normalized'],
-    #        r_calc_I=r_calc,             
-    #        pca_model_I = k,
-    #        pca_method_I = v,
-    #        imputeMissingValues="TRUE",
-    #        cv="q2",
-    #        ncomps="7",
-    #        #scale="none",
-    #        #center="FALSE",
-    #        scale="uv",
-    #        center="TRUE",
-    #        segments="10",
-    #        nruncv="1",
-    #        crossValidation_type="krzanowski",
-    #        );
+    # check for groupings of samples and outliers in the normalized data set using PCA
+    pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
+    pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);
+    pca01.reset_dataStage02_quantification_pca_validation(analysis_id);
+    for k,v in pca_model_method.items():
+        pca01.execute_pca(analysis_id,
+            concentration_units_I=['umol*gDW-1_glog_normalized'],
+            #concentration_units_I=['mM_glog_normalized'],
+            r_calc_I=r_calc,             
+            pca_model_I = k,
+            pca_method_I = v,
+            imputeMissingValues="TRUE",
+            cv="q2",
+            ncomps="7",
+            #scale="none",
+            #center="FALSE",
+            scale="uv",
+            center="TRUE",
+            segments="10",
+            nruncv="1",
+            crossValidation_type="krzanowski",
+            );
     ## perform a pair-wise comparison of each sample in the normalized data set
     #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
     #        tables_I = [], 
@@ -749,72 +747,72 @@ for analysis_id in analysis_ids_run:
     #    distance_measures_I = distance_measures,
     #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
     #    );
-    ## perform a pls-da analysis
-    #pls01.reset_dataStage02_quantification_pls_scores(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_loadings(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_validation(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_vip(analysis_id_I=analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_loadingsResponse(analysis_id_I=analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_coefficients(analysis_id_I=analysis_id);
-    #for k,v in pls_model_method.items():
-    #    pls01.execute_plsda(
-    #        analysis_id_I = analysis_id,
-    #        #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        concentration_units_I=['mM_glog_normalized'],
-    #        r_calc_I=r_calc,
-    #        pls_model_I = k,
-    #        method = v,
-    #        response_I = None,
-    #        factor_I= "sample_name_abbreviation",
-    #        ncomp = 7,
-    #        Y_add = "NULL",
-    #        scale = "TRUE",
-    #        validation = "CV",
-    #        segments = 5,
-    #        #segments = 10,
-    #        stripped = "FALSE",
-    #        lower = 0.5,
-    #        upper = 0.5, 
-    #        trunc_pow = "FALSE", 
-    #        weights = "NULL",
-    #        p_method = "fdr",
-    #        nperm = 999);
-    ## perform a correlation analysis
-    #heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
-    #heatmap01.execute_heatmap(
-    #    analysis_id,
-    #    #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    concentration_units_I=['mM_glog_normalized'],
-    #    sample_name_shorts_I=[],
-    #    #component_names_I=['cit.cit_2.Light',
-    #    #                   'akg.akg_1.Light',
-    #    #                   'fum.fum_1.Light',
-    #    #                   'glx.glx_1.Light',
-    #    #                   'icit.icit_2.Light',
-    #    #                   'mal-L.mal-L_1.Light',
-    #    #                   'succ.succ_1.Light',
-    #    #                   'acon-C.acon-C_1.Light'],
-    #    order_componentNameBySampleNameShort_I = True,
-    #    );
-    #heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);
-    #heatmap01.execute_heatmap_descriptiveStats(
-    #    analysis_id,
-    #    #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    concentration_units_I=['mM_glog_normalized'],
-    #    sample_name_abbreviations_I=[],
-    #    #component_names_I=['cit.cit_2.Light',
-    #    #                   'akg.akg_1.Light',
-    #    #                   'fum.fum_1.Light',
-    #    #                   'glx.glx_1.Light',
-    #    #                   'icit.icit_2.Light',
-    #    #                   'mal-L.mal-L_1.Light',
-    #    #                   'succ.succ_1.Light',
-    #    #                   'acon-C.acon-C_1.Light'],
-    #    order_componentNameBySampleNameAbbreviation_I = True,
-    #    value_I = 'mean'
-    #    );
+    # perform a pls-da analysis
+    pls01.reset_dataStage02_quantification_pls_scores(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_loadings(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_validation(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_vip(analysis_id_I=analysis_id);
+    pls01.reset_dataStage02_quantification_pls_loadingsResponse(analysis_id_I=analysis_id);
+    pls01.reset_dataStage02_quantification_pls_coefficients(analysis_id_I=analysis_id);
+    for k,v in pls_model_method.items():
+        pls01.execute_plsda(
+            analysis_id_I = analysis_id,
+            concentration_units_I=['umol*gDW-1_glog_normalized'],
+            #concentration_units_I=['mM_glog_normalized'],
+            r_calc_I=r_calc,
+            pls_model_I = k,
+            method = v,
+            response_I = None,
+            factor_I= "sample_name_abbreviation",
+            ncomp = 7,
+            Y_add = "NULL",
+            scale = "TRUE",
+            validation = "CV",
+            segments = 5,
+            #segments = 10,
+            stripped = "FALSE",
+            lower = 0.5,
+            upper = 0.5, 
+            trunc_pow = "FALSE", 
+            weights = "NULL",
+            p_method = "fdr",
+            nperm = 999);
+    # perform a correlation analysis
+    heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
+    heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
+    heatmap01.execute_heatmap(
+        analysis_id,
+        concentration_units_I=['umol*gDW-1_glog_normalized'],
+        #concentration_units_I=['mM_glog_normalized'],
+        sample_name_shorts_I=[],
+        #component_names_I=['cit.cit_2.Light',
+        #                   'akg.akg_1.Light',
+        #                   'fum.fum_1.Light',
+        #                   'glx.glx_1.Light',
+        #                   'icit.icit_2.Light',
+        #                   'mal-L.mal-L_1.Light',
+        #                   'succ.succ_1.Light',
+        #                   'acon-C.acon-C_1.Light'],
+        order_componentNameBySampleNameShort_I = True,
+        );
+    heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
+    heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);
+    heatmap01.execute_heatmap_descriptiveStats(
+        analysis_id,
+        concentration_units_I=['umol*gDW-1_glog_normalized'],
+        #concentration_units_I=['mM_glog_normalized'],
+        sample_name_abbreviations_I=[],
+        #component_names_I=['cit.cit_2.Light',
+        #                   'akg.akg_1.Light',
+        #                   'fum.fum_1.Light',
+        #                   'glx.glx_1.Light',
+        #                   'icit.icit_2.Light',
+        #                   'mal-L.mal-L_1.Light',
+        #                   'succ.succ_1.Light',
+        #                   'acon-C.acon-C_1.Light'],
+        order_componentNameBySampleNameAbbreviation_I = True,
+        value_I = 'mean'
+        );
     
 #norm01.export_dataStage02QuantificationGlogNormalizedCrossTable_js('ALEsKOs01_0');
 #heatmap01.export_dataStage02QuantificationHeatmap_js('ALEsKOs01_0');

@@ -401,21 +401,32 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             print('no missing values found.');
     def execute_imputeMissingValues_replicatesPerExperiment(self,
             analysis_id_I,
-            imputation_method_I = 'ameliaII',
-            imputation_options_I = {'n_imputations':1000,
-                                'geometric_imputation':True},
+            imputation_method_I = "ppca",
+            imputation_options_I = {'pca_model':"pca",
+                        'pca_method':"ppca",
+                        'imputeMissingValues':"TRUE",
+                        'cv':"q2",
+                        'ncomps':"7",
+                        #'scale':"FALSE",
+                        #'center':"FALSE",
+                        'scale':"uv",
+                        'center':"TRUE",
+                        'segments':"10",
+                        'nruncv':"1",
+                        'crossValidation_type':"krzanowski"},
             calculated_concentration_units_I=[],
             experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            time_points_I=[],
             r_calc_I=None):
-        '''calculate estimates for missing replicates values using AmeliaII from R
+        '''calculate estimates for missing replicates values using various imputation methods
         INPUT:
         experiment_id_I
-        sample_name_abbreviations_I'''
+        '''
         
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
 
-        print('execute_calculateMissingValues_condition...')
         data_O = [];
         data_imputations = [];
         # get the calculated_concentration_units/experiment_ids that are unique
@@ -435,7 +446,13 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 analysis_id_I,
                 row['calculated_concentration_units'],
                 row['experiment_id'],
+                sample_name_abbreviations_I=sample_name_abbreviations_I,
+                time_points_I=time_points_I,
                 );
+            # will need to refactor in the future...
+            if type(data_mv)==type(listDict()):
+                data_mv.convert_dataFrame2ListDict()
+                data_mv = data_mv.get_listDict();
             # compute missing values
             if imputation_method_I == 'ameliaII':
                 data_update = [];
@@ -448,6 +465,30 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                     data_new_unique = list(set([(y['experiment_id'],y['sample_name_short'],y['time_point'],y['component_name']) for y in data_update])-set([(x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) for x in data_mv]));
                     data_new = [x for x in data_update if (x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) in data_new_unique];
                     data_O.extend(data_new);
+            elif imputation_method_I in ["svdImpute",'ppca','nipals','bpca']:
+                data_update = [];
+                data_scores,data_loadings,data_perf,data_update = r_calc.calculate_pca_pcaMethods(data_mv,
+                    pca_model_I=imputation_options_I['pca_model'],
+                    pca_method_I=imputation_options_I['pca_method'],
+                    imputeMissingValues=imputation_options_I['imputeMissingValues'],
+                    cv=imputation_options_I['cv'],
+                    ncomps=imputation_options_I['ncomps'],
+                    scale=imputation_options_I['scale'],
+                    center=imputation_options_I['center'],
+                    segments=imputation_options_I['segments'],
+                    nruncv=imputation_options_I['nruncv'],
+                    crossValidation_type =imputation_options_I['crossValidation_type'],
+                    return_data_imputed_I = True);
+                if data_update:
+                    data_new_unique = list(set([(y['experiment_id'],y['sample_name_short'],y['time_point'],y['component_name']) for y in data_update])-set([(x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) for x in data_mv]));
+                    data_new = [x for x in data_update if (x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) in data_new_unique];
+                    #add in columns for calculated_concentration_units and imputation_method
+                    data_new_listDict = listDict(data_new);
+                    data_new_listDict.convert_listDict2DataFrame();
+                    data_new_listDict.add_column2DataFrame('calculated_concentration_units',row['calculated_concentration_units']);
+                    data_new_listDict.add_column2DataFrame('imputation_method',imputation_method_I);
+                    data_new_listDict.convert_dataFrame2ListDict();
+                    data_O.extend(data_new_listDict.get_listDict());
             elif imputation_method_I == 'mean_row_experiment':
                 pass;
             elif imputation_method_I == 'mean_experiment':

@@ -179,33 +179,3 @@ class stage02_quantification_pca_execute(stage02_quantification_pca_io,
                             True,None);
                     self.session.add(row2);
         self.session.commit();
-    def execute_pcaPlot_v1(self,experiment_id_I):
-        '''generate a pca plot'''
-
-        print('execute_pcaPlot...')
-        mplot = matplot();
-        # query metabolomics data from pca_scores and pca_loadings
-        # get time points
-        time_points = [];
-        time_points = self.get_timePoint_experimentID_dataStage02Scores(experiment_id_I);
-        for tp in time_points:
-            print('plotting pca for time_point ' + tp);
-            data_transformed = [];
-            # get concentration units...
-            concentration_units = [];
-            concentration_units = self.get_concentrationUnits_experimentIDAndTimePoint_dataStage02Scores(experiment_id_I,tp);
-            for cu in concentration_units:
-                if cu=='height_ratio_glog_normalized': continue; # skip for now...
-                print('plotting pca for concentration_units ' + cu);
-                # get data:
-                data_scores,data_loadings = [],[];
-                data_scores,data_loadings = self.get_RExpressionData_experimentIDAndTimePointAndUnits_dataStage02QuantificationPCAScoresLoadings(experiment_id_I,tp,cu);
-                # plot the data:
-                PCs = [[1,2],[1,3],[2,3]];
-                for PC in PCs:
-                    # scores
-                    title,xlabel,ylabel,x_data,y_data,text_labels,samples = self.matplot._extractPCAScores(data_scores,PC[0],PC[1]);
-                    mplot.volcanoPlot(title,xlabel,ylabel,x_data,y_data,text_labels);
-                    # loadings
-                    title,xlabel,ylabel,x_data,y_data,text_labels = self.matplot._extractPCALoadings(data_loadings,PC[0],PC[1]);
-                    mplot.volcanoPlot(title,xlabel,ylabel,x_data,y_data,text_labels);

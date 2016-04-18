@@ -1150,20 +1150,49 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 analysis_id_I,
                 calculated_concentration_units_I,
                 experiment_id_I,
+                sample_name_abbreviations_I=[],
+                time_points_I=[],
             ):
         """query unique rows from data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_replicates"""
         try:
-            data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates
+            #data = self.session.query(data_stage02_quantification_dataPreProcessing_replicates
+            #    ).filter(
+            #    data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
+            #    data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
+            #    data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(experiment_id_I),
+            #    data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
+            #    data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
+            #    data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
+            #    data_stage02_quantification_dataPreProcessing_replicates.component_name.asc(),
+            #    ).all();
+            data = self.session.query(
+                data_stage02_quantification_dataPreProcessing_replicates.analysis_id,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units,
+                data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration,
+                data_stage02_quantification_dataPreProcessing_replicates.imputation_method,
+                data_stage02_quantification_dataPreProcessing_replicates.component_group_name,
+                data_stage02_quantification_dataPreProcessing_replicates.component_name,
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id,
+                data_stage02_quantification_analysis.sample_name_abbreviation,
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short,
+                data_stage02_quantification_dataPreProcessing_replicates.time_point,
                 ).filter(
                 data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
                 data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(calculated_concentration_units_I),
                 data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(experiment_id_I),
-                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
-                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.asc(),
-                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.asc(),
-                data_stage02_quantification_dataPreProcessing_replicates.component_name.asc(),
-                ).all();
-            data_O=[d.__repr__dict__() for d in data];
+                data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(data_stage02_quantification_analysis.experiment_id),
+                data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(data_stage02_quantification_analysis.sample_name_short),
+                data_stage02_quantification_dataPreProcessing_replicates.time_point.like(data_stage02_quantification_analysis.time_point),
+                data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).all();
+            #data_O=[d.__repr__dict__() for d in data];
+            if data:
+                data_O = listDict(record_I=data);
+                data_O.convert_record2DataFrame();
+                data_O.filterIn_byDictList({
+                                            'sample_name_abbreviation':sample_name_abbreviations_I,
+                                           'time_point':time_points_I,
+                                           });
             return data_O;
         except SQLAlchemyError as e:
             print(e);

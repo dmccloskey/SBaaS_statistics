@@ -92,11 +92,13 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
                 d['comment_']=None;
                 heatmap_O.append(d);
             # add data to the database for the dendrograms
+            #if dendrogram_col_1['leaves'].__sizeof__() < 8191:
             dendrogram_col_1['analysis_id']=analysis_id_I;
             dendrogram_col_1['value_units']=cu;
             dendrogram_col_1['used_']=True;
             dendrogram_col_1['comment_']=None;
             dendrogram_col_O.append(dendrogram_col_1);
+            #if dendrogram_row_1['leaves'].__sizeof__() < 8191:
             dendrogram_row_1['analysis_id']=analysis_id_I;
             dendrogram_row_1['value_units']=cu;
             dendrogram_row_1['used_']=True;

@@ -110,6 +110,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 calculated_concentration_units_I=[],
                 value_I = 0.0,
                 operator_I='=',
+                set_used_false_I = False,
                 warn_I=False,
                 ):
         '''Delete missing values
@@ -126,23 +127,31 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = [];
             calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu_cnt,cu in enumerate(calculated_concentration_units):
-            self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I = analysis_id_I,
-                calculated_concentration_units_I = cu,
-                value_I = value_I,
-                operator_I = operator_I,
-                warn_I=warn_I,
-                );
+            if set_used_false_I:
+                continue;
+                #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates
+                #set used_ = False;
+            else:
+                self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I = analysis_id_I,
+                    calculated_concentration_units_I = cu,
+                    value_I = value_I,
+                    operator_I = operator_I,
+                    warn_I=warn_I,
+                    );
     def execute_deleteOutliers(self,
                 analysis_id_I,
                 calculated_concentration_units_cv_I=['umol*gDW-1'],
                 calculated_concentration_units_delete_I=['umol*gDW-1_glog_normalized'],
                 cv_threshold_I=80,
+                component_names_I=[],
+                set_used_false_I = False,
                 warn_I=False,
                 ):
         '''Delete outlier metabolites/sample_name_abbreviation pairs
         INPUT:
         cv_threshold_I = float
+        component_names_I = list of component_name to remove if they are identified as outliers
         OUTPUT:
         '''
         quantification_descriptiveStats_query=stage02_quantification_descriptiveStats_query(self.session,self.engine,self.settings);
@@ -164,6 +173,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 calculated_concentration_units_I = cu,
                 cv_threshold_I = cv_threshold_I,
                 used__I=True);
+            #filter in component_names if provided
+            if component_names_I:
+                desc_row = [r for r in desc_rows if r['component_name'] in component_names_I];
             for desc_row in desc_rows:
                 #query sample_name_shorts for each row
                 experiment_id,sample_name_short,time_point = [],[],[];
@@ -181,16 +193,21 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             calculated_concentration_units = calculated_concentration_units_delete_I;
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             for delete_row in delete_rows:
-                #remove experiment_id/sample_name_short/time_point/component_name from the analysis
-                self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
-                    analysis_id_I = analysis_id_I,
-                    calculated_concentration_units_I = cu,
-                    experiment_id_I = delete_row['experiment_id'],
-                    time_point_I = delete_row['time_point'],
-                    sample_name_short_I = delete_row['sample_name_short'],
-                    component_name_I = delete_row['component_name'],
-                    warn_I=warn_I,
-                    );
+                if set_used_false_I:
+                    continue;
+                    #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates
+                    #set used_ = False;
+                else:
+                    #remove experiment_id/sample_name_short/time_point/component_name from the analysis
+                    self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
+                        analysis_id_I = analysis_id_I,
+                        calculated_concentration_units_I = cu,
+                        experiment_id_I = delete_row['experiment_id'],
+                        time_point_I = delete_row['time_point'],
+                        sample_name_short_I = delete_row['sample_name_short'],
+                        component_name_I = delete_row['component_name'],
+                        warn_I=warn_I,
+                        );
 
     #normalization methods
     def execute_normalization(self,
@@ -405,15 +422,16 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
             imputation_options_I = {'pca_model':"pca",
                         'pca_method':"ppca",
                         'imputeMissingValues':"TRUE",
-                        'cv':"q2",
+                        'cv':"none",
                         'ncomps':"7",
-                        #'scale':"FALSE",
-                        #'center':"FALSE",
                         'scale':"uv",
                         'center':"TRUE",
-                        'segments':"10",
+                        'segments':"5",
                         'nruncv':"1",
-                        'crossValidation_type':"krzanowski"},
+                        'crossValidation_type':"krzanowski",
+                        'return_data_imputed':True,
+                        'geometric_imputation':True
+                        },
             calculated_concentration_units_I=[],
             experiment_ids_I=[],
             sample_name_abbreviations_I=[],
@@ -467,7 +485,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                     data_O.extend(data_new);
             elif imputation_method_I in ["svdImpute",'ppca','nipals','bpca']:
                 data_update = [];
-                data_scores,data_loadings,data_perf,data_update = r_calc.calculate_pca_pcaMethods(data_mv,
+                data_update = r_calc.calculate_pca_pcaMethods(data_mv,
                     pca_model_I=imputation_options_I['pca_model'],
                     pca_method_I=imputation_options_I['pca_method'],
                     imputeMissingValues=imputation_options_I['imputeMissingValues'],
@@ -478,7 +496,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                     segments=imputation_options_I['segments'],
                     nruncv=imputation_options_I['nruncv'],
                     crossValidation_type =imputation_options_I['crossValidation_type'],
-                    return_data_imputed_I = True);
+                    return_data_imputed_I = imputation_options_I['return_data_imputed'],
+                    geometric_imputation_I = imputation_options_I['geometric_imputation'],
+                    );
                 if data_update:
                     data_new_unique = list(set([(y['experiment_id'],y['sample_name_short'],y['time_point'],y['component_name']) for y in data_update])-set([(x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) for x in data_mv]));
                     data_new = [x for x in data_update if (x['experiment_id'],x['sample_name_short'],x['time_point'],x['component_name']) in data_new_unique];
@@ -487,6 +507,8 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                     data_new_listDict.convert_listDict2DataFrame();
                     data_new_listDict.add_column2DataFrame('calculated_concentration_units',row['calculated_concentration_units']);
                     data_new_listDict.add_column2DataFrame('imputation_method',imputation_method_I);
+                    data_new_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
+                    data_new_listDict.add_column2DataFrame('used_',True);
                     data_new_listDict.convert_dataFrame2ListDict();
                     data_O.extend(data_new_listDict.get_listDict());
             elif imputation_method_I == 'mean_row_experiment':
@@ -775,3 +797,91 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 return norm_conc,norm_conc_units;
         else:
             return lloq,conc_units;
+        
+    def execute_deleteFeaturesWithMissingValues(self,
+                analysis_id_I,
+                calculated_concentration_units_I=[],
+                component_names_I = [],
+                value_I = None,
+                operator_I='NA',
+                set_used_false_I = False,
+                ):
+        '''Count the number of missing values
+        INPUT:
+        value_I = float, default: None (check for missing values)
+        operator_I = string, (e.g., "=") to compare to the value
+        OUTPUT:
+        '''
+        delete_row_O = [];
+        # query the calculated_concentration_units
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
+        else:
+            calculated_concentration_units = [];
+            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu_cnt,cu in enumerate(calculated_concentration_units):
+            # query the number of unique sample_name_short/experiment_id/time_point
+            ncols = None;
+            ncols = self.getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            # query the component_names/component_group_names:
+            component_names = [];
+            component_names = self.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                analysis_id_I,
+                cu
+                );
+            for cn in component_names:
+                if value_I is None:
+                    # query the number of unique sample_name_short/experiment_id/time_point
+                    mv = None;
+                    mv = self.getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                        analysis_id_I,
+                        cn['component_name'],
+                        cu);
+                else:
+                    mv = None;
+                    mv = self.getAggregateFunction_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I,
+                    column_name_I = 'analysis_id',
+                    aggregate_function_I='count',
+                    query_I={'where':[
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        'column_name':'analysis_id',
+                        'value':analysis_id_I,
+                        'operator':'LIKE',
+                        'connector':'AND'
+                        },
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        'column_name':'calculated_concentration_units',
+                        'value':cu,
+                        'operator':'LIKE',
+                        'connector':'AND'
+                        },
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        'column_name':'calculated_concentration',
+                        'value':value_I,
+                        'operator':operator_I,
+                        'connector':'AND'
+                        },
+                        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                        'column_name':'component_name',
+                        'value':cn['component_name'],
+                        'operator':'LIKE',
+                        'connector':'AND'
+                        },
+                    ]}
+                    );
+                if mv<ncols:
+                    tmp = copy.copy(cn);
+                    tmp['calculated_concentration_units']=cu;
+                    delete_row_O.append(tmp);
+        #delete the rows
+        if set_used_false_I:
+            self.setUsed2False_analysisIDAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(delete_rows_O);
+        else:
+            for delete_row in delete_row_O:
+                self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I,
+                    delete_row['calculated_concentration_units'],
+                    delete_row['component_name'],
+                    warn_I=False
+                    );

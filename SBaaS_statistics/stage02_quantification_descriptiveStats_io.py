@@ -4,6 +4,7 @@ import json
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # Resources
 from io_utilities.base_importData import base_importData
@@ -20,6 +21,7 @@ class stage02_quantification_descriptiveStats_io(stage02_quantification_descript
         analysis_id_I = string,
         plot_points_I = boolean, default=False, raw data points will not be plotted on the same plot
         '''
+        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
 
         #get the analysis information
         analysis_info = [];
@@ -28,7 +30,8 @@ class stage02_quantification_descriptiveStats_io(stage02_quantification_descript
         if plot_points_I:
         #get the replicate data for the analysis
             data_points_O = [];
-            data_points_O = self.get_rowsAndSampleNameAbbreviations_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            data_points_O = quantification_dataPreProcessing_replicates_query.get_rowsAndSampleNameAbbreviations_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            #data_points_O = self.get_rowsAndSampleNameAbbreviations_analysisID_dataStage02GlogNormalized(analysis_id_I);
             data_O = [];
             data_O = self.get_rows_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
         else:

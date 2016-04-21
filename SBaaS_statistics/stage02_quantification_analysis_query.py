@@ -1,7 +1,3 @@
-#lims
-from SBaaS_LIMS.lims_experiment_postgresql_models import *
-from SBaaS_LIMS.lims_sample_postgresql_models import *
-
 from .stage02_quantification_analysis_postgresql_models import *
 
 from SBaaS_base.sbaas_template_query import sbaas_template_query
@@ -91,6 +87,24 @@ class stage02_quantification_analysis_query(sbaas_template_query):
                     sample_name_short_O.append(d.sample_name_short); 
                     time_point_O.append(d.time_point);               
             return  experiment_id_O,sample_name_short_O,time_point_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_timePoint_analysisIDAndExperimentIDAndSampleNameAbbreviation_dataStage02QuantificationAnalysis(self,
+            analysis_id_I,
+            experiment_id_I,
+            sample_name_abbreviation_I):
+        '''Query time_point that are used from the analysis'''
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_analysis.time_point).filter(
+                    data_stage02_quantification_analysis.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_analysis.experiment_id.like(experiment_id_I),
+                    data_stage02_quantification_analysis.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                    data_stage02_quantification_analysis.used_.is_(True)).group_by(
+                    data_stage02_quantification_analysis.time_point).order_by(
+                    data_stage02_quantification_analysis.time_point.asc()).all();
+            time_point_O = [d.time_point for d in data]           
+            return  time_point_O;
         except SQLAlchemyError as e:
             print(e);
 

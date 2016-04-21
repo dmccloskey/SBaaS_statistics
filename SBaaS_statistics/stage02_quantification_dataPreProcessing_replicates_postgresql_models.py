@@ -18,7 +18,9 @@ class data_stage02_quantification_dataPreProcessing_replicates(Base):
     __table_args__ = (#UniqueConstraint('experiment_id','sample_name_short','time_point','component_name'),
                       UniqueConstraint('analysis_id','experiment_id','sample_name_short','time_point',
                             'component_name',
-                            'calculated_concentration_units'),
+                            'calculated_concentration_units',
+                            #'used_'
+                            ),
             )
 
     def __init__(self,

@@ -5,6 +5,8 @@ from .stage02_quantification_dataPreProcessing_replicates_query import stage02_q
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 #Resources:
 from listDict.listDict import listDict
+from io_utilities.base_importData import base_importData
+from io_utilities.base_exportData import base_exportData
 #SBaaS_rnasequencing
 from SBaaS_rnasequencing.stage01_rnasequencing_genesFpkmTracking_query import stage01_rnasequencing_genesFpkmTracking_query
 #SBaaS_quantification
@@ -163,7 +165,6 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                 data_listDict.convert_listDict2DataFrame();
                 data_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
                 data_listDict.dataFrame['id'] = None;
-                data_listDict.add_column2DataFrame("imputation_method",None);
                 data_listDict.convert_dataFrame2ListDict();
                 data_O.extend(data_listDict.get_listDict());
                 ##split 1:
@@ -219,3 +220,19 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
             #    data_O.append(row);
         # add data to the DB every calculated concentration unit to avoid a massive transaction
         self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
+
+    #Updates from file:
+    def import_setUsed2False_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self, filename):
+        '''table adds'''
+        data = base_importData();
+        data.read_csv(filename);
+        data.format_data();
+        self.setUsed2False_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(data.data);
+        data.clear_data();
+    def import_delete_rows_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self, filename):
+        '''table adds'''
+        data = base_importData();
+        data.read_csv(filename);
+        data.format_data();
+        self.delete_rows_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(data.data);
+        data.clear_data();

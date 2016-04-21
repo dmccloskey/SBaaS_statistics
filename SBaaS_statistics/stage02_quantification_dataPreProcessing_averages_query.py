@@ -5,10 +5,12 @@ from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
 from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
-
+#SBaaS template
 from SBaaS_base.sbaas_template_query import sbaas_template_query
-
+#SBaaS tables
 from .stage02_quantification_dataPreProcessing_averages_postgresql_models import *
+#resources
+from listDict.listDict import listDict
 
 class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_query,
                                        ):
@@ -161,6 +163,8 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
 
         #additional blocks
         for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
             for r in v:
                 query[k].append(r);
         
@@ -233,6 +237,8 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
 
         #additional blocks
         for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
             for r in v:
                 query[k].append(r);
         
@@ -291,6 +297,8 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
 
         #additional query blocks
         for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
             for r in v:
                 query[k].append(r);
         
@@ -300,14 +308,16 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
-    def delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingAverages(self,
+    def delete_rows_analysisIDAndCalculatedConcentrationUnitsAndFeatureValueAndOperator_dataStage02QuantificationDataPreProcessingAverages(self,
             analysis_id_I,
             calculated_concentration_units_I,
+            feature_I,
             value_I,operator_I,
             warn_I=True):
         '''delete rows from data_stage02_quantification_dataPreProcessing_averages
         INPUT:
         analysis_id_I = string,
+        feature_I = string, column name
         value_I = float,
         operator_I = string, e.g. "="
         OUTPUT:
@@ -325,7 +335,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
                     'connector':'AND'
                     },{
                     'table_name':table,
-                    'column_name':'calculated_concentration',
+                    'column_name':feature_I,
                     'value':value_I,
 		            'operator':operator_I,
                     'connector':'AND'
@@ -414,6 +424,8 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
 
         #additional blocks
         for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
             for r in v:
                 query[k].append(r);
         
@@ -423,7 +435,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
-    def getGroup_analysisIDAndExperimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+    def getGroup_analysisIDAndExperimentIDAndSampleNameAbbreviationAndTimePoint_analysisIDAndCalculatedConcentrationUnits_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I,
                 query_I={},
@@ -513,6 +525,8 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
 
         #additional blocks
         for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
             for r in v:
                 query[k].append(r);
         
@@ -522,7 +536,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
-    def getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndSampleNameShortAndTimePoint_dataStage02QuantificationDataPreProcessingAverages(self,
+    def getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndSampleNameAbbreviationAndTimePoint_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I,
                 experiment_id_I,
@@ -623,7 +637,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             dictColumn_I=dictColumn_I);
         return data_O;
     
-    def getGroup_analysisIDAndExperimentIDAndSampleNameShortAndTimePointAndComponentNameArray_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+    def getGroup_analysisIDAndExperimentIDAndSampleNameAbbreviationAndTimePointAndComponentNameArray_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I,
                 query_I={},
@@ -660,6 +674,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
         return data_O;   
 
     #Joins with data_preProcessing_analysis and data_stage02_quantification_dataPreProcessing_averages
+    #TODO: refactor to use listDict
     def get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I=[],
@@ -783,6 +798,41 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             data_O=[];
             for d in data:
                 data_O.append(d.__repr__dict__())
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+                analysis_id_I,calculated_concentration_units_I,
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                component_names_I=[],
+                component_group_names_I=[],
+                time_points_I=[],):
+        """get analysis_id, experiment_id, sample_name_abbreviation, time_point, component_name, component_group_name,
+        [descriptive_statistics], and calculated_concentration units from data_stage02_quantification_dataPreProcessing_averages
+        INPUT:
+        analysis_id
+        calculated_concentration_units
+        OPTIONAL INPUT:
+        experiment_ids_I
+        sample_name_abbreviations_I
+        time_points_I
+        """
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).all();
+            data_O = [];
+            if data:
+                data_O = listDict(listDict_I=[d.__repr__dict__() for d in data]);
+                data_O.convert_listDict2DataFrame();
+                data_O.filterIn_byDictList({'experiment_id':experiment_ids_I,
+                                            'sample_name_abbreviation':sample_name_abbreviations_I,
+                                           'component_name':component_names_I,
+                                           'component_group_name':component_group_names_I,
+                                           'time_point':time_points_I,
+                                           });
             return data_O;
         except SQLAlchemyError as e:
             print(e);
@@ -965,7 +1015,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return data;
         except SQLAlchemyError as e:
             print(e);   
-    def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisID_dataStage02QuantificationDataPreProcessingAverages(self, analysis_id_I):
+    def getCount_experimentIDAndSampleNameAbbreviationAndTimePoint_analysisID_dataStage02QuantificationDataPreProcessingAverages(self, analysis_id_I):
         """query row count of unique experiment_id/sample_name_abbreviation/time_point by analysis id from """
         try:
             data = self.session.query(data_stage02_quantification_dataPreProcessing_averages.experiment_id,
@@ -982,7 +1032,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return data;
         except SQLAlchemyError as e:
             print(e);
-    def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+    def getCount_experimentIDAndSampleNameAbbreviationAndTimePoint_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I):
         """query row count of unique experiment_id/sample_name_abbreviation/time_point from """
@@ -1002,7 +1052,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return data;
         except SQLAlchemyError as e:
             print(e);   
-    def getCount_experimentIDAndSampleNameShortAndTimePoint_analysisIDAndImputationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I,
+    def getCount_experimentIDAndSampleNameAbbreviationAndTimePoint_analysisIDAndImputationMethodAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I,
                 imputation_method_I,
                 calculated_concentration_units_I):
         """query row count of unique experiment_id/sample_name_abbreviation/time_point from """

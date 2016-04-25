@@ -1,6 +1,3 @@
-#lims
-from SBaaS_LIMS.lims_experiment_postgresql_models import *
-from SBaaS_LIMS.lims_sample_postgresql_models import *
 #SBaaS
 from .stage02_quantification_analysis_postgresql_models import *
 from .stage02_quantification_pairWiseTest_postgresql_models import *

@@ -155,7 +155,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 row['component_group_name']=gene2componentGroupName_I[fpkm['gene_short_name']];
             else:
                 row['component_group_name']=fpkm['gene_short_name'];
-            row['calculated_concentration_units']='FPKM_cuffdiff';
+            row['calculated_concentration_units']='FPKM_cuffdiff'+"_"+fpkm['normalization_method'];
             #descriptive statistics map
             if fpkm['FPKM_status'] == 'OK': row['test_stat'] = 1;
             else: row['test_stat'] = 0;
@@ -234,7 +234,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                             row['component_group_name']=gene2componentGroupName_I[fpkm['gene']];
                         else:
                             row['component_group_name']=fpkm['gene'];
-                        row['calculated_concentration_units']='log2(FC)';
+                        row['calculated_concentration_units']='log2(FC)'+"_"+fpkm['normalization_method'];
                         #descriptive statistics map
                         data_mean,data_median = fpkm['fold_change_log2'],fpkm['fold_change_log2'];
                         data_var = None;

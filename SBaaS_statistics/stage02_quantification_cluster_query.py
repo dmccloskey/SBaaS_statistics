@@ -1,46 +1,37 @@
-#SBaaS
-from .stage02_quantification_pairWiseCorrelation_postgresql_models import *
-
+#SBaaS_base
 from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
 from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
 from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
 from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
-
+#SBaaS_template
 from SBaaS_base.sbaas_template_query import sbaas_template_query
+#postgresql_models
+from .stage02_quantification_cluster_postgresql_models import *
+#resources
+from listDict.listDict import listDict
 
-class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
+class stage02_quantification_cluster_query(sbaas_template_query,
+                                       ):
     def initialize_supportedTables(self):
-        '''Set the supported tables dict for 
+        '''Set the supported tables dict for stage02_quantification_cluster
         '''
         tables_supported = {
-                            'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
-                            'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
+            'data_stage02_quantification_cluster_impfeat':data_stage02_quantification_cluster_impfeat,
+            'data_stage02_quantification_cluster_responseClassification':data_stage02_quantification_cluster_responseClassification,
+            'data_stage02_quantification_cluster_pipeline':data_stage02_quantification_cluster_pipeline,
+            'data_stage02_quantification_cluster_hyperparameter':data_stage02_quantification_cluster_hyperparameter,
                         };
         self.set_supportedTables(tables_supported);
 
-    def get_rows_analysisID_dataStage02pairWiseCorrelation(self, analysis_id_I):
-        """get data from analysis ID"""
-        #Tested
-        try:
-            data = self.session.query(data_stage02_quantification_pairWiseCorrelation).filter(
-                    data_stage02_quantification_pairWiseCorrelation.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_pairWiseCorrelation.used_.is_(True)).order_by(
-                    data_stage02_quantification_pairWiseCorrelation.calculated_concentration_units.asc(),
-                    data_stage02_quantification_pairWiseCorrelation.sample_name_abbreviation_2.asc()).all();
-            data_O = [];
-            for d in data: 
-                data_O.append(d.__repr__dict__());
-            return data_O;
-        except SQLAlchemyError as e:
-            print(e);
-    def get_rows_dataStage02QuantificationPairWiseCorrelation(self,
+    #Query rows
+    def get_rows_dataStage02QuantificationCluster(self,
                 tables_I,
                 query_I,
                 output_O,
                 dictColumn_I=None):
-        """get rows by analysis ID from data_stage02_quantification_pairWiseCorrelation"""
+        """get rows by analysis ID from data_stage02_quantification_cluster"""
         data_O = [];
         try:
             table_model = self.convert_tableStringList2SqlalchemyModelDict(tables_I);
@@ -53,8 +44,8 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
         except Exception as e:
             print(e);
         return data_O;
-    def add_dataStage02QuantificationPairWiseCorrelation(self,table_I,data_I):
-        '''add rows of data_stage02_quantification_pairWiseCorrelation'''
+    def add_dataStage02QuantificationCluster(self,table_I,data_I):
+        '''add rows of data_stage02_quantification_cluster'''
         if data_I:
             try:
                 model_I = self.convert_tableString2SqlalchemyModel(table_I);
@@ -62,8 +53,8 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
                 queryinsert.add_rows_sqlalchemyModel(model_I,data_I);
             except Exception as e:
                 print(e);
-    def update_dataStage02QuantificationPairWiseCorrelation(self,table_I,data_I):
-        '''update rows of data_stage02_quantification_pairWiseCorrelation'''
+    def update_dataStage02QuantificationCluster(self,table_I,data_I):
+        '''update rows of data_stage02_quantification_cluster'''
         if data_I:
             try:
                 model_I = self.convert_tableString2SqlalchemyModel(table_I);
@@ -72,7 +63,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
             except Exception as e:
                 print(e);
 
-    def initialize_dataStage02_quantification_pairWiseCorrelation(self,
+    def initialize_dataStage02_quantification_cluster(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -83,7 +74,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
                 queryinitialize.initialize_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def drop_dataStage02_quantification_pairWiseCorrelation(self,
+    def drop_dataStage02_quantification_cluster(self,
             tables_I = [],):
         try:
             if not tables_I:
@@ -94,7 +85,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
                 querydrop.drop_table_sqlalchemyModel(model_I);
         except Exception as e:
             print(e);
-    def reset_dataStage02_quantification_pairWiseCorrelation(self,
+    def reset_dataStage02_quantification_cluster(self,
             tables_I = [],
             analysis_id_I = None,
             warn_I=True):
@@ -109,7 +100,6 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
                         'table_name':table,
                         'column_name':'analysis_id',
                         'value':analysis_id_I,
-                        #'value':self.convert_string2StringString(analysis_id_I),
 		                'operator':'LIKE',
                         'connector':'AND'
                         }
@@ -120,66 +110,47 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
         except Exception as e:
             print(e);
 
-    def get_rows_analysisID_dataStage02QuantificationPairWiseCorrelationReplicates(self,
-                analysis_id_I,
-                query_I={},
-                output_O='listDict',
-                dictColumn_I=None):
-        '''Query rows by analysis_id from data_stage02_quantification_pairWiseCorrelation_replicates
+    #Safe calls by other classes
+    def get_rows_analysisID_dataStage02QuantificationClusterPipeline(self,analysis_id_I):
+        '''Query rows that are used by the analysis_id
         INPUT:
         analysis_id_I = string
-        output_O = string
-        dictColumn_I = string
-        OPTIONAL INPUT:
-        query_I = additional query blocks
         OUTPUT:
-        data_O = output specified by output_O and dictColumn_I
-        '''
-
-        tables = ['data_stage02_quantification_pairWiseCorrelation_replicates'];
-        # get the listDict data
-        data_O = [];
-        query = {};
-        query['select'] = [{"table_name":tables[0]}];
-        query['where'] = [
-            {"table_name":tables[0],
-            'column_name':'analysis_id',
-            'value':analysis_id_I,
-            #'value':self.convert_string2StringString(analysis_id_I),
-            'operator':'LIKE',
-            'connector':'AND'
-                        },
-            {"table_name":tables[0],
-            'column_name':'used_',
-            'value':'true',
-            'operator':'IS',
-            'connector':'AND'
-                },
-	    ];
-        query['order_by'] = [
-            {"table_name":tables[0],
-            'column_name':'calculated_concentration_units',
-            'order':'ASC',
-            },
-            {"table_name":tables[0],
-            'column_name':'sample_name_short_1',
-            'order':'ASC',
-            },
-            {"table_name":tables[0],
-            'column_name':'sample_name_short_2',
-            'order':'ASC',
-            },
-        ];
-        #additional blocks
-        for k,v in query_I.items():
-            if not k in query.keys():
-                query[k] = [];
-            for r in v:
-                query[k].append(r);
-        
-        data_O = self.get_rows_tables(
-            tables_I=tables,
-            query_I=query,
-            output_O=output_O,
-            dictColumn_I=dictColumn_I);
-        return data_O;
+        rows_O = listDict'''
+        try:
+            data = self.session.query(data_stage02_quantification_cluster_pipeline).filter(
+                    data_stage02_quantification_cluster_pipeline.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_cluster_pipeline.used_.is_(True)).all();
+            rows_O = [];
+            if data: 
+                for d in data:
+                    rows_O.append(d.__repr__dict__());
+            return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationClusterPipeline(self,pipeline_id_I):
+        '''Query models, methods, and parameters that are used by the pipeline_id in order
+        INPUT:
+        pipeline_id_I = string
+        OUTPUT:
+        models_O = list, pipeline models
+        methods_O = list, pipeline methods
+        parameters_O = list, pipeline parameters'''
+        try:
+            data = self.session.query(
+                data_stage02_quantification_cluster_pipeline.pipeline_model,
+                data_stage02_quantification_cluster_pipeline.pipeline_method,
+                data_stage02_quantification_cluster_pipeline.pipeline_parameters).filter(
+                data_stage02_quantification_cluster_pipeline.pipeline_id.like(pipeline_id_I),
+                data_stage02_quantification_cluster_pipeline.used_.is_(True)).order_by(
+                data_stage02_quantification_cluster_pipeline.pipeline_order).all();
+            models_O,methods_O,parameters_O = [],[],[];
+            if data: 
+                data_i = listDict(record_I=data);
+                data_i.convert_record2DataFrame();
+                models_O=data_i.dataFrame['pipeline_model'].get_values();
+                methods_O=data_i.dataFrame['pipeline_method'].get_values();
+                parameters_O=data_i.dataFrame['pipeline_parameters'].get_values();
+            return models_O,methods_O,parameters_O;
+        except SQLAlchemyError as e:
+            print(e);

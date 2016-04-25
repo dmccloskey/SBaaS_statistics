@@ -130,7 +130,7 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
         value_I = string, e.g., value from descriptiveStats to use 'mean','median','pvalue',etc.
         '''
 
-        print('executing heatmap...');
+        print('executing heatmap from descriptiveStats...');
         calculateheatmap = calculate_heatmap();
         #hmap = heatmap();
         # get the analysis information

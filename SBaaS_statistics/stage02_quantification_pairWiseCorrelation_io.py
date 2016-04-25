@@ -18,15 +18,17 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
         '''table of correlations'''
         pass;
 
-    def export_dataStage02QuantificationPairWiseCorrelationReplicates_heatmap_js(self,
+    def export_dataStage02QuantificationPairWiseCorrelationReplicates_js(self,
                 analysis_id_I,
                 query_I={},
+                add_self_vs_self_I = True,
                 data_dir_I='tmp'
                 ):
-        '''export a chord diagram
+        '''export a heatmap of pairwise correlations
         INPUT:
         analysis_id_I = string
         query_I = {} of additional SQL query operators
+        add_self_vs_self_I = boolean, add in correlation=1 for sns1==sns2
         data_dir_I
         OUTPUT:
         '''
@@ -38,6 +40,21 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
         data_O_listDict = listDict();
         data_O_listDict.set_listDict(data_O);
         data_O_listDict.convert_listDict2DataFrame();
+        #add in rows for self vs self comparison (unique: calculated_concentration_units, sample_name_short_1, sample_name_short_2
+        if add_self_vs_self_I:
+            calculated_concentration_units = data_O_listDict.get_uniqueValues('calculated_concentration_units');
+            sample_name_shorts = data_O_listDict.get_uniqueValues('sample_name_short_1');
+            for ccu in calculated_concentration_units:
+                for sns in sample_name_shorts:
+                    sns_row = data_O_listDict.dataFrame[(data_O_listDict.dataFrame['sample_name_short_1']==sns) & (data_O_listDict.dataFrame['calculated_concentration_units']==ccu)]
+                    head = dict(sns_row.iloc[0]);
+                    head['sample_name_short_2'] = head['sample_name_short_1']
+                    head['sample_name_abbreviation_2'] = head['sample_name_abbreviation_1']
+                    head['correlation_coefficient'] = 1.0
+                    head['pvalue'] = 0.0
+                    head['pvalue_corrected'] = 0.0
+                    data_O_listDict.append_listDict2dataFrame([head]);
+        # add in dummy clustering and ordering indices for heatmap
         data_O_listDict.make_dummyIndexColumn('row_index','sample_name_short_1');
         data_O_listDict.make_dummyIndexColumn('col_index','sample_name_short_2');
         data_O_listDict.make_dummyIndexColumn('row_leaves','sample_name_short_1');
@@ -124,7 +141,8 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
         ddtheatmap = ddt_container_heatmap();
         ddtheatmap.make_container_heatmap(data_O,
             svgcolorcategory='blue2gold64RBG',
-            svgcolordomain=[0,1],
+            #svgcolordomain=[0,1],
+            svgcolordomain='min,max',
             data1_keymap=data1_keymap,
             data1_keys=data1_keys,
             data1_nestkeys=data1_nestkeys,

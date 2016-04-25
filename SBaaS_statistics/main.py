@@ -177,10 +177,17 @@ svm01.initialize_supportedTables();
 #svm01.drop_tables();
 svm01.initialize_tables();
 
+#make the anova table 
+from SBaaS_statistics.stage02_quantification_anova_execute import stage02_quantification_anova_execute
+anova01 = stage02_quantification_anova_execute(session,engine,pg_settings.datadir_settings);
+anova01.initialize_supportedTables();
+anova01.initialize_tables();
+
 analysis_ids_run = [
-        'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
+        #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
+        'ALEsKOs01_0',
         #'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
@@ -226,8 +233,8 @@ n_bins_histogram = [];
 covariance_model = [
     {'data_matrix_shape':'featuresBySamples','model':"MinCovDet",'method':"MinCovDet",'options':None},
     {'data_matrix_shape':'featuresBySamples','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
-    #{'data_matrix_shape':'samplesByFeatures','model':"MinCovDet",'method':"MinCovDet",'options':None},
-    #{'data_matrix_shape':'samplesByFeatures','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
+    {'data_matrix_shape':'samplesByFeatures','model':"MinCovDet",'method':"MinCovDet",'options':None},
+    {'data_matrix_shape':'samplesByFeatures','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
     ];
 
 tree_model = [
@@ -346,21 +353,41 @@ r_calc = r_interface();
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-#    #remove components with missing values
-#    dpprep01.execute_deleteFeaturesWithMissingValues(self,
-#            analysis_id_I = analysis_id,
-#            calculated_concentration_units_I=['umol*gDW-1'],
-##             component_names_I = ['adn.adn_1.Light',
-##                 'gsn.gsn_1.Light',
-##                 'gua.gua_1.Light',
-##                 'hxan.hxan_1.Light',
-##                 'ins.ins_1.Light',
-##                 'ura.ura_1.Light',
-##                 'uri.uri_1.Light',],
-#            value_I = None,
-#            operator_I='NA',
-#            set_used_false_I = False,
-#         );
+    #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id)
+    #pwt01.execute_pairwiseTestReplicates(analysis_id,
+    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #        calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
+    #        test_description_I = "Two Sample t-test",
+    #        ci_level_I = 0.95,
+    #        pvalue_corrected_description_I = "bonferroni",
+    #        r_calc_I=r_calc
+    #        );
+
+    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = [], 
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id,
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    r_calc_I=r_calc
+    #   );
+
+    # perform an ANOVA on the normalized data set
+    anova01.reset_dataStage02_quantification_anova(analysis_id);
+    anova01.execute_anova(analysis_id,
+        calculated_concentration_units_I=[
+            'umol*gDW-1_glog_normalized',
+        ],
+        r_calc_I=r_calc);
+
+    ##remove components with missing values
+    #dpprep01.execute_deleteFeaturesWithMissingValues(
+    #        analysis_id_I = analysis_id,
+    #        calculated_concentration_units_I=['umol*gDW-1'],
+    #        value_I = None,
+    #        operator_I='NA',
+    #        set_used_false_I = False,
+    #     );
     
     #dppave01.reset_stage02_quantification_dataPreProcessing_averages(
     #      tables_I = [
@@ -395,14 +422,14 @@ for analysis_id in analysis_ids_run:
     #   #imputation_method_I = 'value',
     #   #imputation_options_I = {'value':1e-6},
     #   );
-    dppave01.execute_normalization(
-            analysis_id,
-            calculated_concentration_units_I=[],
-            feature_I = 'mean',
-            normalization_method_I='log2',
-            normalization_options_I={},
-            r_calc_I=r_calc
-            );
+    #dppave01.execute_normalization(
+    #        analysis_id,
+    #        calculated_concentration_units_I=[],
+    #        feature_I = 'mean',
+    #        normalization_method_I='log2',
+    #        normalization_options_I={},
+    #        r_calc_I=r_calc
+    #        );
 
     ##get the replicate data and check for missing values
     #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
@@ -609,6 +636,7 @@ for analysis_id in analysis_ids_run:
     #outliers01.execute_calculateOutliersPCA(analysis_id,
     #            concentration_units_I = ['umol*gDW-1'],
     #            r_calc_I=r_calc);
+
     ## check for outliers using SVD
     #svd01.reset_dataStage02_quantification_svd(
     #        tables_I = [], 
@@ -620,7 +648,8 @@ for analysis_id in analysis_ids_run:
     #        r_calc_I=r_calc,
     #        svd_method_I = k,
     #        );
-    ### check for outliers using oneClassSVM
+
+    ## check for outliers using oneClassSVM
     #outliers01.execute_calculateOutliersOneClassSVM(
     #    analysis_id,
     #    calculated_concentration_units_I = ['FPKM_log2_normalized'],
@@ -645,7 +674,8 @@ for analysis_id in analysis_ids_run:
     #        covariance_model_I=row['model'],
     #        covariance_method_I=row['method'],
     #        covariance_options_I=row['options'],
-    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        #calculated_concentration_units_I=['FPKM_log2_normalized'],
+    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
     #        experiment_ids_I=[],
     #        sample_name_abbreviations_I=[],
     #        sample_name_shorts_I=[],
@@ -653,7 +683,8 @@ for analysis_id in analysis_ids_run:
     #        component_group_names_I=[],
     #        time_points_I=[],
     #        );
-    ##apply a tree classifer
+
+    #apply a tree classifer
     #tree01.reset_dataStage02_quantification_tree(
     #        tables_I = [
     #            'data_stage02_quantification_tree_impfeat',
@@ -698,6 +729,7 @@ for analysis_id in analysis_ids_run:
     #        component_group_names_I=[],
     #        time_points_I=[],
     #        );
+
     ##apply a svm classifer
     #svm01.reset_dataStage02_quantification_svm(
     #        tables_I = [
@@ -903,55 +935,37 @@ for analysis_id in analysis_ids_run:
     #    value_I = 'mean'
     #    );
     
-#norm01.export_dataStage02QuantificationGlogNormalizedCrossTable_js('ALEsKOs01_0');
-#heatmap01.export_dataStage02QuantificationHeatmap_js('ALEsKOs01_0');
-#pca01.export_dataStage02QuantificationPCAScoresAndLoadings_js('ALEsKOs01_0');
-#pca01.export_dataStage02QuantificationPCABiPlotAndValidation_js('ALEsKOs01_0');
-#pls01.export_dataStage02QuantificationPLSScoresAndLoadings_js('ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01');
-#pls01.export_dataStage02QuantificationPLSBiPlotAndValidation_js('ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01');
-#count01.export_dataStage02QuantificationCountCorrelationPattern_js('ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01');
-#pls01.export_dataStage02QuantificationPLSSPlot_js('ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01');
-#descstats01.export_dataStage02QuantificationDescriptiveStats_js('ALEsKOs01_0',plot_points_I=True);
-
-#svd01.export_dataStage02QuantificationSVDV_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01");
-#svd01.export_dataStage02QuantificationSVDU_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01");
-#svd01.export_dataStage02QuantificationSVDD_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01");
-#svd01.export_rows_analysisID_dataStage02QuantificationSVD_csv(
-#    tables_I=['data_stage02_quantification_svd_d'],
-#    analysis_id_I = "ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
-#    filename_O = 'tmp.csv'
-#    );
-#svd01.export_dataStage02QuantificationSVDScoresAndLoadings_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01");
-#svd01.export_dataStage02QuantificationSVDScoresAndLoadingsAndMethods_js("ALEsKOs01_0-1-2-3-11_evo04pgiEvo02");
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
+
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
-#    query_I = {},
-#    #{'where':[
-#    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-#    #    'column_name':'sample_name_abbreviation_1',
-#    #    'value':'OxicEvo04EcoliGlc',
-#    #    'operator':'LIKE',
-#    #    'connector':'AND'
-#    #        },
-#    #    {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-#    #    'column_name':'sample_name_abbreviation_2',
-#    #    'value':'OxicEvo04EcoliGlc',
-#    #    'operator':'LIKE',
-#    #    'connector':'AND'
-#    #        },
-#    #    #{"table_name":'data_stage02_quantification_pairWiseTable_replicates',
-#    #    #'column_name':'calculated_concentration_units',
-#    #    #'value':'FPKM_log2_normalized',
-#    #    #'operator':'LIKE',
-#    #    #'connector':'AND'
-#    #    #    },
-#    #]
-#    #},
+#    #query_I = {},
+#    query_I = {'where':[
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'sample_name_abbreviation_1',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'sample_name_abbreviation_2',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'calculated_concentration_units',
+#        'value':'FPKM_log2_normalized',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#    ]
+#    },
 #    single_plot_I=True
 #    );
+
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_chordDiagram_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
 #    query_I = 
@@ -977,21 +991,22 @@ for analysis_id in analysis_ids_run:
 #    ]
 #    },
 #    );
-#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_heatmap_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+
+#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
 #    query_I = 
 #    {'where':[
-#        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-#        #'column_name':'sample_name_abbreviation_1',
-#        #'value':'OxicEvo04EcoliGlc',
-#        #'operator':'LIKE',
-#        #'connector':'AND'
-#        #    },
-#        #{"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-#        #'column_name':'sample_name_abbreviation_2',
-#        #'value':'OxicEvo04EcoliGlc',
-#        #'operator':'LIKE',
-#        #'connector':'AND'
-#        #    },
+#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+#        'column_name':'sample_name_abbreviation_1',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
+#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
+#        'column_name':'sample_name_abbreviation_2',
+#        'value':'OxicEvo04EcoliGlc',
+#        'operator':'LIKE',
+#        'connector':'AND'
+#            },
 #        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
 #        'column_name':'calculated_concentration_units',
 #        'value':'FPKM_log2_normalized',
@@ -1001,3 +1016,5 @@ for analysis_id in analysis_ids_run:
 #    ]
 #    },
 #    );
+
+covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')

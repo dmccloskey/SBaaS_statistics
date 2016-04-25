@@ -1,7 +1,5 @@
 
 from .stage02_quantification_covariance_io import stage02_quantification_covariance_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
-from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
 from r_statistics.r_interface import r_interface
@@ -44,39 +42,27 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
             
         '''
 
-        #print('execute_covariance...')
+        print('execute_covariance...')
 
         # instanciate helper classes
         calculateinterface = calculate_interface()
-        stage02quantificationnormalizationquery = stage02_quantification_normalization_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-        stage02quantificationnormalizationquery.initialize_supportedTables();
-        stage02quantificationanalysisquery = stage02_quantification_analysis_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-        stage02quantificationanalysisquery.initialize_supportedTables();
         dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         # instanciate data lists
         data_O=[]; #samples/features cov_matrix and precision_matrix
         data_mahalanobis_O=[]; #samples/features mahal_dist
         data_score_O=[]; #samples/features score
-        ## get the analysis information
-        #analysis_info = [];
-        #analysis_info = stage02quantificationanalysisquery.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
-        #analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
-        # query metabolomics data from glogNormalization
+
         # get concentration units
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            #calculated_concentration_units = stage02quantificationnormalizationquery.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
-            #calculated_concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
             calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu in calculated_concentration_units:
-            #print('calculating covariance for calculated_concentration_units ' + cu);
-            data = [];
+            print('calculating covariance for calculated_concentration_units ' + cu);
+            data_listDict = None;
             # get data:
-            #data = stage02quantificationnormalizationquery.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
-            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
-            data = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+            data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,
                 cu,
                 experiment_ids_I=experiment_ids_I,
@@ -100,10 +86,6 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                 factor_label = 'sample_name_short'
             else:
                 print('data_matrix_shape_I not recongnized.');
-            #data_listDict = listDict(data);
-            #data_listDict.convert_listDict2DataFrame();
-            data_listDict = listDict();
-            data_listDict.set_dataFrame(data);
             data_listDict.set_pivotTable(
                 value_label_I=value_label,
                 row_labels_I=row_labels,
@@ -141,10 +123,10 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                         tmp['covariance_model'] = covariance_model_I;
                         tmp['covariance_method'] = covariance_method_I;
                         tmp['covariance_options'] = covariance_options_I;
-                        tmp['sample_name_abbreviation_1']=calculateinterface.data['column_labels'][i][1] #same order as column_labels
-                        tmp['sample_name_abbreviation_2']=calculateinterface.data['column_labels'][j][1]
-                        tmp['sample_name_short_1']= calculateinterface.data['column_labels'][i][2] #same order as column_labels
-                        tmp['sample_name_short_2']= calculateinterface.data['column_labels'][j][2]
+                        tmp['sample_name_abbreviation_1']=calculateinterface.data['column_labels']['sample_name_abbreviation'][i]
+                        tmp['sample_name_abbreviation_2']=calculateinterface.data['column_labels']['sample_name_abbreviation'][j]
+                        tmp['sample_name_short_1']= calculateinterface.data['column_labels']['sample_name_short'][i]
+                        tmp['sample_name_short_2']= calculateinterface.data['column_labels']['sample_name_short'][j]
                         tmp['covariance']=cov_matrix[i,j]
                         tmp['precision']=precision_matrix[i,j]
                         data_O.append(tmp);
@@ -157,8 +139,8 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                     tmp['covariance_model'] = covariance_model_I;
                     tmp['covariance_method'] = covariance_method_I;
                     tmp['covariance_options'] = covariance_options_I;
-                    tmp['component_name']=calculateinterface.data_train['response'][i][0] #same order as row_labels
-                    tmp['component_group_name']= calculateinterface.data_train['response'][i][1]  #same order as row_labels
+                    tmp['component_name']=calculateinterface.data_train['response']['component_name'][i]
+                    tmp['component_group_name']= calculateinterface.data_train['response']['component_group_name'][i]
                     tmp['mahalanobis']=mahal_dist[i] #check the correct dimension
                     data_mahalanobis_O.append(tmp);
                 tmp = {};
@@ -183,10 +165,10 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                         tmp['covariance_model'] = covariance_model_I;
                         tmp['covariance_method'] = covariance_method_I;
                         tmp['covariance_options'] = covariance_options_I;
-                        tmp['component_name_1']=calculateinterface.data['column_labels'][i][1] #same order as column_labels
-                        tmp['component_name_2']=calculateinterface.data['column_labels'][j][1]
-                        tmp['component_group_name_1']= calculateinterface.data['column_labels'][i][2] #same order as column_labels
-                        tmp['component_group_name_2']= calculateinterface.data['column_labels'][j][2]
+                        tmp['component_name_1']=calculateinterface.data['column_labels']['component_name'][i]
+                        tmp['component_name_2']=calculateinterface.data['column_labels']['component_name'][j]
+                        tmp['component_group_name_1']= calculateinterface.data['column_labels']['component_group_name'][i]
+                        tmp['component_group_name_2']= calculateinterface.data['column_labels']['component_group_name'][j]
                         tmp['covariance']=cov_matrix[i,j]
                         tmp['precision']=precision_matrix[i,j]
                         data_O.append(tmp);
@@ -199,8 +181,8 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                     tmp['covariance_model'] = covariance_model_I;
                     tmp['covariance_method'] = covariance_method_I;
                     tmp['covariance_options'] = covariance_options_I;
-                    tmp['sample_name_abbreviation']=calculateinterface.data_train['response'][i][1] #same order as row_labels
-                    tmp['sample_name_short']= calculateinterface.data_train['response'][i][2]  #same order as row_labels
+                    tmp['sample_name_abbreviation']=calculateinterface.data_train['response']['sample_name_abbreviation'][i]
+                    tmp['sample_name_short']= calculateinterface.data_train['response']['sample_name_short'][i]
                     tmp['mahalanobis']=mahal_dist[i] #check the correct dimension
                     data_mahalanobis_O.append(tmp);
                 tmp = {};

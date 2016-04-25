@@ -73,16 +73,16 @@ class data_stage02_quantification_countCorrelationProfile(Base):
     def __init__(self,
                 row_dict_I,
                 ):
-        self.comment_=data_dict_I['comment_'];
-        self.analysis_id=data_dict_I['analysis_id'];
-        self.feature_id=data_dict_I['feature_id'];
-        self.feature_units=data_dict_I['feature_units'];
-        self.distance_measure=data_dict_I['distance_measure'];
-        self.correlation_coefficient_threshold=data_dict_I['correlation_coefficient_threshold'];
-        self.element_id=data_dict_I['element_id'];
-        self.frequency=data_dict_I['frequency'];
-        self.fraction=data_dict_I['fraction'];
-        self.used_=data_dict_I['used_'];
+        self.comment_=row_dict_I['comment_'];
+        self.analysis_id=row_dict_I['analysis_id'];
+        self.feature_id=row_dict_I['feature_id'];
+        self.feature_units=row_dict_I['feature_units'];
+        self.distance_measure=row_dict_I['distance_measure'];
+        self.correlation_coefficient_threshold=row_dict_I['correlation_coefficient_threshold'];
+        self.element_id=row_dict_I['element_id'];
+        self.frequency=row_dict_I['frequency'];
+        self.fraction=row_dict_I['fraction'];
+        self.used_=row_dict_I['used_'];
 
     def __set__row__(self,analysis_id_I,
             feature_id_I,
@@ -143,16 +143,16 @@ class data_stage02_quantification_countCorrelationTrend(Base):
     def __init__(self,
                 row_dict_I,
                 ):
-        self.comment_=data_dict_I['comment_'];
-        self.analysis_id=data_dict_I['analysis_id'];
-        self.feature_id=data_dict_I['feature_id'];
-        self.feature_units=data_dict_I['feature_units'];
-        self.distance_measure=data_dict_I['distance_measure'];
-        self.correlation_coefficient_threshold=data_dict_I['correlation_coefficient_threshold'];
-        self.element_id=data_dict_I['element_id'];
-        self.frequency=data_dict_I['frequency'];
-        self.fraction=data_dict_I['fraction'];
-        self.used_=data_dict_I['used_'];
+        self.comment_=row_dict_I['comment_'];
+        self.analysis_id=row_dict_I['analysis_id'];
+        self.feature_id=row_dict_I['feature_id'];
+        self.feature_units=row_dict_I['feature_units'];
+        self.distance_measure=row_dict_I['distance_measure'];
+        self.correlation_coefficient_threshold=row_dict_I['correlation_coefficient_threshold'];
+        self.element_id=row_dict_I['element_id'];
+        self.frequency=row_dict_I['frequency'];
+        self.fraction=row_dict_I['fraction'];
+        self.used_=row_dict_I['used_'];
 
     def __set__row__(self,analysis_id_I,
             feature_id_I,
@@ -213,16 +213,16 @@ class data_stage02_quantification_countCorrelationPattern(Base):
     def __init__(self,
                 row_dict_I,
                 ):
-        self.comment_=data_dict_I['comment_'];
-        self.analysis_id=data_dict_I['analysis_id'];
-        self.feature_id=data_dict_I['feature_id'];
-        self.feature_units=data_dict_I['feature_units'];
-        self.distance_measure=data_dict_I['distance_measure'];
-        self.correlation_coefficient_threshold=data_dict_I['correlation_coefficient_threshold'];
-        self.element_id=data_dict_I['element_id'];
-        self.frequency=data_dict_I['frequency'];
-        self.fraction=data_dict_I['fraction'];
-        self.used_=data_dict_I['used_'];
+        self.comment_=row_dict_I['comment_'];
+        self.analysis_id=row_dict_I['analysis_id'];
+        self.feature_id=row_dict_I['feature_id'];
+        self.feature_units=row_dict_I['feature_units'];
+        self.distance_measure=row_dict_I['distance_measure'];
+        self.correlation_coefficient_threshold=row_dict_I['correlation_coefficient_threshold'];
+        self.element_id=row_dict_I['element_id'];
+        self.frequency=row_dict_I['frequency'];
+        self.fraction=row_dict_I['fraction'];
+        self.used_=row_dict_I['used_'];
 
     def __set__row__(self,analysis_id_I,
             feature_id_I,

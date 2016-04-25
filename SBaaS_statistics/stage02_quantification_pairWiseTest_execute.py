@@ -1,16 +1,209 @@
-
+from .stage02_quantification_pairWiseTable_query import stage02_quantification_pairWiseTable_query
 from .stage02_quantification_pairWiseTest_io import stage02_quantification_pairWiseTest_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
+from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
-import numpy
+import numpy as np
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from matplotlib_utilities.matplot import matplot
-# TODO: remove after making add methods
-from .stage02_quantification_pairWiseTest_postgresql_models import *
+from listDict.listDict import listDict
 
-class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWiseTest_io,
-                                         stage02_quantification_normalization_query):
+class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWiseTest_io):
+
+    
+    def execute_pairwiseTestReplicates(self,analysis_id_I,
+            calculated_concentration_units_I=[],
+            calculated_concentration_units_FC_I= {},
+            test_description_I = "Two Sample t-test",
+            ci_level_I = 0.95,
+            pvalue_corrected_description_I = "bonferroni",
+            redundancy_I=True,
+            component_names_I=[],
+            r_calc_I=None):
+        '''
+        execute pairwiseTest using R and scipy
+
+        NOTES:
+        pvalue correction is performed on a per component basis
+        i.e., n = len(pairwise comparisons per component)
+
+        INPUT:
+        analysis_id_I = string
+        calculated_concentration_units_I = [] of strings
+        calculated_concentration_units_FC_I = {'ccu_ttest':'ccu_fc'}
+            specific concentration units to perform the fold-change calculation on
+            i.e., fold-change cannot be accurately calculated on values that span [-inf,inf]
+                (e.g., log-normalized values)
+        test_description_I = string, name of the test to perform
+        test_options_I = {}, options of the test
+            default: 'equal_var' = True, standard independent t-test
+                     'equal_var' = False, Welches t-test
+        ci_level_I = float, confidence interval level (default = 0.95)
+        pvalue_corrected_description_I = string, name of the pvalue adjustment method
+        '''
+
+        print('execute_pairwiseTest...')
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+        calc = calculate_interface();
+        
+        #quantification_pairWiseTable_query = stage02_quantification_pairWiseTable_query(self.session,self.engine,self.settings);
+        #quantification_pairWiseTable_query.initialize_supportedTables();
+        
+        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        quantification_dataPreProcessing_replicates_query.initialize_supportedTables();
+
+        data_pairwise_O = [];
+        
+        ## get concentration units
+        #if calculated_concentration_units_I:
+        #    calculated_concentration_units = calculated_concentration_units_I;
+        #else:
+        #    calculated_concentration_units = [];
+        #    calculated_concentration_units = quantification_pairWiseTable_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I);
+        #for cu_cnt,cu in enumerate(calculated_concentration_units):
+        #    print('calculating pairwiseTest for concentration_units ' + cu);
+        #    # get the component_names
+        #    component_names,component_group_names = [],[];
+        #    component_names,component_group_names = quantification_pairWiseTable_query.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,cu);
+        #    for cn_cnt, cn in enumerate(component_names):
+        #        # get unique experiment_id/time_point/sample_name_short/sample_name_abbreviation/component_name/component_group_name
+        #        # get sample_name_abbreviations and sample_name_shorts:
+        #        sample_name_abbreviations_1,sample_name_abbreviations_2 = [],[];
+        #        sample_name_abbreviations_1,sample_name_abbreviations_2 = quantification_pairWiseTable_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationPairWiseTableReplicates(
+        #            analysis_id_I,cu,cn)
+            
+        #        # Pass 1: calculate the pairwise statistics
+        #        data_O = [];
+        #        for sn_1_cnt,sn_1 in enumerate(sample_name_abbreviations_1):
+        #            # get the calculated concentrations in ordered by component name:
+        #            data_1,data_2 = [],[];
+        #            data_1,data_2 = quantification_pairWiseTable_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationPairWiseTableReplicates(
+        #                analysis_id_I,cu,cn,sample_name_abbreviations_1[sn_1_cnt],sample_name_abbreviations_2[sn_1_cnt]);
+
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
+        else:
+            calculated_concentration_units = [];
+            calculated_concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu in calculated_concentration_units:
+            #get component_names
+            component_names = [];
+            component_names = quantification_dataPreProcessing_replicates_query.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                analysis_id_I,cu);
+            for cn in component_names:
+                #get the sample_name_abbreviations
+                sample_name_abbreviations = quantification_dataPreProcessing_replicates_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I,cu,cn['component_name']);
+                for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
+                    
+                    data_O=[];
+                    #pass 1: calculate the pairwise statistics
+                    if redundancy_I: list_2 = sample_name_abbreviations;
+                    else: list_2 = sample_name_abbreviations[sna_1+1:];
+                    for cnt,sna_2 in enumerate(list_2):
+                        if redundancy_I: sna_2_cnt = cnt;
+                        else: sna_2_cnt = sna_1_cnt+cnt+1;
+                        if sna_1 != sna_2:
+                            data_1,data_2 = [],[];  
+                            data_1 = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,cu,cn['component_name'],sna_1
+                                );
+                            data_2 = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,cu,cn['component_name'],sna_2);
+                            #calculate the specific test
+                            if test_description_I in ["Two Sample t-test","Paired t-test"]:
+                                ##split 1: R
+                                ##TODO: fix p-value correction and break into individual function calls
+                                #data_pairwiseTTest = {};
+                                #if len(data_1)==len(data_2):
+                                #    data_pairwiseTTest = r_calc.calculate_twoSampleTTest(data_1, data_2, alternative_I = "two.sided", mu_I = 0, paired_I="TRUE", var_equal_I = "TRUE", ci_level_I = 0.95, padjusted_method_I = "bonferroni");
+                                #else:
+                                #    data_pairwiseTTest = r_calc.calculate_twoSampleTTest(data_1, data_2, alternative_I = "two.sided", mu_I = 0, paired_I="FALSE", var_equal_I = "TRUE", ci_level_I = 0.95, padjusted_method_I = "bonferroni");
+                                #split 2: scipy
+                                if len(data_1)==len(data_2):
+                                    tstat,pval = calc.calculate_pairwiseTTest(data_1, data_2);
+                                else:
+                                    tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, var_equal_I = True);
+                            elif test_description_I in ["Welch's t-test"]:
+                                tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, var_equal_I = False);
+                            #elif test_description_I == "Wilcoxon-Mann-Whitney test":
+                            #    #split 1: R
+                            #    #TODO: fix p-value correction and break into individual function calls
+                            #    data_pairwiseTTest = {};
+                            #    if len(data_1)==len(data_2):
+                            #        data_pairwiseTTest = r_calc.calculate_twoSampleWilcoxonRankSumTest(data_1, data_2,
+                            #                            alternative_I = "two.sided",
+                            #                            mu_I = 0,
+                            #                            paired_I="TRUE",
+                            #                            ci_level_I = 0.95, 
+                            #                            padjusted_method_I = "bonferroni",
+                            #                            exact_I = "NULL",
+                            #                            correct_I = "TRUE",
+                            #                            );
+                            #    else:
+                            #        data_pairwiseTTest = r_calc.calculate_twoSampleWilcoxonRankSumTest(data_1, data_2,
+                            #                            alternative_I = "two.sided", 
+                            #                            mu_I = 0, paired_I="FALSE", 
+                            #                            ci_level_I = 0.95, 
+                            #                            padjusted_method_I = "bonferroni",
+                            #                            exact_I = "NULL",
+                            #                            correct_I = "TRUE",
+                            #                            );
+                    
+                            # calculate the difference
+                            diff = calc.calculate_difference(data_1,data_2);
+                    
+                            # calculate the confidence intervals
+                            mean,var,lb,ub = calc.calculate_ave_var(diff,confidence_I = ci_level_I);
+
+                            # calculate the fold change
+                            if calculated_concentration_units_FC_I:
+                                # Query the original concentration values to calculate the fold change
+                                data_1,data_2 = [],[];  
+                                data_1 = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                                    analysis_id_I,calculated_concentration_units_FC_I[cu],cn['component_name'],sna_1
+                                    );
+                                data_2 = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                                    analysis_id_I,calculated_concentration_units_FC_I[cu],cn['component_name'],sna_2);
+                            foldChange = calc.calculate_foldChange(np.array(data_1).mean(),np.array(data_2).mean())
+
+                            # add data to database
+                            tmp = {'analysis_id':analysis_id_I,
+                                'sample_name_abbreviation_1':sna_1,
+                                'sample_name_abbreviation_2':sna_2,
+                                'component_group_name':cn['component_group_name'],
+                                'component_name':cn['component_name'],
+                                'mean':mean,
+                                'test_stat':tstat,
+                                'test_description':test_description_I,
+                                'pvalue':pval,
+                                'ci_lb':lb,
+                                'ci_ub':ub,
+                                'ci_level':ci_level_I,
+                                'fold_change':foldChange,
+                                'calculated_calculated_concentration_units':cu,
+                                'used_':True,
+                                'comment_':None};
+                            data_O.append(tmp);
+
+                    # Pass 2: calculate the corrected p-values
+                    data_listDict = listDict(data_O);
+                    data_listDict.convert_listDict2DataFrame();
+                    pvalues = data_listDict.dataFrame['pvalue'].get_values();
+                    # call R
+                    r_calc.clear_workspace();
+                    r_calc.make_vectorFromList(pvalues,'pvalues');
+                    pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+                    # add in the corrected p-values
+                    data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                    data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                    data_listDict.convert_dataFrame2ListDict();
+                    data_pairwise_O.extend(data_listDict.get_listDict());
+
+        # add data to the DB
+        self.add_rows_table('data_stage02_quantification_pairWiseTest',data_pairwise_O);
+
     def execute_pairwiseTTest(self,analysis_id_I,
             concentration_units_I=[],
             component_names_I=[],
@@ -57,7 +250,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                 component_names = [x for i,x in enumerate(component_names) if i in component_names_ind]
                 component_group_names = [x for i,x in enumerate(component_group_names) if i in component_names_ind]
             for cnt_cn,cn in enumerate(component_names):
-                print('calculating pairwiseTTest for component_names ' + cn);
+                #print('calculating pairwiseTTest for component_names ' + cn);
                 # get sample_name_abbreviations:
                 sample_name_abbreviations = [];
                 sample_name_abbreviations = self.get_sampleNameAbbreviations_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(analysis_id_I,cu, cn)
@@ -68,7 +261,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                         if redundancy_I: sna_2_cnt = cnt;
                         else: sna_2_cnt = sna_1_cnt+cnt+1;
                         if sna_1 != sna_2:
-                            print('calculating pairwiseTTest for sample_name_abbreviations ' + sna_1 + ' vs. ' + sna_2);
+                            #print('calculating pairwiseTTest for sample_name_abbreviations ' + sna_1 + ' vs. ' + sna_2);
                             # get data:
                             all_1,all_2 = [],[];
                             data_1,data_2 = [],[];

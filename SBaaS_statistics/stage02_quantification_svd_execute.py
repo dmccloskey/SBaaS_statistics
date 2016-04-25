@@ -14,7 +14,7 @@ class stage02_quantification_svd_execute(stage02_quantification_svd_io,
                     svd_method_I="svd"):
         '''execute svd using R'''
 
-        #print('execute_svd...')
+        print('execute_svd...')
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
 
@@ -25,6 +25,7 @@ class stage02_quantification_svd_execute(stage02_quantification_svd_io,
         stage02quantificationanalysisquery.initialize_supportedTables();
 
         quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        
         data_U_O = [];
         data_d_O = [];
         data_V_O = [];

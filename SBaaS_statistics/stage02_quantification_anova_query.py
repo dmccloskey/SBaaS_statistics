@@ -18,6 +18,7 @@ class stage02_quantification_anova_query(sbaas_template_query):
         '''Set the supported tables dict for 
         '''
         tables_supported = {'data_stage02_quantification_anova':data_stage02_quantification_anova,
+                            'data_stage02_quantification_anova_posthoc':data_stage02_quantification_anova_posthoc,
                         };
         self.set_supportedTables(tables_supported);
     def initialize_dataStage02_quantification_anova(self):
@@ -34,9 +35,7 @@ class stage02_quantification_anova_query(sbaas_template_query):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_anova).filter(data_stage02_quantification_anova.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_anova).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     def get_rows_analysisID_dataStage02QuantificationAnova(self, analysis_id_I):
@@ -48,11 +47,7 @@ class stage02_quantification_anova_query(sbaas_template_query):
                     data_stage02_quantification_anova.used_.is_(True)).order_by(
                     data_stage02_quantification_anova.calculated_concentration_units.asc(),
                     data_stage02_quantification_anova.component_group_name.asc()).all();
-            data_O = [];
-            for d in data: 
-                data_1 = {};
-                data_1 = d.__repr__dict__();
-                data_O.append(data_1);
+            data_O = [d.__repr__dict__() for d in data];
             return data_O;
         except SQLAlchemyError as e:
             print(e);

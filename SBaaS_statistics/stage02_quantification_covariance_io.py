@@ -16,15 +16,18 @@ class stage02_quantification_covariance_io(stage02_quantification_covariance_que
                                     sbaas_template_io #abstract io methods
                                     ):
     def export_dataStage02QuantificationCovarianceSamples_js(self,analysis_id_I,
-                        single_plot_I=False,
-                        data_dir_I='tmp'):
+                single_plot_I=False,
+                query_I={},
+                data_dir_I='tmp'):
         '''Export Covariance V matrix
         Plot = Bar plot
         Table
         '''
 
         
-        data_O = self.get_rows_analysisID_dataStage02QuantificationCovarianceSamples(analysis_id_I);
+        data_O = self.get_rows_analysisID_dataStage02QuantificationCovarianceSamples(
+            analysis_id_I,
+            query_I = query_I);
 
         #TODO:
         # make the tile objects  

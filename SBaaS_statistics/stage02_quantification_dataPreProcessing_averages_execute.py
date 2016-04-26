@@ -37,12 +37,6 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                 aggregate_function_I='count',
                 query_I={'where':[
                     {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
-                    'column_name':'analysis_id',
-                    'value':analysis_id_I,
-                    'operator':'LIKE',
-                    'connector':'AND'
-                    },
-                    {"table_name":'data_stage02_quantification_dataPreProcessing_averages',
                     'column_name':'calculated_concentration_units',
                     'value':cu,
                     'operator':'LIKE',
@@ -258,7 +252,7 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
             analysis_id_I,
             calculated_concentration_units_I=[],
             experiment_ids_I=[],
-            sample_name_shorts_I=[],
+            sample_name_abbreviations_I=[],
             time_points_I=[],
             feature_I = 'mean',
             imputation_method_I = 'lloq',
@@ -289,11 +283,11 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
             unique_groups = self.get_analysisIDAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                 analysis_id_I,cu,
                 experiment_ids_I,
-                sample_name_shorts_I,
+                sample_name_abbreviations_I,
                 time_points_I);
             #fill values for each missing component
             missing_components_found = False;
-            for unique_group in unique_groups:
+            for unique_group in unique_groups.get_listDict():
                 #get all components for the row
                 unique_components = [];
                 unique_components = self.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndSampleNameAbbreviationAndTimePoint_dataStage02QuantificationDataPreProcessingAverages(

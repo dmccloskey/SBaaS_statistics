@@ -14,9 +14,84 @@ from ddt_python.ddt_container_filterMenuAndChart2dAndTable import ddt_container_
 
 class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairWiseCorrelation_query,sbaas_template_io):
 
-    def export_dataStage02QuantificationPairWiseCorrelation_js(self,):
-        '''table of correlations'''
-        pass;
+    def export_dataStage02QuantificationPairWiseCorrelation_js(self,
+                analysis_id_I,
+                query_I={},
+                add_self_vs_self_I = False,
+                data_dir_I='tmp'
+                ):
+        '''export a heatmap of pairwise correlations
+        INPUT:
+        analysis_id_I = string
+        query_I = {} of additional SQL query operators
+        add_self_vs_self_I = boolean, add in correlation=1 for sna1==sna2
+        data_dir_I
+        OUTPUT:
+        '''
+
+        #get the data
+        data = [];        
+        data_O = self.get_rows_analysisID_dataStage02QuantificationPairWiseCorrelation(analysis_id_I,
+                query_I = query_I);
+        data_O_listDict = listDict();
+        data_O_listDict.set_listDict(data_O);
+        data_O_listDict.convert_listDict2DataFrame();
+
+        # add in dummy clustering and ordering indices for heatmap
+        data_O_listDict.make_dummyIndexColumn('row_index','sample_name_abbreviation_1');
+        data_O_listDict.make_dummyIndexColumn('col_index','sample_name_abbreviation_2');
+        data_O_listDict.make_dummyIndexColumn('row_leaves','sample_name_abbreviation_1');
+        data_O_listDict.make_dummyIndexColumn('col_leaves','sample_name_abbreviation_2');
+        data_O_listDict.convert_dataFrame2ListDict();
+        data_O = data_O_listDict.get_listDict();
+        # make the tile objects  
+        #data1 = filter menu and table  
+        data1_keys = [
+            'analysis_id',
+            'sample_name_abbreviation_1',
+            'sample_name_abbreviation_2',
+            'row_index',
+            'col_index',
+            'row_leaves',
+            'col_leaves',
+            'calculated_concentration_units',
+            'distance_measure'
+            ]
+        data1_nestkeys = [
+            'sample_name_abbreviation_1',
+            'sample_name_abbreviation_2'
+            ];
+        data1_keymap = {
+            'xdata':'row_index',
+            'ydata':'col_index',
+            'zdata':'correlation_coefficient',
+            'rowslabel':'sample_name_abbreviation_1',
+            'columnslabel':'sample_name_abbreviation_2',
+            'rowsindex':'row_index',
+            'columnsindex':'col_index',
+            'rowsleaves':'row_index',
+            'columnsleaves':'col_index'
+            };  
+
+        # dump the data to a json file
+        ddtheatmap = ddt_container_heatmap();
+        ddtheatmap.make_container_heatmap(data_O,
+            svgcolorcategory='blue2gold64RBG',
+            #svgcolordomain=[0,1],
+            svgcolordomain='min,max',
+            data1_keymap=data1_keymap,
+            data1_keys=data1_keys,
+            data1_nestkeys=data1_nestkeys,
+            svgparameters_I={'svgcolordatalabel':'correlation_coefficient'}
+            );
+
+        if data_dir_I=='tmp':
+            filename_str = self.settings['visualization_data'] + '/tmp/ddt_data.js'
+        elif data_dir_I=='data_json':
+            data_json_O = ddtheatmap.get_allObjects_js();
+            return data_json_O;
+        with open(filename_str,'w') as file:
+            file.write(ddtheatmap.get_allObjects());
 
     def export_dataStage02QuantificationPairWiseCorrelationReplicates_js(self,
                 analysis_id_I,

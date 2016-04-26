@@ -310,7 +310,6 @@ class stage02_quantification_pairWiseTest_query(sbaas_template_query):
             print(e);
     def get_rows_analysisID_dataStage02pairWiseTest(self, analysis_id_I):
         """get data from analysis ID"""
-        #Tested
         try:
             data = self.session.query(data_stage02_quantification_pairWiseTest).filter(
                     data_stage02_quantification_pairWiseTest.analysis_id.like(analysis_id_I),
@@ -331,14 +330,27 @@ class stage02_quantification_pairWiseTest_query(sbaas_template_query):
                 data_1['component_name'] = d.component_name;
                 data_1['test_stat'] = d.test_stat;
                 data_1['test_description'] = d.test_description;
-                data_1['pvalue_negLog10'] = -log(d.pvalue,10);
-                data_1['pvalue_corrected_negLog10'] = -log(d.pvalue_corrected,10);
+                try:
+                    data_1['pvalue_negLog10'] = -log(d.pvalue,10);
+                except ValueError as e:
+                    print(e);
+                    print('substituting 0 pvalue for 1e-12');
+                    data_1['pvalue_negLog10'] = -log(1e-12,10);
+                try:
+                    data_1['pvalue_corrected_negLog10'] = -log(d.pvalue_corrected,10);
+                except ValueError as e:
+                    print(e);
+                    print('substituting 0 pvalue for 1e-12');
+                    data_1['pvalue_negLog10'] = -log(1e-12,10);
                 data_1['pvalue_corrected_description'] = d.pvalue_corrected_description;
                 data_1['mean'] = d.mean;
                 data_1['ci_lb'] = d.ci_lb;
                 data_1['ci_ub'] = d.ci_ub;
                 data_1['ci_level'] = d.ci_level;
-                data_1['fold_change_log2'] = log(d.fold_change,2);
+                try:
+                    data_1['fold_change_log2'] = log(d.fold_change,2);
+                except ValueError as e:
+                    print(e);
                 data_1['calculated_concentration_units'] = d.calculated_concentration_units;
                 data_1['used_'] = d.used_;
                 data_1['comment_'] = d.comment_;

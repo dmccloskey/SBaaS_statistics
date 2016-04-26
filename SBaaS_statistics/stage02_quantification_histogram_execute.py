@@ -1,22 +1,15 @@
 #sbaas
 from .stage02_quantification_histogram_io import stage02_quantification_histogram_io
 from .stage02_quantification_histogram_dependencies import stage02_quantification_histogram_dependencies
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
-from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
-#sbaas models
-from .stage02_quantification_histogram_postgresql_models import *
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 #resources
 from python_statistics.calculate_histogram import calculate_histogram
 
 class stage02_quantification_histogram_execute(
             stage02_quantification_histogram_io,
-            stage02_quantification_normalization_query,
-            stage02_quantification_descriptiveStats_query,
-            stage02_quantification_analysis_query,
             stage02_quantification_histogram_dependencies,
-            stage02_quantification_dataPreProcessing_replicates_query
             ):
     def execute_binFeatures(self,analysis_id_I,features_I=[],feature_units_I=[],n_bins_I=[]):
         '''bin features of continuous data from the normalized data
@@ -30,6 +23,13 @@ class stage02_quantification_histogram_execute(
         '''
         data_O = [];
         calculatehistogram = calculate_histogram();
+
+        quantification_dataPreProcessing_averages_query=stage02_quantification_dataPreProcessing_averages_query(self.session,self.engine,self.settings);
+        quantification_dataPreProcessing_averages_query.initialize_supportedTables();
+        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        quantification_dataPreProcessing_replicates_query.initialize_supportedTables();
+        quantification_descriptiveStats_query=stage02_quantification_descriptiveStats_query(self.session,self.engine,self.settings);
+        quantification_descriptiveStats_query.initialize_supportedTables();
         #bin each feature
         for features_cnt,features in enumerate(features_I):
             n_bins = 100;
@@ -41,7 +41,7 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    data_hist = self.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,feature_units);
+                    data_hist = quantification_dataPreProcessing_replicates_query.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,feature_units);
                     #data_hist = self.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
@@ -50,9 +50,11 @@ class stage02_quantification_histogram_execute(
                         data_O.extend(tmp);
             elif features == 'mean':
                 for feature_units in feature_units_I:
-                    #get all the data for the analysi
+                    #get all the data for the analysis
                     data_hist = [];
-                    data_hist = self.get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
+                    data_hist = quantification_dataPreProcessing_averages_query.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
+                    if not data_hist:
+                        data_hist = quantification_descriptiveStats_query.get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
                         x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
@@ -62,7 +64,7 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    data_hist = self.get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
+                    data_hist = quantification_descriptiveStats_query.get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
                         x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
@@ -72,7 +74,7 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    data_hist = self.get_allVariances_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
+                    data_hist = quantification_descriptiveStats_query.get_allVariances_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
                         x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
@@ -82,7 +84,7 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    data_hist = self.get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
+                    data_hist = quantification_descriptiveStats_query.get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
                         x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);

@@ -12,7 +12,10 @@ class stage02_quantification_cluster_execute(stage02_quantification_cluster_io):
                 pipeline_id_I=None,
                 test_size_I = 0.,
                 impfeat_methods_I=[{'impfeat_method':'feature_importance','impfeat_options':None}],
-                response_class_methods_I=[{'response_class_method':'class_probability','response_class_options':None}],
+                response_class_methods_I=[
+                    {'response_class_method':'labels','response_class_options':None},
+                    {'response_class_method':'cluster_centers','response_class_options':None},
+                    ],
                 calculated_concentration_units_I=[],
                 experiment_ids_I=[],
                 sample_name_abbreviations_I=[],
@@ -40,7 +43,6 @@ class stage02_quantification_cluster_execute(stage02_quantification_cluster_io):
         
         # instantiate data lists
         data_O=[]; #samples/features cov_matrix and precision_matrix
-        data_impfeat_O=[]; #samples/features mahal_dist
         data_response_class_O=[]; #samples/features score
 
         # query metabolomics data from glogNormalization
@@ -103,8 +105,9 @@ class stage02_quantification_cluster_execute(stage02_quantification_cluster_io):
 
             # extract out the response information
             for row in response_class_methods_I:
-                if row['response_class_method'] == 'class_probability':
-                    response_value_tmp, response_label_tmp = calculateinterface.extract_classProbabilities(
+                if row['response_class_method'] == 'labels':
+                    #TODO:
+                    response_value_tmp, response_label_tmp = calculateinterface.extract_clusterLabels(
                         response_method_I=row['response_class_method'],
                         response_options_I=row['response_class_options']); #dim [nsamples,nresponses]
                     if response_value_tmp is None: continue;
@@ -124,8 +127,9 @@ class stage02_quantification_cluster_execute(stage02_quantification_cluster_io):
                     data_O_listDict.convert_dictList2DataFrame();
                     sample_names_short, response_label = data_O_listDict.get_flattenedDataAndColumnLabels();
                     data_O_listDict.clear_allData();
-                elif row['response_class_method'] == 'decision_function':
-                    response_value, response_label = calculateinterface.extract_decisionFunction(
+                elif row['response_class_method'] == 'cluster_centers':
+                    #TODO:
+                    response_value, response_label = calculateinterface.extract_clusterCenters(
                         response_method_I=row['response_class_method'],
                         response_options_I=row['response_class_options']);
                     if response_value is None: continue;
@@ -149,63 +153,12 @@ class stage02_quantification_cluster_execute(stage02_quantification_cluster_io):
                 data_response_class_O.extend(data_O_listDict.get_listDict());
                 data_O_listDict.clear_allData();
 
-            # extract out feature information
-            for row in impfeat_methods_I:
-                if row['impfeat_method'] == 'feature_importance':
-                    impfeat_value = calculateinterface.extract_importantFeatures();
-                    if impfeat_value is None: continue;
-                    impfeat_n,impfeat_std = calculateinterface.calculate_importantFeatures_std(impfeat_value);
-                    impfeat_zscore,impfeat_pvalue = calculateinterface.calculate_ZScoreAndPValue(
-                        impfeat_value,impfeat_n,impfeat_std);
-                    response_name='all';
-                    #convert impfeat_statistics to the proper data structure
-                    data_O_listDict.set_dictList({'n':impfeat_n,'std':impfeat_std,'zscore':impfeat_zscore,'pvalue':impfeat_pvalue});
-                elif row['impfeat_method'] in ['RFE','RFECV']:
-                    dataFeatureSelection = calculateinterface.make_dataFeatureSelection(
-                            row['impfeat_method'],row['impfeat_options']);
-                    calculateinterface.fit_data2FeatureSelection();
-                    impfeat_options_I = calculateinterface.data_model.get_params(); #update the parameters
-                    impfeat_value,impfeat_score = calculateinterface.extract_dataFeatureSelection_ranking();
-                    if impfeat_value is None: continue;
-                    response_name='all';
-                    #convert impfeat_statistics to the proper data structure
-                    data_O_listDict.set_dictList({'score':impfeat_score});
-                elif row['impfeat_method'] == 'coefficients':
-                    impfeat_n,impfeat_value,impfeat_mean,impfeat_std = calculateinterface.extract_coefficientsSVM();
-                    if impfeat_value is None: continue;
-                    response_name='all';
-                    #convert impfeat_statistics to the proper data structure
-                    data_O_listDict.set_dictList({'n':impfeat_n,'std':impfeat_std,'mean':impfeat_mean});
-                data_O_listDict.convert_dictList2DataFrame();
-                data_O_listDict.convert_dataFrame2ListDict();
-                impfeat_statistics = data_O_listDict.get_listDict();
-                data_O_listDict.clear_allData();
-                # add in additional rows to the output data object
-                data_O_listDict.add_column2DataFrame('component_name',calculateinterface.data['column_labels']['component_name'].ravel());
-                data_O_listDict.add_column2DataFrame('component_group_name',calculateinterface.data['column_labels']['component_group_name'].ravel());
-                data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
-                data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
-                data_O_listDict.add_column2DataFrame('test_size',test_size_I);
-                data_O_listDict.add_column2DataFrame('response_name',response_name);
-                data_O_listDict.add_column2DataFrame('used_',True);
-                data_O_listDict.add_column2DataFrame('comment_',None);
-                data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
-                data_O_listDict.add_column2DataFrame('impfeat_value',impfeat_value);
-                data_O_listDict.add_column2DataFrame('impfeat_method',row['impfeat_method']);
-                data_O_listDict.add_column2DataFrame('impfeat_options',row['impfeat_options']);
-                data_O_listDict.add_column2DataFrame('impfeat_statistics',impfeat_statistics);
-                # add data to the database
-                data_O_listDict.convert_dataFrame2ListDict();
-                data_impfeat_O.extend(data_O_listDict.get_listDict());
-                data_O_listDict.clear_allData();
-
             #extract out sample information
 
             # reset calculate_interface
             calculateinterface.clear_data();
         # add data to the database
         #self.add_rows_table('data_stage02_quantification_cluster_samples',data_O);
-        self.add_rows_table('data_stage02_quantification_cluster_impfeat',data_impfeat_O);
         self.add_rows_table('data_stage02_quantification_cluster_responseClassification',data_response_class_O);
 
     def execute_clusterHyperparameter(self,analysis_id_I,

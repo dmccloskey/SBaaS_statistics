@@ -184,10 +184,12 @@ anova01.initialize_supportedTables();
 anova01.initialize_tables();
 
 analysis_ids_run = [
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
-        'ALEsKOs01_0',
+        #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
+        #'ALEsKOs01_0',
         #'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
@@ -223,8 +225,8 @@ correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient 
 
 #RNAsequencing
 mv_value_operator = [
-    {'value':None,'operator':'NA'},
-    {'value':0.0,'operator':'<='},
+    {'value':None,'operator':'NA','feature':'mean'},
+    #{'value':0.0,'operator':'<='},
     ]
 features_histogram = ['calculated_concentration'];
 feature_units = ['FPKM','FPKM_log2_normalized'];
@@ -352,6 +354,31 @@ r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+    #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
+    #       tables_I = ['data_stage02_quantification_pairWiseTable'], 
+    #       analysis_id_I = analysis_id,
+    #       warn_I=True);
+
+    #pairWiseTable01.execute_pairwiseTableAverages(analysis_id,
+    #        sample_name_abbreviations_I=[],
+    #        calculated_concentration_units_I=['log2(FC)'],
+    #        component_names_I=[],
+    #        redundancy_I=True,
+    #        value_I = 'mean');
+    
+    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+            tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
+            analysis_id_I = analysis_id,
+            warn_I=True);
+    pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
+            sample_name_abbreviations_I=[],
+            calculated_concentration_units_I=['log2(FC)'],
+            component_names_I=[],
+            pvalue_corrected_description_I = "bonferroni",
+            redundancy_I=True,
+            distance_measure_I='pearson',
+            value_I = 'mean',
+            r_calc_I=r_calc);
 
     #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id)
     #pwt01.execute_pairwiseTestReplicates(analysis_id,
@@ -372,13 +399,15 @@ for analysis_id in analysis_ids_run:
     #    r_calc_I=r_calc
     #   );
 
-    # perform an ANOVA on the normalized data set
-    anova01.reset_dataStage02_quantification_anova(analysis_id);
-    anova01.execute_anova(analysis_id,
-        calculated_concentration_units_I=[
-            'umol*gDW-1_glog_normalized',
-        ],
-        r_calc_I=r_calc);
+    ## perform an ANOVA on the normalized data set
+    #anova01.reset_dataStage02_quantification_anova(analysis_id);
+    #anova01.execute_anova(analysis_id,
+    #    calculated_concentration_units_I=[
+    #        'umol*gDW-1_glog_normalized',
+    #        ],
+    #        ci_level_I = 0.95,
+    #        pvalue_corrected_description_I = "bonferroni",
+    #    r_calc_I=r_calc);
 
     ##remove components with missing values
     #dpprep01.execute_deleteFeaturesWithMissingValues(
@@ -388,6 +417,20 @@ for analysis_id in analysis_ids_run:
     #        operator_I='NA',
     #        set_used_false_I = False,
     #     );
+
+    ##import the log2(fold change) for differentially expressed genes as the mean
+    #dppave01.import_dataStage01RNASequencingGeneExpDiff_foldChange(
+    #    analysis_id,
+    #    geneID2componentName_I = {},
+    #    gene2componentGroupName_I = {},
+    #    sna2snaRNASequencing_I = {},
+    #    experimentID2experimentIDRNASequencing_I = {},
+    #    sample_name_abbreviations_base_I = ['OxicEvo04EcoliGlc'],
+    #    experiment_ids_base_I = ['ALEsKOs01'],
+    #    add_self_vs_self_I = True,
+    #    fold_change_log2_threshold_I = 2,
+    #    q_value_threshold_I = 0.05,
+    #    );
     
     #dppave01.reset_stage02_quantification_dataPreProcessing_averages(
     #      tables_I = [
@@ -401,6 +444,14 @@ for analysis_id in analysis_ids_run:
     #    analysis_id_I = analysis_id,
     #    analysisID2analysisIDRNASequencing_I = {"ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01":"ALEsKOs01_0_evo04_11_evo04Evo01"},
     #    );
+    ##fill in any remaining missing values with 0
+    ##i.e., no fold-change
+    #dppave01.execute_imputeMissingValues(
+    #   analysis_id,
+    #    feature_I = 'mean',
+    #   imputation_method_I = 'value',
+    #   imputation_options_I = {'value':0.0},
+    #   );
     ##count the number of missing values
     #dppave01.reset_stage02_quantification_dataPreProcessing_averages(
     #       tables_I = ['data_stage02_quantification_dataPreProcessing_averages_mv',
@@ -410,6 +461,7 @@ for analysis_id in analysis_ids_run:
     #for row in mv_value_operator:
     #   dppave01.execute_countMissingValues(
     #       analysis_id,
+    #       feature_I = row['feature'],
     #       value_I = row['value'],
     #       operator_I = row['operator'],
     #   );
@@ -1017,4 +1069,6 @@ for analysis_id in analysis_ids_run:
 #    },
 #    );
 
-covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
+#covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
+pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+#pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')

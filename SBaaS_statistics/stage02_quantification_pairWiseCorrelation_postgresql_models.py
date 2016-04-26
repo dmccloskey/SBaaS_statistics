@@ -10,7 +10,7 @@ class data_stage02_quantification_pairWiseCorrelation(Base):
     #time_point_1 = Column(String(10))
     #time_point_2 = Column(String(10))
     #time_point_units = Column(String(50))
-    value_name = Column(String(500))
+    value_name = Column(String(100))
     distance_measure = Column(String(50)); #pearson or spearman
     correlation_coefficient = Column(Float)
     pvalue = Column(Float)

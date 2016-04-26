@@ -66,7 +66,8 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                 
                 row["imputation_method"]=None;
                 row['calculated_concentration']=fpkm['FPKM'];
-                row['calculated_concentration_units']='FPKM'+"_"+fpkm['normalization_method'];
+                #row['calculated_concentration_units']='FPKM'+"_"+fpkm['normalization_method'];
+                row['calculated_concentration_units']='FPKM';
                 row['used_']=fpkm['used_']
                 row['comment_']=fpkm['comment_'];                
                 data_O.append(row);

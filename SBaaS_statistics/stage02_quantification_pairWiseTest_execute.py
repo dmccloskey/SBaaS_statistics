@@ -19,6 +19,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
             pvalue_corrected_description_I = "bonferroni",
             redundancy_I=True,
             component_names_I=[],
+            sample_name_abbreviations_I=[],
             r_calc_I=None):
         '''
         execute pairwiseTest using R and scipy
@@ -91,10 +92,14 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
             component_names = [];
             component_names = quantification_dataPreProcessing_replicates_query.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,cu);
+            if component_names_I:
+                component_names = [cn for cn in component_names if cn['component_name'] in component_names_I];
             for cn in component_names:
                 #get the sample_name_abbreviations
                 sample_name_abbreviations = quantification_dataPreProcessing_replicates_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
                     analysis_id_I,cu,cn['component_name']);
+                if sample_name_abbreviations_I:
+                    sample_name_abbreviations = [sna for sna in sample_name_abbreviations if sna in sample_name_abbreviations_I];
                 for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
                     
                     data_O=[];
@@ -166,7 +171,16 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                                     );
                                 data_2 = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrations_analysisIDAndCalculatedConcentrationUnitsAndComponentNameAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
                                     analysis_id_I,calculated_concentration_units_FC_I[cu],cn['component_name'],sna_2);
-                            foldChange = calc.calculate_foldChange(np.array(data_1).mean(),np.array(data_2).mean())
+                            data_1_mean = np.array(data_1).mean();
+                            data_2_mean = np.array(data_2).mean();
+                            if data_1_mean < 0 or data_2_mean < 0:
+                                print('negative mean found in data for component_name ' + cn['component_name']);
+                                print('fold change can only be calculated on values in the domain [0,inf)');
+                            foldChange = calc.calculate_foldChange(data_1_mean,data_2_mean);
+                            if foldChange < 0:
+                                print('negative fold_change found for component_name ' + cn['component_name']);
+                                print('fold change can only be in the domain [0,inf)');
+
 
                             # add data to database
                             tmp = {'analysis_id':analysis_id_I,

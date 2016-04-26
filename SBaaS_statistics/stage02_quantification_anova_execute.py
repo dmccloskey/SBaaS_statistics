@@ -39,6 +39,8 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 analysis_id_I,
                 cu,
                 );
+            if component_names_I:
+                component_names = [cn for cn in component_names if cn['component_name'] in component_names_I];
             for cn in component_names:
                 #print('calculating anova for component_names ' + cn);
                 # get data:
@@ -70,7 +72,7 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
 
                 # add anova data to database
                 data_anova = {};
-                data_anova['sample_name_abbreviation'] = sample_name_abbreviations;
+                data_anova['sample_name_abbreviation'] = list(set(sample_name_abbreviations));
                 data_anova['component_name'] = cn['component_name'];
                 data_anova['test_stat'] = f_stat;
                 data_anova['test_description'] = '1-way ANOVA; F value';
@@ -89,8 +91,10 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                         aov_I='aov.out',
                         ci_level_I=ci_level_I,
                         tukeyhsd_O='tukeyhsd');
-                diff,lb,ub,pvalue,labels_1,labels_2=r_calc.extract_tukeyHSD(tukeyhsd_I='tukeyhsd');
-                
+                diff,lb,ub,pvalue,labels=r_calc.extract_tukeyHSD(tukeyhsd_I='tukeyhsd');
+                labels_1 = [x.split('-')[0] for x in labels];
+                labels_2 = [x.split('-')[1] for x in labels];
+
                 #Pvalue correction
                 r_calc.make_vectorFromList(pvalue,'pvalues');
                 pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
@@ -99,6 +103,128 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 data_pairwise = {'mean':diff,'ci_lb':lb,'ci_ub':ub,'pvalue':pvalue,
                             'sample_name_abbreviation_1':labels_1,
                             'sample_name_abbreviation_2':labels_2,
+                            };
+                data_pairwise_listDict = listDict(dictList_I=data_pairwise);
+                data_pairwise_listDict.convert_dictList2DataFrame();
+                data_pairwise_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
+                data_pairwise_listDict.add_column2DataFrame('ci_level',ci_level_I);
+                data_pairwise_listDict.add_column2DataFrame('test_description','TukeyHSD');
+                data_pairwise_listDict.add_column2DataFrame('component_name',cn['component_name']);
+                data_pairwise_listDict.add_column2DataFrame('component_group_name',cn['component_group_name']);
+                data_pairwise_listDict.add_column2DataFrame('calculated_concentration_units',cu);
+                data_pairwise_listDict.add_column2DataFrame('used_',True);
+                data_pairwise_listDict.add_column2DataFrame('comment_',None);
+                # add in the corrected p-values
+                data_pairwise_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                data_pairwise_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                data_pairwise_listDict.convert_dataFrame2ListDict();
+                data_pairwise_O.extend(data_pairwise_listDict.get_listDict());
+
+        #self.session.commit();
+        self.add_rows_table('data_stage02_quantification_anova',data_anova_O);
+        self.add_rows_table('data_stage02_quantification_anova_posthoc',data_pairwise_O);
+    def execute_twoWayAnova(self,
+            analysis_id_I,
+            calculated_concentration_units_I=[],
+            component_names_I=[],
+            experiment_ids_I = [],
+            time_points_I = [],
+            sample_name_abbreviations_I = [],
+            sample_name_shorts_I = [],
+            ci_level_I = 0.95,
+            pvalue_corrected_description_I = "bonferroni",
+            r_calc_I=None):
+        '''execute twoWayAnova using R'''
+
+        print('execute_twoWayAnova...')
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        dataPreProcessing_replicates_query.initialize_supportedTables();
+
+        data_anova_O = [];
+        data_pairwise_O = [];
+        # query the calculated_concentration_units
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
+        else:
+            calculated_concentration_units = [];
+            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu_cnt,cu in enumerate(calculated_concentration_units):
+            # query the component_names/component_group_names:
+            component_names = [];
+            component_names = dataPreProcessing_replicates_query.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                analysis_id_I,
+                cu,
+                );
+            for cn in component_names:
+                print('calculating twoWayAnova for component_names ' + cn);
+                # get data:
+                data = dataPreProcessing_replicates_query.get_RDataFrame_analysisIDAndCalculatedConcentrationUnitsAndComponentNames_dataStage02DataPreProcessingReplicates(
+                    analysis_id_I,
+                    cu,
+                    cn['component_name'],
+                    experiment_ids_I = experiment_ids_I,
+                    time_points_I = time_points_I,
+                    sample_name_abbreviations_I = sample_name_abbreviations_I,
+                    sample_name_shorts_I = sample_name_shorts_I
+                    );
+                # call R
+                r_calc.clear_workspace();
+                calculated_concentrations = data.dataFrame['calculated_concentration'].get_values();
+                sample_name_abbreviations = data.dataFrame['sample_name_abbreviation'].get_values();
+                time_points = data.dataFrame['time_point'].get_values();
+
+                # calculate ANOVA
+                r_calc.make_vectorFromList(calculated_concentrations,'concentrations');
+                r_calc.make_vectorFromList(sample_name_abbreviations,'sna');
+                r_calc.make_vectorFromList(time_points,'tp');
+                r_calc.make_dataFrameFromLists(
+                        labels_I=['concentrations','sna','tp'],
+                        dataFrame_O='dF');
+                r_calc.calculate_aov(
+                        function_I = 'concentrations ~ sna*tp',
+                        dataFrame_I = 'dF',
+                        aov_O = 'aov.out');
+                f_stat,pvalue = r_calc.extraction_aov(aov_I = 'aov.out');
+
+                # add anova data to database
+                data_anova = {};
+                data_anova['sample_name_abbreviation'] = list(set(sample_name_abbreviations));
+                data_anova['time_point'] = list(set(time_points));
+                data_anova['component_name'] = cn['component_name'];
+                data_anova['test_stat'] = f_stat;
+                data_anova['test_description'] = '1-way ANOVA; F value';
+                data_anova['pvalue'] = pvalue;
+                data_anova['pvalue_corrected'] = None;
+                data_anova['pvalue_corrected_description'] = None;
+                data_anova['analysis_id']=analysis_id_I;
+                data_anova['component_group_name'] = cn['component_group_name'];
+                data_anova['calculated_concentration_units'] = cu;
+                data_anova['used_'] = True;
+                data_anova['comment_'] = None;
+                data_anova_O.append(data_anova);
+
+                #PostHoc analysis
+                r_calc.calculate_tukeyHSD(
+                        aov_I='aov.out',
+                        ci_level_I=ci_level_I,
+                        tukeyhsd_O='tukeyhsd');
+                diff,lb,ub,pvalue,labels=r_calc.extract_tukeyHSD(tukeyhsd_I='tukeyhsd');
+                #TODO:
+                #labels_1 = [x.split('-')[0] for x in labels];
+                #labels_2 = [x.split('-')[1] for x in labels];
+
+                #Pvalue correction
+                r_calc.make_vectorFromList(pvalue,'pvalues');
+                pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+
+                # add pairwise data to the database
+                data_pairwise = {'mean':diff,'ci_lb':lb,'ci_ub':ub,'pvalue':pvalue,
+                            'sample_name_abbreviation_1':labels_1,
+                            'sample_name_abbreviation_2':labels_2,
+                            'time_point_1':labels_3,
+                            'time_point_2':labels_4,
                             };
                 data_pairwise_listDict = listDict(dictList_I=data_pairwise);
                 data_pairwise_listDict.convert_dictList2DataFrame();

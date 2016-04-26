@@ -20,21 +20,69 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
                         };
         self.set_supportedTables(tables_supported);
 
-    def get_rows_analysisID_dataStage02pairWiseCorrelation(self, analysis_id_I):
-        """get data from analysis ID"""
-        #Tested
-        try:
-            data = self.session.query(data_stage02_quantification_pairWiseCorrelation).filter(
-                    data_stage02_quantification_pairWiseCorrelation.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_pairWiseCorrelation.used_.is_(True)).order_by(
-                    data_stage02_quantification_pairWiseCorrelation.calculated_concentration_units.asc(),
-                    data_stage02_quantification_pairWiseCorrelation.sample_name_abbreviation_2.asc()).all();
-            data_O = [];
-            for d in data: 
-                data_O.append(d.__repr__dict__());
-            return data_O;
-        except SQLAlchemyError as e:
-            print(e);
+    def get_rows_analysisID_dataStage02QuantificationPairWiseCorrelation(self,
+                analysis_id_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_pairWiseCorrelation
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_pairWiseCorrelation'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            #'value':self.convert_string2StringString(analysis_id_I),
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'sample_name_abbreviation_1',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'sample_name_abbreviation_2',
+            'order':'ASC',
+            },
+        ];
+        #additional blocks
+        for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
     def get_rows_dataStage02QuantificationPairWiseCorrelation(self,
                 tables_I,
                 query_I,

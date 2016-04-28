@@ -1,8 +1,4 @@
 #SBaaS_base
-from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
-from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
-from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
-from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 #SBaaS_template
@@ -27,65 +23,6 @@ class stage02_quantification_tree_query(sbaas_template_query,
         self.set_supportedTables(tables_supported);
 
     #Query rows
-    def get_rows_dataStage02QuantificationTree(self,
-                tables_I,
-                query_I,
-                output_O,
-                dictColumn_I=None):
-        """get rows by analysis ID from data_stage02_quantification_tree"""
-        data_O = [];
-        try:
-            table_model = self.convert_tableStringList2SqlalchemyModelDict(tables_I);
-            queryselect = sbaas_base_query_select(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            query = queryselect.make_queryFromString(table_model,query_I);
-            data_O = queryselect.get_rows_sqlalchemyModel(
-                query_I=query,
-                output_O=output_O,
-                dictColumn_I=dictColumn_I);
-        except Exception as e:
-            print(e);
-        return data_O;
-    def add_dataStage02QuantificationTree(self,table_I,data_I):
-        '''add rows of data_stage02_quantification_tree'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryinsert = sbaas_base_query_insert(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryinsert.add_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-    def update_dataStage02QuantificationTree(self,table_I,data_I):
-        '''update rows of data_stage02_quantification_tree'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryupdate = sbaas_base_query_update(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryupdate.update_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-
-    def initialize_dataStage02_quantification_tree(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            queryinitialize = sbaas_base_query_initialize(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                queryinitialize.initialize_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
-    def drop_dataStage02_quantification_tree(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            querydrop = sbaas_base_query_drop(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                querydrop.drop_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
     def reset_dataStage02_quantification_tree(self,
             tables_I = [],
             analysis_id_I = None,

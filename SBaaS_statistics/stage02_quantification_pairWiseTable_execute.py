@@ -9,7 +9,8 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             calculated_concentration_units_I=[],
             component_names_I=[],
             redundancy_I=True,
-            value_I = 'mean'):
+            value_I = 'mean',
+            query_object_descStats_I = 'stage02_quantification_descriptiveStats_query'):
         '''
         execute pairwiseTable
         INPUT:
@@ -18,15 +19,21 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
         component_names_I = [] of strings
         redundancy_I = boolean, default=True
         value_I = string, e.g., value from descriptiveStats to use 'mean','median','pvalue',etc.
-
+        query_object_descStats_I = query objects to select the data descriptive statistics data
+            options: 'stage02_quantification_descriptiveStats_query'
+                     'stage02_quantification_dataPreProcessing_averages_query'
 
         '''
 
         print('execute_pairwiseTable...')
         
-        
-        quantification_dataPreProcessing_averages_query=stage02_quantification_dataPreProcessing_averages_query(self.session,self.engine,self.settings);
-        quantification_dataPreProcessing_averages_query.initialize_supportedTables();
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query};
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
 
         data_pairwise_O = [];
         # get concentration units
@@ -34,19 +41,33 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = quantification_dataPreProcessing_averages_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            if hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             print('calculating pairwiseCorrelation for concentration_units ' + cu);
             # get sample_name_abbreviations and sample_name_shorts:
-            sample_name_abbreviations=[];
-            sample_name_abbreviations=quantification_dataPreProcessing_averages_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
-                analysis_id_I,cu);
+            if sample_name_abbreviations_I:
+                sample_name_abbreviations = sample_name_abbreviations_I;
+            else:
+                sample_name_abbreviations=[];
+                if hasattr(query_instance, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+                    analysis_id_I,cu);
+                elif hasattr(query_instance, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+                    analysis_id_I,cu);
+                else:
+                    print('query instance does not have the required method.');
             for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
                     
                 data_O=[];
                 #pass 1: calculate the pairwise correlations
                 if redundancy_I: list_2 = sample_name_abbreviations;
-                else: list_2 = sample_name_abbreviations[sna_1+1:];
+                else: list_2 = sample_name_abbreviations[sna_1_cnt+1:];
                 for cnt,sna_2 in enumerate(list_2):
                     if redundancy_I: sna_2_cnt = cnt;
                     else: sna_2_cnt = sna_1_cnt+cnt+1;
@@ -54,10 +75,18 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
 
                         # get the calculated concentrations ordered by component name:
                         data_1,data_2 = [],[];
-                        data_1 = quantification_dataPreProcessing_averages_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
-                            analysis_id_I,cu,sna_1);
-                        data_2 = quantification_dataPreProcessing_averages_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
-                            analysis_id_I,cu,sna_2);
+                        if hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages'):
+                            data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
+                                analysis_id_I,cu,sna_1);
+                            data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
+                                analysis_id_I,cu,sna_2);
+                        elif hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats'):
+                            data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(
+                                analysis_id_I,cu,sna_1);
+                            data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(
+                                analysis_id_I,cu,sna_2);
+                        else:
+                            print('query instance does not have the required method.');
 
                         if len(data_1)!=len(data_2):
                             print('the number of components in sn_1 and sn_2 are not equal.');
@@ -114,7 +143,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             sample_name_abbreviations,sample_name_shorts = dataPreProcessing_replicates_query.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu)
             for sn_1_cnt,sn_1 in enumerate(sample_name_shorts):
                 if redundancy_I: list_2 = sample_name_shorts;
-                else: list_2 = sample_name_shorts[sn_1+1:];
+                else: list_2 = sample_name_shorts[sn_1_cnt+1:];
                 for cnt,sn_2 in enumerate(list_2):
                     if redundancy_I: sn_2_cnt = cnt;
                     else: sn_2_cnt = sn_1_cnt+cnt+1;

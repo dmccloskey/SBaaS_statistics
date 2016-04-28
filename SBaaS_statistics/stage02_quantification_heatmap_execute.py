@@ -1,8 +1,7 @@
 # SBaaS
 from .stage02_quantification_heatmap_io import stage02_quantification_heatmap_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
-from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 
 # Resources
@@ -10,11 +9,8 @@ from .stage02_quantification_dataPreProcessing_replicates_query import stage02_q
 from python_statistics.calculate_heatmap import calculate_heatmap
 from listDict.listDict import listDict
 
-class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
-                                         #stage02_quantification_normalization_query,
-                                         stage02_quantification_analysis_query,
-                                         stage02_quantification_descriptiveStats_query):
-    def execute_heatmap(self, analysis_id_I,concentration_units_I=[],
+class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,):
+    def execute_heatmap(self, analysis_id_I,calculated_concentration_units_I=[],
                 sample_name_shorts_I=[],component_names_I=[],
                 row_pdist_metric_I='euclidean',row_linkage_method_I='complete',
                 col_pdist_metric_I='euclidean',col_linkage_method_I='complete',
@@ -38,26 +34,21 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
         print('executing heatmap...');
         calculateheatmap = calculate_heatmap();
         quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
-        #hmap = heatmap();
-        # get the analysis information
-        analysis_info = [];
-        analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
+
         # query metabolomics data from the experiment
         heatmap_O = [];
         dendrogram_col_O = [];
         dendrogram_row_O = [];
-        if concentration_units_I:
-            concentration_units = concentration_units_I;
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
         else:
-            concentration_units = [];
-            concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
-            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
-        for cu in concentration_units:
+            calculated_concentration_units = [];
+            calculated_concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu in calculated_concentration_units:
             print('generating a heatmap for concentration_units ' + cu);
             # get the data
             data = [];
             data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
-            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
             # will need to refactor in the future...
             if type(data)==type(listDict()):
                 data.convert_dataFrame2ListDict()
@@ -107,7 +98,7 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
         self.add_rows_table('data_stage02_quantification_heatmap',heatmap_O);
         self.add_rows_table('data_stage02_quantification_dendrogram',dendrogram_col_O);
         self.add_rows_table('data_stage02_quantification_dendrogram',dendrogram_row_O);
-    def execute_heatmap_descriptiveStats(self, analysis_id_I,concentration_units_I=[],
+    def execute_heatmap_descriptiveStats(self, analysis_id_I,calculated_concentration_units_I=[],
                 sample_name_abbreviations_I=[],
                 component_names_I=[],
                 row_pdist_metric_I='euclidean',row_linkage_method_I='complete',
@@ -115,7 +106,8 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
                 order_componentNameBySampleNameAbbreviation_I = True,
                 order_sample_name_abbreviations_I=False,
                 order_component_names_I=False,
-                value_I = 'mean'):
+                value_I = 'mean',
+                query_object_descStats_I = 'stage02_quantification_descriptiveStats_query'):
         '''Execute hierarchical cluster on row and column data corresponding
         INPUT:
         analysis_id_I = string, analysis id
@@ -128,28 +120,47 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,
         order_sample_name_abbreviations_I = if True, order of the sample_name_abbreviations will be kept
         order_component_names_I = if True, order of the component_names will be kept
         value_I = string, e.g., value from descriptiveStats to use 'mean','median','pvalue',etc.
+        
+        query_object_descStats_I = query objects to select the data descriptive statistics data
+            options: 'stage02_quantification_descriptiveStats_query'
+                     'stage02_quantification_dataPreProcessing_averages_query'
         '''
 
         print('executing heatmap from descriptiveStats...');
+
+        
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query};
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
+
         calculateheatmap = calculate_heatmap();
-        #hmap = heatmap();
-        # get the analysis information
-        analysis_info = [];
-        analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
         # query metabolomics data from the experiment
         heatmap_O = [];
         dendrogram_col_O = [];
         dendrogram_row_O = [];
-        if concentration_units_I:
-            concentration_units = concentration_units_I;
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
         else:
-            concentration_units = [];
-            concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
-        for cu in concentration_units:
+            if hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
+        for cu in calculated_concentration_units:
             print('generating a heatmap for concentration_units ' + cu);
             # get the data
             data = [];
-            data = self.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+            if hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                data = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+            elif hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                data = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+            else:
+                print('query instance does not have the required method.');
             # generate the clustering for the heatmap
             heatmap_1 = [];
             dendrogram_col_1 = {};

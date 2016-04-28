@@ -105,7 +105,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                     data_O=[];
                     #pass 1: calculate the pairwise statistics
                     if redundancy_I: list_2 = sample_name_abbreviations;
-                    else: list_2 = sample_name_abbreviations[sna_1+1:];
+                    else: list_2 = sample_name_abbreviations[sna_1_cnt+1:];
                     for cnt,sna_2 in enumerate(list_2):
                         if redundancy_I: sna_2_cnt = cnt;
                         else: sna_2_cnt = sna_1_cnt+cnt+1;
@@ -129,9 +129,9 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                                 if len(data_1)==len(data_2):
                                     tstat,pval = calc.calculate_pairwiseTTest(data_1, data_2);
                                 else:
-                                    tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, var_equal_I = True);
+                                    tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, equal_var_I = True);
                             elif test_description_I in ["Welch's t-test"]:
-                                tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, var_equal_I = False);
+                                tstat,pval = calc.calculate_twoSampleTTest(data_1, data_2, equal_var_I = False);
                             #elif test_description_I == "Wilcoxon-Mann-Whitney test":
                             #    #split 1: R
                             #    #TODO: fix p-value correction and break into individual function calls
@@ -201,19 +201,20 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                                 'comment_':None};
                             data_O.append(tmp);
 
-                    # Pass 2: calculate the corrected p-values
-                    data_listDict = listDict(data_O);
-                    data_listDict.convert_listDict2DataFrame();
-                    pvalues = data_listDict.dataFrame['pvalue'].get_values();
-                    # call R
-                    r_calc.clear_workspace();
-                    r_calc.make_vectorFromList(pvalues,'pvalues');
-                    pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
-                    # add in the corrected p-values
-                    data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
-                    data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
-                    data_listDict.convert_dataFrame2ListDict();
-                    data_pairwise_O.extend(data_listDict.get_listDict());
+                    if data_O:
+                        # Pass 2: calculate the corrected p-values
+                        data_listDict = listDict(data_O);
+                        data_listDict.convert_listDict2DataFrame();
+                        pvalues = data_listDict.dataFrame['pvalue'].get_values();
+                        # call R
+                        r_calc.clear_workspace();
+                        r_calc.make_vectorFromList(pvalues,'pvalues');
+                        pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+                        # add in the corrected p-values
+                        data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                        data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                        data_listDict.convert_dataFrame2ListDict();
+                        data_pairwise_O.extend(data_listDict.get_listDict());
 
         # add data to the DB
         self.add_rows_table('data_stage02_quantification_pairWiseTest',data_pairwise_O);
@@ -270,7 +271,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                 sample_name_abbreviations = self.get_sampleNameAbbreviations_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(analysis_id_I,cu, cn)
                 for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
                     if redundancy_I: list_2 = sample_name_abbreviations;
-                    else: list_2 = sample_name_abbreviations[sna_1+1:];
+                    else: list_2 = sample_name_abbreviations[sna_1_cnt+1:];
                     for cnt,sna_2 in enumerate(list_2):
                         if redundancy_I: sna_2_cnt = cnt;
                         else: sna_2_cnt = sna_1_cnt+cnt+1;
@@ -394,7 +395,7 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                 sample_name_abbreviations = self.get_sampleNameAbbreviations_analysisIDAndUnitsAndComponentNames_dataStage02GlogNormalized(analysis_id_I,cu, cn)
                 for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
                     if redundancy_I: list_2 = sample_name_abbreviations;
-                    else: list_2 = sample_name_abbreviations[sna_1+1:];
+                    else: list_2 = sample_name_abbreviations[sna_1_cnt+1:];
                     for cnt,sna_2 in enumerate(list_2):
                         if redundancy_I: sna_2_cnt = cnt;
                         else: sna_2_cnt = sna_1_cnt+cnt+1;

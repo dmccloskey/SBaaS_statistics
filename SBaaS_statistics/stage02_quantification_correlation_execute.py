@@ -1,5 +1,6 @@
 #SBaaS
 from .stage02_quantification_correlation_io import stage02_quantification_correlation_io
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 #Resources
@@ -526,7 +527,8 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
                         component_match_I=None,
                         component_match_units_I=None,
                         distance_measure_I='pearson',
-                        concentration_units_I=[]):
+                        concentration_units_I=[],
+                        query_object_I = 'stage02_quantification_descriptiveStats_query'):
         '''Correlate a pattern or component to other components
         INPUT:
         analysis_id = string
@@ -543,12 +545,29 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
         component_match_units_I = calculated_concentration_units
         
         distance_measure_I = 'spearman' or 'pearson'
+        query_object_I = query object to select the data
+            options: 'stage02_quantification_descriptiveStats_query'
+                     'stage02_quantification_dataPreProcessing_averages_query'
         '''
         data_O = [];
+        
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query};
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
+
         calculatecorrelation = calculate_correlation();
         #get the sample_name_abbreviations in the analysis
         sample_name_abbreviations_tmp,time_points_tmp = [],[];
-        sample_name_abbreviations_tmp,time_points_tmp = self.get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+        if hasattr(query_instance, 'get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDescriptiveStats'):
+            sample_name_abbreviations_tmp,time_points_tmp = query_instance.get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+        elif hasattr(query_instance, 'get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+            sample_name_abbreviations_tmp,time_points_tmp = query_instance.get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+        else:
+            print('query instance does not have the required method.');
         if sample_name_abbreviations_I and time_points_I:
             sample_name_abbreviations,time_points = [],[];
             for sna_cnt,sna in enumerate(sample_name_abbreviations_I):
@@ -590,7 +609,12 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
             calculated_concentration_units = concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            if hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         #parse the pattern or get the component_match
         if pattern_match_I:
             plist_compare = calculatecorrelation.convert_profileStr2List(pattern_match_I)
@@ -600,8 +624,14 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
             for sna in sample_name_abbreviations:
                 # get each individual data point
                 data_mean,data_stdev,data_lb,data_ub,data_unit = None,None,None,None,None;
-                data_mean,data_stdev,data_lb,data_ub,data_unit = self.get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
-                    analysis_id_I,sna,component_match_I,component_match_units_I);
+                if hasattr(query_instance, 'get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    data_mean,data_stdev,data_lb,data_ub,data_unit = query_instance.get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+                        analysis_id_I,sna,component_match_I,component_match_units_I);
+                elif hasattr(query_instance, 'get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    data_mean,data_stdev,data_lb,data_ub,data_unit = query_instance.get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+                        analysis_id_I,sna,component_match_I,component_match_units_I);
+                else:
+                    print('query instance does not have the required method.');
             #generate the pattern
             plist_compare = data_means;
         else:
@@ -610,7 +640,15 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
         for cu in calculated_concentration_units:
             #get the component_names in the analysis
             component_names,component_group_names = [],[];
-            component_names,component_group_names = self.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+            if hasattr(query_instance, 'get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                component_names,component_group_names = query_instance.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+            elif hasattr(query_instance, 'get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                component_names,component_group_names = query_instance.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+            #TODO: update descriptiveStats to include this method?
+            #elif hasattr(query_instance, 'getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+            #    component_names,component_group_names = query_instance.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+            else:
+                print('query instance does not have the required method.');
             for cn_cnt,cn in enumerate(component_names):
                 #if cn=='g6p.g6p_1.Light':
                 #    print("check");
@@ -619,8 +657,14 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
                 for sna_cnt,sna in enumerate(sample_name_abbreviations):
                     # get each individual data point
                     data_mean,data_stdev,data_lb,data_ub,data_unit = None,None,None,None,None;
-                    data_mean,data_stdev,data_lb,data_ub,data_unit = self.get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
-                        analysis_id_I,sna,time_points[sna_cnt],cn,cu);
+                    if hasattr(query_instance, 'get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                        data_mean,data_stdev,data_lb,data_ub,data_unit = query_instance.get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+                            analysis_id_I,sna,time_points[sna_cnt],cn,cu);
+                    elif hasattr(query_instance, 'get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                        data_mean,data_stdev,data_lb,data_ub,data_unit = query_instance.get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+                            analysis_id_I,sna,time_points[sna_cnt],cn,cu);
+                    else:
+                        print('query instance does not have the required method.');
                     data_means.append(data_mean);
                     data_stdevs.append(data_stdev);
                     data_lbs.append(data_lb);
@@ -659,4 +703,4 @@ class stage02_quantification_correlation_execute(stage02_quantification_correlat
                     };
                 data_O.append(data_tmp);
         #add the data to the database
-        self.add_dataStage02QuantificationCorrelationPattern(data_O);
+        self.add_rows_table('data_stage02_quantification_correlationPattern',data_O);

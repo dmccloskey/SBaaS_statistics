@@ -110,7 +110,7 @@ class stage02_quantification_descriptiveStats_execute(stage02_quantification_des
                     'used_':True,
                     'comment_':None};
             data_O.append(tmp);
-        self.add_dataStage02QuantificationDescriptiveStats(data_O);
+        self.add_rows_table('data_stage02_quantification_descriptiveStats',data_O);
     def execute_descriptiveStats_v1(self,analysis_id_I,experiment_ids_I=[],time_points_I=[],concentration_units_I=[],component_names_I=[],r_calc_I=None):
         '''execute descriptiveStats using R'''
 

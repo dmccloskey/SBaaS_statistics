@@ -11,6 +11,7 @@ from SBaaS_base.sbaas_template_query import sbaas_template_query
 from .stage02_quantification_dataPreProcessing_averages_postgresql_models import *
 #resources
 from listDict.listDict import listDict
+from math import sqrt
 
 class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_query,
                                        ):
@@ -97,7 +98,6 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
                         'table_name':table,
                         'column_name':'analysis_id',
                         'value':analysis_id_I,
-                        #'value':self.convert_string2StringString(analysis_id_I),
 		                'operator':'LIKE',
                         'connector':'AND'
                         }
@@ -1086,9 +1086,107 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
                     data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation.like(sample_name_abbreviation_I),
                     data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).order_by(
                     data_stage02_quantification_dataPreProcessing_averages.component_name.asc()).all();
-            data_O = [];
-            for d in data: 
-                data_O.append(d.__repr__dict__());
+            data_O = [d.__repr__dict__() for d in data];
             return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+      
+    # query sample_names from data_stage02_quantification_descriptiveStats
+    def get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I):
+        '''Querry sample_name_abbreviations that are used from the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation,
+                    data_stage02_quantification_dataPreProcessing_averages.time_point).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).group_by(
+                    data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation,
+                    data_stage02_quantification_dataPreProcessing_averages.time_point).order_by(
+                    data_stage02_quantification_dataPreProcessing_averages.time_point.asc(),
+                    data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation.asc()).all();
+            sample_name_abbreviations_O = [];
+            time_points_O = [];
+            if data: 
+                for d in data:
+                    sample_name_abbreviations_O.append(d.sample_name_abbreviation);
+                    time_points_O.append(d.time_point);
+            return sample_name_abbreviations_O,time_points_O;
+        except SQLAlchemyError as e:
+            print(e);
+    # query component_names from data_stage02_quantification_descriptiveStats
+    def get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I,calculated_concentration_units_I):
+        '''Query component_names and component_group_names that are used by analysis_id and calculated_concentration_units'''
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages.component_name,
+                                      data_stage02_quantification_dataPreProcessing_averages.component_group_name).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).group_by(
+                    data_stage02_quantification_dataPreProcessing_averages.component_name,
+                    data_stage02_quantification_dataPreProcessing_averages.component_group_name).order_by(
+                    data_stage02_quantification_dataPreProcessing_averages.component_name.asc()).all();
+            component_name_O = [];
+            component_group_name_O = [];
+            if data: 
+                for d in data:
+                    component_name_O.append(d.component_name);
+                    component_group_name_O.append(d.component_group_name);
+            return component_name_O,component_group_name_O;
+        except SQLAlchemyError as e:
+            print(e);
+    # query data from data_stage02_quantification_descriptiveStats
+    def get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+                                analysis_id_I,
+                                sample_name_abbreviation_I,
+                                component_name_I,
+                                calculated_concentration_units_I):
+        '''Query data by sample_name_abbreviation, component_name, and calculated_concentration_units that are used for the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                    data_stage02_quantification_dataPreProcessing_averages.component_name.like(component_name_I),
+                    data_stage02_quantification_dataPreProcessing_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).all();
+            mean,stdev,ci_lb,ci_ub,calculated_concentration_units = None,None,None,None,None;
+            if len(data)>1:
+                print('More than 1 row found');
+            if data: 
+                for d in data:
+                    mean=d.mean;
+                    if d.var and not d.var is None: stdev=sqrt(d.var);
+                    else: stdev=0.0;
+                    ci_lb=d.ci_lb;
+                    ci_ub=d.ci_ub;
+                    calculated_concentration_units=d.calculated_concentration_units;
+            return mean,stdev,ci_lb,ci_ub,calculated_concentration_units;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_data_analysisIDAndSampleNameAbbreviationAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+                                analysis_id_I,
+                                sample_name_abbreviation_I,
+                                time_point_I,
+                                component_name_I,
+                                calculated_concentration_units_I):
+        '''Querry data by sample_name_abbreviation, component_name, and calculated_concentration_units that are used from the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                    data_stage02_quantification_dataPreProcessing_averages.time_point.like(time_point_I),
+                    data_stage02_quantification_dataPreProcessing_averages.component_name.like(component_name_I),
+                    data_stage02_quantification_dataPreProcessing_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).all();
+            mean,stdev,ci_lb,ci_ub,calculated_concentration_units = None,None,None,None,None;
+            if len(data)>1:
+                print('More than 1 row found');
+            if data: 
+                for d in data:
+                    mean=d.mean;
+                    if d.var and not d.var is None: stdev=sqrt(d.var);
+                    else: stdev=0.0;
+                    ci_lb=d.ci_lb;
+                    ci_ub=d.ci_ub;
+                    calculated_concentration_units=d.calculated_concentration_units;
+            return mean,stdev,ci_lb,ci_ub,calculated_concentration_units;
         except SQLAlchemyError as e:
             print(e);

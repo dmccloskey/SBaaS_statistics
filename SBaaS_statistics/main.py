@@ -184,12 +184,12 @@ anova01.initialize_supportedTables();
 anova01.initialize_tables();
 
 analysis_ids_run = [
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+        #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
         #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
-        #'ALEsKOs01_0',
+        'ALEsKOs01_0',
         #'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
@@ -366,19 +366,19 @@ for analysis_id in analysis_ids_run:
     #        redundancy_I=True,
     #        value_I = 'mean');
     
-    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-            tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
-            analysis_id_I = analysis_id,
-            warn_I=True);
-    pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
-            sample_name_abbreviations_I=[],
-            calculated_concentration_units_I=['log2(FC)'],
-            component_names_I=[],
-            pvalue_corrected_description_I = "bonferroni",
-            redundancy_I=True,
-            distance_measure_I='pearson',
-            value_I = 'mean',
-            r_calc_I=r_calc);
+    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
+    #        analysis_id_I = analysis_id,
+    #        warn_I=True);
+    #pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
+    #        sample_name_abbreviations_I=[],
+    #        calculated_concentration_units_I=['log2(FC)'],
+    #        component_names_I=[],
+    #        pvalue_corrected_description_I = "bonferroni",
+    #        redundancy_I=True,
+    #        distance_measure_I='pearson',
+    #        value_I = 'mean',
+    #        r_calc_I=r_calc);
 
     #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id)
     #pwt01.execute_pairwiseTestReplicates(analysis_id,
@@ -864,25 +864,14 @@ for analysis_id in analysis_ids_run:
     #        tables_I = [], 
     #        analysis_id_I = analysis_id);
     #pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id);
-    #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id);
-    #pwt01.execute_pairwiseWilcoxonRankSumTest(analysis_id,
-    #    concentration_units_I=[
-    #        'mM_glog_normalized',
-    #        'height_ratio_glog_normalized',
-    #        'ratio',
-    #        'mM',
-    #        'height_ratio',
-    #    ],
-    #    r_calc_I=r_calc);
-    #pwt01.execute_pairwiseTTest(analysis_id,
-    #    concentration_units_I=[
-    #        'mM_glog_normalized',
-    #        'height_ratio_glog_normalized',
-    #        'ratio',
-    #        'mM',
-    #        'height_ratio',
-    #    ],
-    #    r_calc_I=r_calc);
+    pwt01.execute_pairwiseTestReplicates(analysis_id,
+        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+        calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
+        test_description_I = "Two Sample t-test",
+        ci_level_I = 0.95,
+        redundancy_I=False,
+        pvalue_corrected_description_I = "bonferroni",
+        r_calc_I=r_calc);
 
     ## bin the data
     #hist01.reset_dataStage02_quantification_histogram(analysis_id_I = analysis_id);

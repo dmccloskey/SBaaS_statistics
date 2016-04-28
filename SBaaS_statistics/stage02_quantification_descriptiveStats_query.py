@@ -1,16 +1,15 @@
 ﻿from .stage02_quantification_descriptiveStats_postgresql_models import *
 from .stage02_quantification_analysis_postgresql_models import *
 
-from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
-from SBaaS_base.sbaas_base_query_drop import sbaas_base_query_drop
-from SBaaS_base.sbaas_base_query_initialize import sbaas_base_query_initialize
-from SBaaS_base.sbaas_base_query_insert import sbaas_base_query_insert
+#SBaaS_base
 from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
-
+#SBaaS_template
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
+#Resources
 from math import sqrt
+from listDict.listDict import listDict
 
 class stage02_quantification_descriptiveStats_query(sbaas_template_query):
     def initialize_supportedTables(self):
@@ -171,7 +170,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             if data: 
                 for d in data:
                     mean=d.mean;
-                    stdev=sqrt(d.var);
+                    if d.var and not d.var is None: stdev=sqrt(d.var);
+                    else: stdev=0.0;
                     ci_lb=d.ci_lb;
                     ci_ub=d.ci_ub;
                     calculated_concentration_units=d.calculated_concentration_units;
@@ -199,7 +199,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             if data: 
                 for d in data:
                     mean=d.mean;
-                    stdev=sqrt(d.var);
+                    if d.var and not d.var is None: stdev=sqrt(d.var);
+                    else: stdev=0.0;
                     ci_lb=d.ci_lb;
                     ci_ub=d.ci_ub;
                     calculated_concentration_units=d.calculated_concentration_units;
@@ -249,47 +250,91 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
         except SQLAlchemyError as e:
             print(e);
     def get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,
-            analysis_id_I,
-            calculated_concentration_units_I):
-        '''Querry rows by analysis_id and calculated_concentration_units that are used'''
-        try:
-            data = self.session.query(data_stage02_quantification_descriptiveStats).filter(
-                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.used_.is_(True)).all();
-            rows_O = [];
-            if data: 
-                for d in data:
-                    rows_O.append({'analysis_id':d.analysis_id,
-                    'experiment_id':d.experiment_id,
-                    'sample_name_abbreviation':d.sample_name_abbreviation,
-                    'time_point':d.time_point,
-                    'component_group_name':d.component_group_name,
-                    'component_name':d.component_name,
-                    'test_stat':d.test_stat,
-                    'test_description':d.test_description,
-                    'pvalue':d.pvalue,
-                    'pvalue_corrected':d.pvalue_corrected,
-                    'pvalue_corrected_description':d.pvalue_corrected_description,
-                    'mean':d.mean,
-                    'var':d.var,
-                    'cv':d.cv,
-                    'n':d.n,
-                    'ci_lb':d.ci_lb,
-                    'ci_ub':d.ci_ub,
-                    'ci_level':d.ci_level,
-                    'min':d.min,
-                    'max':d.max,
-                    'median':d.median,
-                    'iq_1':d.iq_1,
-                    'iq_3':d.iq_3,
-                    'calculated_concentration_units':d.calculated_concentration_units,
-                    'used_':d.used_,
-                    'comment_':d.comment_
-                    });
-            return rows_O;
-        except SQLAlchemyError as e:
-            print(e);
+        #    analysis_id_I,
+        #    calculated_concentration_units_I):
+        #'''Querry rows by analysis_id and calculated_concentration_units that are used'''
+        #try:
+        #    data = self.session.query(data_stage02_quantification_descriptiveStats).filter(
+        #            data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+        #            data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+        #            data_stage02_quantification_descriptiveStats.used_.is_(True)).all();
+        #    rows_O = [d.__repr__dict() for d in data];
+        #    return rows_O;
+        #except SQLAlchemyError as e:
+        #    print(e);
+                analysis_id_I,
+                calculated_concentration_units_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_data_stage02_quantification_descriptiveStats
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_data_stage02_quantification_descriptiveStats'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'value':calculated_concentration_units_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'experiment_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'sample_name_abbreviation',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'time_point',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
     def get_rows_analysisIDAndCalculatedConcentrationUnitsAndCVThreshold_dataStage02QuantificationDescriptiveStats(self,
             analysis_id_I,
             calculated_concentration_units_I,
@@ -314,6 +359,87 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                     data_stage02_quantification_descriptiveStats.used_.is_(used__I)).all();
             rows_O = [d.__repr__dict__() for d in data];
             return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(self, analysis_id_I,calculated_concentration_units_I,sample_name_abbreviation_I):
+        """get rows by analysis_id, calculated_concentration_units, and sample_name_abbreviation from data_stage02_quantification_descriptiveStats"""
+        #Tested
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_descriptiveStats).filter(
+                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                    data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats.component_name.asc()).all();
+            data_O = [d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDescriptiveStats(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_id_I,
+                sample_name_abbreviation_I,
+                time_point_I,
+            ):
+        """query unique rows from data_stage02_quantification_descriptiveStats"""
+        try:
+            data = self.session.query(data_stage02_quantification_descriptiveStats
+                ).filter(
+                data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                data_stage02_quantification_descriptiveStats.experiment_id.like(experiment_id_I),
+                data_stage02_quantification_descriptiveStats.time_point.like(time_point_I),
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation.asc(),
+                data_stage02_quantification_descriptiveStats.component_name.asc(),
+                ).all();
+            data_O=[d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    # Query unique groups from 
+    def get_analysisIDAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                time_points_I=[],
+            ):
+        """query unique rows from data_preProcessing_analysis and data_stage02_quantification_descriptiveStats"""
+        try:
+            data = self.session.query(
+                data_stage02_quantification_descriptiveStats.analysis_id,
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units,
+                data_stage02_quantification_descriptiveStats.experiment_id,
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation,
+                data_stage02_quantification_descriptiveStats.time_point,
+                ).filter(
+                data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                data_stage02_quantification_descriptiveStats.used_.is_(True)).group_by(
+                data_stage02_quantification_descriptiveStats.analysis_id,
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units,
+                data_stage02_quantification_descriptiveStats.experiment_id,
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation,
+                data_stage02_quantification_descriptiveStats.time_point).order_by(
+                data_stage02_quantification_descriptiveStats.analysis_id.asc(),
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units.asc(),
+                data_stage02_quantification_descriptiveStats.experiment_id.asc(),
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation.asc(),
+                data_stage02_quantification_descriptiveStats.time_point.asc()).all();
+            data_O=[];
+            if data:
+                data_O = listDict(record_I=data);
+                data_O.convert_record2DataFrame();
+                data_O.filterIn_byDictList({'experiment_id':experiment_ids_I,
+                                            'sample_name_abbreviation':sample_name_abbreviations_I,
+                                           'time_point':time_points_I,
+                                           });
+                data_O.convert_dataFrame2ListDict();
+            return data_O;
         except SQLAlchemyError as e:
             print(e);
     # Query specific columns of data_stage02_quantification_descriptiveStats
@@ -386,16 +512,6 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
         except SQLAlchemyError as e:
             print(e);
 
-    def initialize_dataStage02_quantification_descriptiveStats(self):
-        try:
-            data_stage02_quantification_descriptiveStats.__table__.create(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def drop_dataStage02_quantification_descriptiveStats(self):
-        try:
-            data_stage02_quantification_descriptiveStats.__table__.drop(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
     def reset_dataStage02_quantification_descriptiveStats(self,analysis_id_I = None, calculated_concentration_units_I = []):
         try:
             if analysis_id_I and calculated_concentration_units_I:
@@ -410,82 +526,4 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 self.session.commit();
         except SQLAlchemyError as e:
             print(e);
-
-    def add_dataStage02QuantificationDescriptiveStats(self, data_I):
-        '''add rows of data_stage02_quantification_descriptiveStats'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_descriptiveStats(d
-                        #d['analysis_id'],
-                        #d['experiment_id'],
-                        #d['sample_name_abbreviation'],
-                        #d['time_point'],
-                        ##d['time_point_units'],
-                        #d['component_group_name'],
-                        #d['component_name'],
-                        #d['mean'],
-                        #d['var'],
-                        #d['cv'],
-                        #d['n'],
-                        #d['test_stat'],
-                        #d['test_description'],
-                        #d['pvalue'],
-                        #d['pvalue_corrected'],
-                        #d['pvalue_corrected_description'],
-                        #d['ci_lb'],
-                        #d['ci_ub'],
-                        #d['ci_level'],
-                        #d['min'],
-                        #d['max'],
-                        #d['median'],
-                        #d['iq_1'],
-                        #d['iq_3'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_']
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationDescriptiveStats(self,data_I):
-        '''update rows of data_stage02_quantification_descriptiveStats'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_descriptiveStats).filter(
-                            data_stage02_quantification_descriptiveStats.id==d['id']).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'experiment_id':d['experiment_id'],
-                            'sample_name_abbreviation':d['sample_name_abbreviation'],
-                            'time_point':d['time_point'],
-                            #'time_point_units':d['time_point_units'],
-                            'component_group_name':d['component_group_name'],
-                            'component_name':d['component_name'],
-                            'mean':d['mean'],
-                            'var':d['var'],
-                            'cv':d['cv'],
-                            'n':d['n'],
-                            'test_stat':d['test_stat'],
-                            'test_description':d['test_description'],
-                            'pvalue':d['pvalue'],
-                            'pvalue_corrected':d['pvalue_corrected'],
-                            'pvalue_corrected_description':d['pvalue_corrected_description'],
-                            'ci_lb':d['ci_lb'],
-                            'ci_ub':d['ci_ub'],
-                            'ci_level':d['ci_level'],
-                            'min':d['min'],
-                            'max':d['max'],
-                            'median':d['median'],
-                            'iq_1':d['iq_1'],
-                            'iq_3':d['iq_3'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
    

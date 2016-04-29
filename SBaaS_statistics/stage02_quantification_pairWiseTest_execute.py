@@ -156,11 +156,13 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                             #                            correct_I = "TRUE",
                             #                            );
                     
-                            # calculate the difference
-                            diff = calc.calculate_difference(data_1,data_2);
-                    
-                            # calculate the confidence intervals
-                            mean,var,lb,ub = calc.calculate_ave_var(diff,confidence_I = ci_level_I);
+                            
+                            mean,var,lb,ub = None,None,None,None;
+                            if len(data_1)==len(data_2):
+                                # calculate the difference
+                                diff = calc.calculate_difference(data_1,data_2);
+                                # calculate the confidence intervals
+                                mean,var,lb,ub = calc.calculate_ave_var(diff,confidence_I = ci_level_I);
 
                             # calculate the fold change
                             if calculated_concentration_units_FC_I:

@@ -15,6 +15,7 @@ class stage02_quantification_enrichment_query(sbaas_template_query,
         tables_supported = {
             'data_stage02_quantification_enrichment':data_stage02_quantification_enrichment,
             'data_stage02_quantification_enrichmentClasses':data_stage02_quantification_enrichmentClasses,
+            'data_stage02_quantification_geneSetEnrichment':data_stage02_quantification_geneSetEnrichment,
                         };
         self.set_supportedTables(tables_supported);
 

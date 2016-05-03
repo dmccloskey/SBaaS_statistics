@@ -362,27 +362,38 @@ for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
     #perform a gene_set_enrichment analysis:
-    enrichment01.execute_enrichment(
-                analysis_id_I = analysis_id,
-                calculated_concentration_units_I=['log2(FC)'],
-                experiment_ids_I=[],
-                time_points_I=[],
-                sample_name_abbreviations_I=[],
-                component_names_I=[],
-                enrichment_method_I='topGO',
-                enrichment_options_I={
-                    'pvalue_threshold':0.05,
-                    'enrichment_class_database':'GO.db',
-                    'algorithm':'classic','statistic':'fisher',
-                    'ontology':"BP",'annot':"annFUN.org",
-                    'mapping':"org.EcK12.eg.db",
-                    'ID' :'alias'},
-                pvalue_threshold_I = 0.05,
-                pvalue_corrected_description_I = "bonferroni",
-                value_I = 'mean',
-                query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-                r_calc_I=r_calc
-                );
+    enrichment01.reset_dataStage02_quantification_enrichment(
+        tables_I = ['data_stage02_quantification_geneSetEnrichment'],
+        analysis_id_I = analysis_id,
+        warn_I = False,
+        );
+    algorithm_test = [
+        {'enrichment_algorithm':'weight01','test_description':'globaltest'},
+        {'enrichment_algorithm':'classic','test_description':'fisher'},
+        ]
+    for row in algorithm_test:
+        enrichment01.execute_geneSetEnrichment(
+            analysis_id_I = analysis_id,
+            calculated_concentration_units_I=['log2(FC)'],
+            experiment_ids_I=[],
+            time_points_I=[],
+            sample_name_abbreviations_I=[],
+            component_names_I=[],
+            enrichment_method_I='topGO',
+            enrichment_options_I={
+                'pvalue_threshold':0.05,
+                'GO_database':'GO.db',
+                'enrichment_algorithm':'weight01','test_description':'globaltest',
+                #'enrichment_algorithm':'classic','test_description':'fisher',
+                'GO_ontology':"BP",'GO_annotation':"annFUN.org",
+                'GO_annotation_mapping':"org.EcK12.eg.db",
+                'GO_annotation_id' :'alias'},
+            pvalue_threshold_I = 0.05,
+            pvalue_corrected_description_I = "bonferroni",
+            value_I = 'mean',
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+            r_calc_I=r_calc
+            );
 
 
     #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(

@@ -18,6 +18,8 @@ class stage02_quantification_count_execute(
             stage02_quantification_correlation_query,
             stage02_quantification_count_dependencies
             ):
+    #TODO: 
+    #1. change from method inheritance to method instantion
 
     def execute_countElementsInFeatures_correlationProfile(self,
             analysis_id_I,

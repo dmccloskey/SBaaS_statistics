@@ -8,6 +8,8 @@ import copy
 
 class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantification_dataPreProcessing_averages_io,
                                            stage02_quantification_analysis_query):
+
+    #TODO: support for detecting and filling in null values
     def execute_countMissingValues(self,
                 analysis_id_I,
                 calculated_concentration_units_I=[],
@@ -90,6 +92,7 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                 "mv_value":value_I,
                 "mv_operator":operator_I,
                 "used_":True,
+                "mv_feature":feature_I,
                 'comment_I':None}
             data_O.append(tmp);
         # add data to the DB
@@ -205,6 +208,7 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                 "normalization_method":normalization_method_I,
                 "normalization_options":normalization_options_I,
                 'calculated_concentration_units':cu,
+                'mv_feature':feature_I,
                 "used_":True,
                 'comment_I':None
                 };
@@ -433,6 +437,7 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                     "normalization_method":None,
                     "normalization_options":None,
                     'calculated_concentration_units':cu,
+                    'mv_feature':feature_I,
                     "used_":True,
                     'comment_':None
                     }

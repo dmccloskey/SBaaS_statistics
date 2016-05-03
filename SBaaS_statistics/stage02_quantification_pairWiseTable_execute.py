@@ -41,9 +41,9 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            if hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
                 calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
-            elif hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
                 calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
             else:
                 print('query instance does not have the required method.');
@@ -54,10 +54,10 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                 sample_name_abbreviations = sample_name_abbreviations_I;
             else:
                 sample_name_abbreviations=[];
-                if hasattr(query_instance, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                if hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
                     calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                     analysis_id_I,cu);
-                elif hasattr(query_instance, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                elif hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                     calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
                     analysis_id_I,cu);
                 else:
@@ -75,12 +75,12 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
 
                         # get the calculated concentrations ordered by component name:
                         data_1,data_2 = [],[];
-                        if hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages'):
+                        if hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages'):
                             data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
                                 analysis_id_I,cu,sna_1);
                             data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
                                 analysis_id_I,cu,sna_2);
-                        elif hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats'):
+                        elif hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats'):
                             data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(
                                 analysis_id_I,cu,sna_1);
                             data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(

@@ -153,6 +153,7 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
     calculated_concentration_units = Column(String(50))
     mv_value = Column(Float)
     mv_operator = Column(String(50))
+    mv_feature = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
@@ -160,7 +161,8 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
                       UniqueConstraint('analysis_id',
                             'calculated_concentration_units',
                             'mv_value',
-                            'mv_operator'),
+                            'mv_operator',
+                            'mv_feature'),
             )
 
     def __init__(self,
@@ -174,6 +176,7 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
         self.missing_fraction=row_dict_I['missing_fraction'];
         self.mv_value=row_dict_I['mv_value'];
         self.mv_operator=row_dict_I['mv_operator'];
+        self.mv_feature=row_dict_I['mv_feature'];
 
     def __set__row__(self, 
                  analysis_id_I,
@@ -182,6 +185,7 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
                  calculated_concentration_units_I,
                  mv_value_I,
                  mv_operator_I,
+                 mv_feature_I,
                  used_I,comment_I):
         self.analysis_id = analysis_id_I;
         self.missing_values = missing_values_I;
@@ -189,6 +193,7 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
         self.calculated_concentration_units = calculated_concentration_units_I;
         self.mv_value = mv_value_I;
         self.mv_operator = mv_operator_I;
+        self.mv_feature = mv_feature_I;
         self.used_ = used_I;
         self.comment_ = comment_I;
 
@@ -199,7 +204,8 @@ class data_stage02_quantification_dataPreProcessing_averages_mv(Base):
             "missing_fraction":self.missing_fraction,
             "calculated_concentration_units":self.calculated_concentration_units,
             "mv_value":self.mv_value,
-            "mv_operator":self.mv_value,
+            "mv_operator":self.operator,
+            "mv_feature":self.mv_feature,
             "used_":self.used_,
             'comment_I':self.comment_
                 }
@@ -214,6 +220,7 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
     imputation_options = Column(postgresql.JSON);
     normalization_method = Column(String(50))
     normalization_options = Column(postgresql.JSON);
+    mv_feature = Column(String(50))
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
@@ -222,6 +229,7 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
                       UniqueConstraint('analysis_id',
                             'imputation_method',
                             'normalization_method',
+                            'mv_feature',
                             'calculated_concentration_units',),
             )
 
@@ -236,6 +244,7 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
         self.used_=row_dict_I['used_'];
         self.comment_=row_dict_I['comment_'];
         self.analysis_id=row_dict_I['analysis_id'];
+        self.mv_feature=row_dict_I['mv_feature'];
 
     def __set__row__(self, 
                  analysis_id_I,
@@ -243,6 +252,7 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
                  imputation_options_I,
                  normalization_method_I,
                  normalization_options_I,
+                 mv_feature_I,
                  calculated_concentration_units_I,
                  used_I,comment_I):
         self.analysis_id = analysis_id_I;
@@ -250,6 +260,7 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
         self.imputation_options = imputation_options_I;
         self.normalization_method = normalization_method_I;
         self.normalization_options = normalization_options_I;
+        self.mv_feature = mv_feature_I;
         self.calculated_concentration_units = calculated_concentration_units_I;
         self.used_ = used_I;
         self.comment_ = comment_I;
@@ -263,7 +274,8 @@ class data_stage02_quantification_dataPreProcessing_averages_im(Base):
             "normalization_options":self.normalization_options,
             "calculated_concentration_units":self.calculated_concentration_units,
             "used_":self.used_,
-            'comment_I':self.comment_
+            'comment_I':self.comment_,
+            "mv_feature":self.mv_feature,
                 }
     
     def __repr__json__(self):

@@ -145,9 +145,9 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
         else:
-            if hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
                 calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
-            elif hasattr(query_instance, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
                 calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
             else:
                 print('query instance does not have the required method.');
@@ -155,9 +155,9 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
             print('generating a heatmap for concentration_units ' + cu);
             # get the data
             data = [];
-            if hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+            if hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
                 data = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
-            elif hasattr(query_instance, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+            elif hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                 data = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
             else:
                 print('query instance does not have the required method.');

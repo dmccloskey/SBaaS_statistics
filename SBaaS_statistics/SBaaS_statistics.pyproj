@@ -58,8 +58,12 @@
     <Compile Include="stage02_quantification_count_query.py" />
     <Compile Include="stage02_quantification_descriptiveStats_execute.py" />
     <Compile Include="stage02_quantification_descriptiveStats_io.py" />
+    <Compile Include="stage02_quantification_enrichment_execute.py" />
+    <Compile Include="stage02_quantification_enrichment_io.py" />
+    <Compile Include="stage02_quantification_enrichment_postgresql_models.py" />
     <Compile Include="stage02_quantification_descriptiveStats_postgresql_models.py" />
     <Compile Include="stage02_quantification_descriptiveStats_query.py" />
+    <Compile Include="stage02_quantification_enrichment_query.py" />
     <Compile Include="stage02_quantification_heatmap_execute.py" />
     <Compile Include="stage02_quantification_heatmap_io.py" />
     <Compile Include="stage02_quantification_heatmap_postgresql_models.py" />

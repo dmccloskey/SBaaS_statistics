@@ -183,13 +183,19 @@ anova01 = stage02_quantification_anova_execute(session,engine,pg_settings.datadi
 anova01.initialize_supportedTables();
 anova01.initialize_tables();
 
+#make the enrichment table 
+from SBaaS_statistics.stage02_quantification_enrichment_execute import stage02_quantification_enrichment_execute
+enrichment01 = stage02_quantification_enrichment_execute(session,engine,pg_settings.datadir_settings);
+enrichment01.initialize_supportedTables();
+enrichment01.initialize_tables();
+
 analysis_ids_run = [
-        #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
         #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
-        'ALEsKOs01_0',
+        #'ALEsKOs01_0',
         #'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
@@ -354,6 +360,31 @@ r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+
+    #perform a gene_set_enrichment analysis:
+    enrichment01.execute_enrichment(
+                analysis_id_I = analysis_id,
+                calculated_concentration_units_I=['log2(FC)'],
+                experiment_ids_I=[],
+                time_points_I=[],
+                sample_name_abbreviations_I=[],
+                component_names_I=[],
+                enrichment_method_I='topGO',
+                enrichment_options_I={
+                    'pvalue_threshold':0.05,
+                    'enrichment_class_database':'GO.db',
+                    'algorithm':'classic','statistic':'fisher',
+                    'ontology':"BP",'annot':"annFUN.org",
+                    'mapping':"org.EcK12.eg.db",
+                    'ID' :'alias'},
+                pvalue_threshold_I = 0.05,
+                pvalue_corrected_description_I = "bonferroni",
+                value_I = 'mean',
+                query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+                r_calc_I=r_calc
+                );
+
+
     #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
     #       tables_I = ['data_stage02_quantification_pairWiseTable'], 
     #       analysis_id_I = analysis_id,
@@ -863,15 +894,15 @@ for analysis_id in analysis_ids_run:
     #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
     #        tables_I = [], 
     #        analysis_id_I = analysis_id);
-    #pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id);
-    pwt01.execute_pairwiseTestReplicates(analysis_id,
-        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-        calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
-        test_description_I = "Two Sample t-test",
-        ci_level_I = 0.95,
-        redundancy_I=False,
-        pvalue_corrected_description_I = "bonferroni",
-        r_calc_I=r_calc);
+    ##pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id);
+    #pwt01.execute_pairwiseTestReplicates(analysis_id,
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
+    #    test_description_I = "Two Sample t-test",
+    #    ci_level_I = 0.95,
+    #    redundancy_I=False,
+    #    pvalue_corrected_description_I = "bonferroni",
+    #    r_calc_I=r_calc);
 
     ## bin the data
     #hist01.reset_dataStage02_quantification_histogram(analysis_id_I = analysis_id);
@@ -1059,5 +1090,5 @@ for analysis_id in analysis_ids_run:
 #    );
 
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
-pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')

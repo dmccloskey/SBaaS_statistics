@@ -354,6 +354,19 @@ svm_hyperparameters = [
     # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
     # },
     ];
+
+algorithm_test = [
+    #{'enrichment_algorithm':'weight01','test_description':'globaltest'},
+    #{'enrichment_algorithm':'classic','test_description':'globaltest'},
+    #{'enrichment_algorithm':'classic','test_description':'fisher'},
+    #{'enrichment_algorithm':'elim','test_description':'globaltest'},
+    {'enrichment_algorithm':'elim','test_description':'fisher'},
+    {'enrichment_algorithm':'weight','test_description':'fisher'},
+    {'enrichment_algorithm':'weight01','test_description':'fisher'},
+    {'enrichment_algorithm':'parentchild','test_description':'fisher'},
+    ]
+
+
 # Load R once
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
@@ -367,11 +380,10 @@ for analysis_id in analysis_ids_run:
         analysis_id_I = analysis_id,
         warn_I = False,
         );
-    algorithm_test = [
-        {'enrichment_algorithm':'weight01','test_description':'globaltest'},
-        {'enrichment_algorithm':'classic','test_description':'fisher'},
-        ]
+
     for row in algorithm_test:
+        print("running algorithm " + row['enrichment_algorithm']);
+        print("running statistic " + row['test_description']);        
         enrichment01.execute_geneSetEnrichment(
             analysis_id_I = analysis_id,
             calculated_concentration_units_I=['log2(FC)'],
@@ -383,14 +395,14 @@ for analysis_id in analysis_ids_run:
             enrichment_options_I={
                 'pvalue_threshold':0.05,
                 'GO_database':'GO.db',
-                'enrichment_algorithm':'weight01','test_description':'globaltest',
-                #'enrichment_algorithm':'classic','test_description':'fisher',
-                'GO_ontology':"BP",'GO_annotation':"annFUN.org",
+                'enrichment_algorithm':row['enrichment_algorithm'],
+                'test_description':row['test_description'],
+                'GO_ontology':"BP",
+                'GO_annotation':"annFUN.org",
                 'GO_annotation_mapping':"org.EcK12.eg.db",
                 'GO_annotation_id' :'alias'},
             pvalue_threshold_I = 0.05,
             pvalue_corrected_description_I = "bonferroni",
-            value_I = 'mean',
             query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
             r_calc_I=r_calc
             );

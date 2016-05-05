@@ -181,9 +181,7 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
                     'GO_ontology':"BP",'GO_annotation':"annFUN.org",
                     'GO_annotation_mapping':"org.EcK12.eg.db",
                     'GO_annotation_id' :'alias'},
-                pvalue_threshold_I = 0.05,
                 pvalue_corrected_description_I = "bonferroni",
-                value_I = 'mean',
                 query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
                 r_calc_I=None
                 ):
@@ -203,6 +201,9 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
         enrichment_method_I='topGO'
         enrichment_options_I={
             'pvalue_threshold':0.05,
+            'value':'mean',
+            'value_operator':"<",
+            'value_threshold':0,
             'GO_database':'GO.db',
             'enrichment_algorithm':'classic','test_description':'fisher',
             'GO_ontology':"BP",'GO_annotation':"annFUN.org",
@@ -274,7 +275,28 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
                 # check for the pvalue cutoff:
                 data_listDict = listDict(listDict_I = data);
                 data_listDict.convert_listDict2DataFrame();
-                data_filtered = data_listDict.dataFrame[(data_listDict.dataFrame.pvalue_corrected < enrichment_options_I['pvalue_threshold'])];
+                ##Testing adding in a FC direction
+                #if 'pvalue_threshold' in enrichment_options_I.keys() and 'value_operator' in enrichment_options_I.keys()\
+                #    and 'value_operator'=='>':
+                #    data_filtered = data_listDict.dataFrame[
+                #        (data_listDict.dataFrame.pvalue_corrected < enrichment_options_I['pvalue_threshold'])&
+                #        (data_listDict.dataFrame['value'] > enrichment_options_I['value_threshold'])];
+                #    enrichment_direction = '>';
+                #elif 'pvalue_threshold' in enrichment_options_I.keys() and 'value_operator' in enrichment_options_I.keys()\
+                #    and 'value_operator'=='<':
+                #    data_filtered = data_listDict.dataFrame[
+                #        (data_listDict.dataFrame.pvalue_corrected < enrichment_options_I['pvalue_threshold'])&
+                #        (data_listDict.dataFrame['value'] < enrichment_options_I['value_threshold'])];
+                #    enrichment_direction = '<';
+                #elif 'pvalue_threshold' in enrichment_options_I.keys():
+                #    data_filtered = data_listDict.dataFrame[
+                #        (data_listDict.dataFrame.pvalue_corrected < enrichment_options_I['pvalue_threshold'])
+                #        ];
+                #    enrichment_direction = 'None';
+                if 'pvalue_threshold' in enrichment_options_I.keys():
+                    data_filtered = data_listDict.dataFrame[
+                        (data_listDict.dataFrame.pvalue_corrected < enrichment_options_I['pvalue_threshold'])
+                        ];
                 if len(data_filtered)<1: continue;
                 data_listDict.dataFrame['pvalue_corrected'].fillna(1.0, inplace=True)
                 data_listDict.convert_dataFrame2ListDict()
@@ -311,9 +333,12 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
                 data_listDict.add_column2DataFrame('GO_annotation_mapping', enrichment_options_I['GO_annotation_mapping']);
                 data_listDict.add_column2DataFrame('GO_annotation_id', enrichment_options_I['GO_annotation_id']);
                 enrichment_method = ('%s_%s'%(enrichment_method_I,enrichment_options_I['enrichment_algorithm']))
-                test_description = ('%s_%s'%(enrichment_method_I,enrichment_options_I['test_description']))
                 data_listDict.add_column2DataFrame('enrichment_method', enrichment_method);
+                test_description = ('%s_%s'%(enrichment_method_I,enrichment_options_I['test_description']))
                 data_listDict.add_column2DataFrame('test_description', test_description);
+                enrichment_options = {'pvalue_threshold':enrichment_options_I['pvalue_threshold']};
+                data_listDict.add_column2DataFrame('enrichment_options', enrichment_options);
+                #data_listDict.add_column2DataFrame('enrichment_direction', enrichment_direction);
                 data_listDict.add_column2DataFrame('used_', True);
 
                 if pvalues.any():

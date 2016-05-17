@@ -185,12 +185,12 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             #sample_name_abbreviations_1,sample_name_shorts_1,sample_name_abbreviations_2,sample_name_shorts_2 = [],[],[],[];
             #sample_name_abbreviations_1,sample_name_shorts_1,sample_name_abbreviations_2,sample_name_shorts_2 = quantification_pairWiseTable_query.get_sampleNameAbbreviationsAndSampleNameShorts_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationPairWiseTableReplicates(analysis_id_I,cu)
             #for sn_1_cnt,sn_1 in enumerate(sample_name_shorts_1):
-            for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
+            for sna_1_cnt,sna_1 in enumerate(sample_name_shorts):
                     
                 data_O=[];
                 #pass 1: calculate the pairwise correlations
-                if redundancy_I: list_2 = sample_name_abbreviations;
-                else: list_2 = sample_name_abbreviations[sna_1_cnt+1:];
+                if redundancy_I: list_2 = sample_name_shorts;
+                else: list_2 = sample_name_shorts[sna_1_cnt+1:];
                 for cnt,sna_2 in enumerate(list_2):
                     if redundancy_I: sna_2_cnt = cnt;
                     else: sna_2_cnt = sna_1_cnt+cnt+1;

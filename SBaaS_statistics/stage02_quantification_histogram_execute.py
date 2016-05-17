@@ -60,9 +60,9 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysis
                     data_hist = [];
-                    if hasattr(query_instance, 'get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    if hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                         data_hist = query_instance_descStats.get_allMeans_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
-                    elif hasattr(query_instance, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    elif hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
                         data_hist = query_instance_descStats.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
                     else:
                         print('query instance does not have the required method.');
@@ -75,9 +75,9 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    if hasattr(query_instance, 'get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    if hasattr(query_instance_descStats, 'get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                         data_hist = query_instance_descStats.get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
-                    #elif hasattr(query_instance, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    #elif hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
                     #    data_hist = query_instance_descStats.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
                     else:
                         print('query instance does not have the required method.');
@@ -90,9 +90,9 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    if hasattr(query_instance, 'get_allVariances_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    if hasattr(query_instance_descStats, 'get_allVariances_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                         data_hist = query_instance_descStats.get_allVariances_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
-                    #elif hasattr(query_instance, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    #elif hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
                     #    data_hist = query_instance_descStats.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
                     else:
                         print('query instance does not have the required method.');
@@ -105,9 +105,9 @@ class stage02_quantification_histogram_execute(
                 for feature_units in feature_units_I:
                     #get all the data for the analysi
                     data_hist = [];
-                    if hasattr(query_instance, 'get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    if hasattr(query_instance_descStats, 'get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                         data_hist = query_instance_descStats.get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
-                    #elif hasattr(query_instance, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    #elif hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
                     #    data_hist = query_instance_descStats.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
                     else:
                         print('query instance does not have the required method.');

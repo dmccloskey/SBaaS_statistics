@@ -1,11 +1,13 @@
 ﻿from SBaaS_base.postgresql_orm_base import *
-#pls
-class data_stage02_quantification_pls_scores(Base):
-    __tablename__ = 'data_stage02_quantification_pls_scores'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_scores_id_seq'), primary_key=True)
+
+#pairWisePLS
+class data_stage02_quantification_pairWisePLS_scores(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_scores'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_scores_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     sample_name_short = Column(String(100))
     response_name = Column(String(100))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     score = Column(Float);
     score_response = Column(Float);
     axis = Column(Integer);
@@ -18,17 +20,19 @@ class data_stage02_quantification_pls_scores(Base):
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
-    __table_args__ = (UniqueConstraint('analysis_id','sample_name_short','response_name','axis',
-                                       'calculated_concentration_units','pls_model','pls_method'),
+    __table_args__ = (UniqueConstraint(
+        'analysis_id','sample_name_short','response_name','response_name_pair','axis','calculated_concentration_units','pls_model','pls_method'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.var_proportion=row_dict_I['var_proportion'];
         self.analysis_id=row_dict_I['analysis_id'];
         self.sample_name_short=row_dict_I['sample_name_short'];
         self.response_name=row_dict_I['response_name'];
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.score=row_dict_I['score'];
         self.score_response=row_dict_I['score_response'];
         self.axis=row_dict_I['axis'];
@@ -44,6 +48,7 @@ class data_stage02_quantification_pls_scores(Base):
                  analysis_id_I,
                  sample_name_short_I,
                 response_name_I,
+                response_name_pair_I,
                 score_I,
                 score_response_I,
                 axis_I,
@@ -58,6 +63,7 @@ class data_stage02_quantification_pls_scores(Base):
         self.analysis_id=analysis_id_I
         self.sample_name_short=sample_name_short_I
         self.response_name=response_name_I
+        self.response_name_pair=response_name_pair_I
         self.score=score_I
         self.score_response=score_response_I
         self.axis=axis_I
@@ -76,6 +82,7 @@ class data_stage02_quantification_pls_scores(Base):
             'analysis_id':self.analysis_id,
             'sample_name_short':self.sample_name_short,
             'response_name':self.response_name,
+            'response_name_pair':';'.join(self.response_name_pair),
             'score':self.score,
             'score_response':self.score_response,
             'axis':self.axis,
@@ -90,10 +97,11 @@ class data_stage02_quantification_pls_scores(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_loadings(Base):
-    __tablename__ = 'data_stage02_quantification_pls_loadings'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_loadings_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_loadings(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_loadings'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_loadings_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     component_group_name = Column(String(100))
     component_name = Column(String(500))
     loadings = Column(Float);
@@ -108,12 +116,13 @@ class data_stage02_quantification_pls_loadings(Base):
 
     __table_args__ = (
                       #UniqueConstraint('analysis_id','experiment_id','component_name','axis','calculated_concentration_units'),
-                      UniqueConstraint('analysis_id','component_name','axis','pls_model','pls_method','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id','response_name_pair','component_name','axis','pls_model','pls_method','calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.analysis_id=row_dict_I['analysis_id'];
         self.pls_options=row_dict_I['pls_options'];
         self.pls_method=row_dict_I['pls_method'];
@@ -129,6 +138,7 @@ class data_stage02_quantification_pls_loadings(Base):
 
     def __set__row__(self, 
                  analysis_id_I,
+                response_name_pair_I,
                 component_group_name_I,
                 component_name_I,
                 loadings_I,
@@ -141,6 +151,7 @@ class data_stage02_quantification_pls_loadings(Base):
                 used__I,
                 comment__I,):
         self.analysis_id=analysis_id_I
+        self.response_name_pair=response_name_pair_I
         self.component_group_name=component_group_name_I
         self.component_name=component_name_I
         self.loadings=loadings_I
@@ -156,6 +167,7 @@ class data_stage02_quantification_pls_loadings(Base):
     def __repr__dict__(self):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
+            'response_name_pair':';'.join(self.response_name_pair),
             'component_group_name':self.component_group_name,
             'component_name':self.component_name,
             'loadings':self.loadings,
@@ -170,10 +182,11 @@ class data_stage02_quantification_pls_loadings(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_validation(Base):
-    __tablename__ = 'data_stage02_quantification_pls_validation'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_validation_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_validation(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_validation'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_validation_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     pls_model = Column(String(50))
     pls_method = Column(String(50))
     pls_msep = Column(Float);
@@ -195,7 +208,7 @@ class data_stage02_quantification_pls_validation(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','pls_model','pls_method',
+                      UniqueConstraint('analysis_id','response_name_pair','pls_model','pls_method',
                                        'crossValidation_ncomp','crossValidation_method',
                                        'permutation_nperm',
                                        'calculated_concentration_units'),
@@ -204,6 +217,7 @@ class data_stage02_quantification_pls_validation(Base):
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.pls_method=row_dict_I['pls_method'];
         self.pls_model=row_dict_I['pls_model'];
         self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
@@ -226,6 +240,7 @@ class data_stage02_quantification_pls_validation(Base):
         self.pls_msep=row_dict_I['pls_msep'];
 
     def __set__row__(self, analysis_id_I,
+            response_name_pair_I,
             pls_model_I,
             pls_method_I,
             pls_msep_I,
@@ -246,6 +261,7 @@ class data_stage02_quantification_pls_validation(Base):
             used__I,
             comment__I,):
         self.analysis_id=analysis_id_I
+        self.response_name_pair=response_name_pair_I
         self.pls_model=pls_model_I
         self.pls_method=pls_method_I
         self.pls_msep=pls_msep_I
@@ -269,6 +285,7 @@ class data_stage02_quantification_pls_validation(Base):
     def __repr__dict__(self):
         return {'id':self.id,
                 'analysis_id':self.analysis_id,
+            'response_name_pair':';'.join(self.response_name_pair),
                 'pls_model':self.pls_model,
                 'pls_method':self.pls_method,
                 'pls_msep':self.pls_msep,
@@ -291,10 +308,11 @@ class data_stage02_quantification_pls_validation(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_permutation(Base):
-    __tablename__ = 'data_stage02_quantification_pls_permutation'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_permutation_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_permutation(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_permutation'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_permutation_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     pls_model = Column(String(50))
     pls_method = Column(String(50))
     pls_scale = Column(Boolean);
@@ -316,17 +334,14 @@ class data_stage02_quantification_pls_permutation(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','pls_model','pls_method',
+                      UniqueConstraint('analysis_id','response_name_pair','pls_model','pls_method',
                                        'crossValidation_ncomp','crossValidation_method',
                                        'permutation_nperm',
                                        'calculated_concentration_units'),
             )
 
-    #def __init__(self,
-    #            row_dict_I,
-    #            ):
-
     def __set__row__(self, analysis_id_I,
+                response_name_pair_I,
             pls_model_I,
             pls_method_I,
             pls_scale_I,
@@ -347,6 +362,7 @@ class data_stage02_quantification_pls_permutation(Base):
             used__I,
             comment__I,):
         self.analysis_id=analysis_id_I
+        self.response_name_pair=response_name_pair_I
         self.pls_model=pls_model_I
         self.pls_method=pls_method_I
         self.pls_scale=pls_scale_I
@@ -370,6 +386,7 @@ class data_stage02_quantification_pls_permutation(Base):
     def __repr__dict__(self):
         return {'id':self.id,
                 'analysis_id':self.analysis_id,
+            'response_name_pair':';'.join(self.response_name_pair),
                 'pls_model':self.pls_model,
                 'pls_method':self.pls_method,
                 'pls_scale':self.pls_scale,
@@ -392,11 +409,12 @@ class data_stage02_quantification_pls_permutation(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_vip(Base):
-    __tablename__ = 'data_stage02_quantification_pls_vip'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_vip_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_vip(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_vip'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_vip_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     response_name = Column(String(100))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     component_group_name = Column(String(100))
     component_name = Column(String(500))
     pls_vip = Column(Float);
@@ -408,12 +426,13 @@ class data_stage02_quantification_pls_vip(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','response_name','component_name','pls_model','pls_method','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id','response_name','response_name_pair','component_name','pls_model','pls_method','calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
         self.component_group_name=row_dict_I['component_group_name'];
         self.comment_=row_dict_I['comment_'];
@@ -429,6 +448,7 @@ class data_stage02_quantification_pls_vip(Base):
     def __set__row__(self, 
                  analysis_id_I,
                 response_name_I,
+                response_name_pair_I,
                 component_group_name_I,
                 component_name_I,
                 pls_vip_I,
@@ -440,6 +460,7 @@ class data_stage02_quantification_pls_vip(Base):
                 comment__I,):
         self.analysis_id=analysis_id_I
         self.response_name=response_name_I
+        self.response_name_pair=response_name_pair_I
         self.component_group_name=component_group_name_I
         self.component_name=component_name_I
         self.pls_vip=pls_vip_I
@@ -454,6 +475,7 @@ class data_stage02_quantification_pls_vip(Base):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
             'response_name':self.response_name,
+            'response_name_pair':';'.join(self.response_name_pair),
             'component_group_name':self.component_group_name,
             'component_name':self.component_name,
             'pls_vip':self.pls_vip,
@@ -466,11 +488,12 @@ class data_stage02_quantification_pls_vip(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_coefficients(Base):
-    __tablename__ = 'data_stage02_quantification_pls_coefficients'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_coefficients_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_coefficients(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_coefficients'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_coefficients_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     response_name = Column(String(100))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     component_group_name = Column(String(100))
     component_name = Column(String(500))
     pls_coefficients = Column(Float);
@@ -482,13 +505,13 @@ class data_stage02_quantification_pls_coefficients(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','response_name',
-                                       'component_name','pls_model','pls_method','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id','response_name','response_name_pair','component_name','pls_model','pls_method','calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.comment_=row_dict_I['comment_'];
         self.analysis_id=row_dict_I['analysis_id'];
         self.response_name=row_dict_I['response_name'];
@@ -504,6 +527,7 @@ class data_stage02_quantification_pls_coefficients(Base):
     def __set__row__(self, 
                  analysis_id_I,
                 response_name_I,
+                response_name_pair_I,
                 component_group_name_I,
                 component_name_I,
                 pls_coefficients_I,
@@ -515,8 +539,7 @@ class data_stage02_quantification_pls_coefficients(Base):
                 comment__I,):
         self.analysis_id=analysis_id_I
         self.response_name=response_name_I
-        #self.time_point = time_point_I;
-        #self.time_point_units = time_point_units_I;
+        self.response_name_pair=response_name_pair_I
         self.component_group_name=component_group_name_I
         self.component_name=component_name_I
         self.pls_coefficients=pls_coefficients_I
@@ -531,6 +554,7 @@ class data_stage02_quantification_pls_coefficients(Base):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
             'response_name':self.response_name,
+            'response_name_pair':';'.join(self.response_name_pair),
             'component_group_name':self.component_group_name,
             'component_name':self.component_name,
             'pls_coefficients':self.pls_coefficients,
@@ -543,11 +567,12 @@ class data_stage02_quantification_pls_coefficients(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_pls_loadingsResponse(Base):
-    __tablename__ = 'data_stage02_quantification_pls_loadingsResponse'
-    id = Column(Integer, Sequence('data_stage02_quantification_pls_loadingsResponse_id_seq'), primary_key=True)
+class data_stage02_quantification_pairWisePLS_loadingsResponse(Base):
+    __tablename__ = 'data_stage02_quantification_pairWisePLS_loadingsResponse'
+    id = Column(Integer, Sequence('data_stage02_quantification_pairWisePLS_loadingsResponse_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     response_name = Column(String(100))
+    response_name_pair = Column(postgresql.ARRAY(String(100)))
     loadings_response = Column(Float);
     axis = Column(Integer)
     correlations_response = Column(Float);
@@ -560,12 +585,13 @@ class data_stage02_quantification_pls_loadingsResponse(Base):
 
     __table_args__ = (
                       #UniqueConstraint('analysis_id','experiment_id','component_name','axis','calculated_concentration_units'),
-                      UniqueConstraint('analysis_id','response_name','axis','pls_model','pls_method','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id','response_name','response_name_pair','axis','pls_model','pls_method','calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
+        self.response_name_pair=row_dict_I['response_name_pair'];
         self.pls_options=row_dict_I['pls_options'];
         self.pls_model=row_dict_I['pls_model'];
         self.correlations_response=row_dict_I['correlations_response'];
@@ -581,6 +607,7 @@ class data_stage02_quantification_pls_loadingsResponse(Base):
     def __set__row__(self, 
                  analysis_id_I,
                 response_name_I,
+                response_name_pair_I,
                 loadings_response_I,
                 axis_I,
                 correlations_response_I,
@@ -592,6 +619,7 @@ class data_stage02_quantification_pls_loadingsResponse(Base):
                 comment__I,):
         self.analysis_id=analysis_id_I
         self.response_name=response_name_I
+        self.response_name_pair=response_name_pair_I
         self.loadings_response=loadings_response_I
         self.axis=axis_I
         self.correlations_response=correlations_response_I
@@ -606,6 +634,7 @@ class data_stage02_quantification_pls_loadingsResponse(Base):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
             'response_name':self.response_name,
+            'response_name_pair':';'.join(self.response_name_pair),
             'loadings_response':self.loadings_response,
             'axis':self.axis,
             'correlations_response':self.correlations_response,

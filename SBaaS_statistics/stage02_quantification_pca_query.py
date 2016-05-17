@@ -377,6 +377,30 @@ class stage02_quantification_pca_query(sbaas_template_query):
             return data_scores_O, data_loadings_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_rows_analysisID_dataStage02QuantificationPCALoadings(self, analysis_id_I,axis_I=3):
+        """get data from analysis ID"""
+        try:
+            # query loadings
+            data_loadings = self.session.query(data_stage02_quantification_pca_loadings).filter(
+                    data_stage02_quantification_pca_loadings.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_pca_loadings.axis<=axis_I,
+                    data_stage02_quantification_pca_loadings.used_.is_(True)).all();
+            data_loadings_O = [d.__repr__dict__() for d in data_loadings];
+            return data_loadings_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisID_dataStage02QuantificationPCAScores(self, analysis_id_I,axis_I=3):
+        """get data from analysis ID"""
+        try:
+            # query scores
+            data_scores = self.session.query(data_stage02_quantification_pca_scores).filter(
+                    data_stage02_quantification_pca_scores.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_pca_scores.axis<=axis_I,
+                    data_stage02_quantification_pca_scores.used_.is_(True)).all();
+            data_scores_O = [d.__repr__dict__() for d in data_scores];
+            return data_scores_O;
+        except SQLAlchemyError as e:
+            print(e);
     def get_rowAxisDict_analysisID_dataStage02QuantificationPCAScores(self, analysis_id_I,axis_I=3):
         """get rows from analysis ID"""
         try:
@@ -642,7 +666,7 @@ class stage02_quantification_pca_query(sbaas_template_query):
                     print(e);
             self.session.commit();
 
-    # Query data from data_stage02_quantification_pls_validation
+    # Query data from data_stage02_quantification_pca_validation
     def get_rows_analysisID_dataStage02QuantificationPCAValidation(self, analysis_id_I):
         """get rows by analysis ID from data_stage02_quantification_pca_validation"""
         try:

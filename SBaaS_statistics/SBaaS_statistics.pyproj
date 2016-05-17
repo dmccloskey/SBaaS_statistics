@@ -82,6 +82,10 @@
     <Compile Include="stage02_quantification_outliers_postgresql_models.py" />
     <Compile Include="stage02_quantification_outliers_query.py" />
     <Compile Include="stage02_quantification_pairWiseCorrelation_execute.py" />
+    <Compile Include="stage02_quantification_pairWisePLS_execute.py" />
+    <Compile Include="stage02_quantification_pairWisePLS_io.py" />
+    <Compile Include="stage02_quantification_pairWisePLS_postgresql_models.py" />
+    <Compile Include="stage02_quantification_pairWisePLS_query.py" />
     <Compile Include="stage02_quantification_pairWiseTable_execute.py" />
     <Compile Include="stage02_quantification_pairWiseTable_io.py" />
     <Compile Include="stage02_quantification_pairWiseTable_postgresql_models.py" />
@@ -102,6 +106,10 @@
     <Compile Include="stage02_quantification_pls_postgresql_models.py" />
     <Compile Include="stage02_quantification_pls_query.py" />
     <Compile Include="stage02_quantification_covariance_execute.py" />
+    <Compile Include="stage02_quantification_spls_execute.py" />
+    <Compile Include="stage02_quantification_spls_io.py" />
+    <Compile Include="stage02_quantification_spls_postgresql_models.py" />
+    <Compile Include="stage02_quantification_spls_query.py" />
     <Compile Include="stage02_quantification_svd_execute.py" />
     <Compile Include="stage02_quantification_covariance_io.py" />
     <Compile Include="stage02_quantification_svd_io.py" />

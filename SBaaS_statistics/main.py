@@ -73,15 +73,7 @@ analysis01.initialize_dataStage02_quantification_analysis();
 #    data_dir_I = 'tmp',
 #    );
 
-#make the outliers tables
-from SBaaS_statistics.stage02_quantification_outliers_execute import stage02_quantification_outliers_execute
-outliers01 = stage02_quantification_outliers_execute(session,engine,pg_settings.datadir_settings);
-outliers01.initialize_dataStage02_quantification_outliers();
 
-#make the normalization methods table
-from SBaaS_statistics.stage02_quantification_normalization_execute import stage02_quantification_normalization_execute
-norm01 = stage02_quantification_normalization_execute(session,engine,pg_settings.datadir_settings);
-norm01.initialize_dataStage02_quantification_glogNormalized();
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute
@@ -89,37 +81,23 @@ descstats01 = stage02_quantification_descriptiveStats_execute(session,engine,pg_
 descstats01.initialize_supportedTables();
 descstats01.initialize_tables();
 
-#make the pairWiseTest table
-from SBaaS_statistics.stage02_quantification_pairWiseTest_execute import stage02_quantification_pairWiseTest_execute
-pwt01 = stage02_quantification_pairWiseTest_execute(session,engine,pg_settings.datadir_settings);
-pwt01.initialize_dataStage02_quantification_pairWiseTest();
-
 #make the heatmap tables
 from SBaaS_statistics.stage02_quantification_heatmap_execute import stage02_quantification_heatmap_execute
 heatmap01 = stage02_quantification_heatmap_execute(session,engine,pg_settings.datadir_settings);
 heatmap01.initialize_supportedTables();
-heatmap01.initialize_dataStage02_quantification_heatmap();
-
-#make the pls tables
-from SBaaS_statistics.stage02_quantification_pls_execute import stage02_quantification_pls_execute
-pls01 = stage02_quantification_pls_execute(session,engine,pg_settings.datadir_settings);
-#pls01.drop_dataStage02_quantification_pls();
-pls01.initialize_dataStage02_quantification_pls();
-
-#make the histogram table
-from SBaaS_statistics.stage02_quantification_histogram_execute import stage02_quantification_histogram_execute
-hist01 = stage02_quantification_histogram_execute(session,engine,pg_settings.datadir_settings);
-hist01.initialize_dataStage02_quantification_histogram();
-
-#make the count table
-from SBaaS_statistics.stage02_quantification_count_execute import stage02_quantification_count_execute
-count01 = stage02_quantification_count_execute(session,engine,pg_settings.datadir_settings);
-count01.initialize_dataStage02_quantification_count();
+heatmap01.initialize_tables();
 
 #make the pca tables
 from SBaaS_statistics.stage02_quantification_pca_execute import stage02_quantification_pca_execute
 pca01 = stage02_quantification_pca_execute(session,engine,pg_settings.datadir_settings);
-pca01.initialize_dataStage02_quantification_pca();
+pca01.initialize_supportedTables();
+pca01.initialize_tables();
+
+#make the pls tables
+from SBaaS_statistics.stage02_quantification_pls_execute import stage02_quantification_pls_execute
+pls01 = stage02_quantification_pls_execute(session,engine,pg_settings.datadir_settings);
+pls01.initialize_supportedTables();
+pls01.initialize_tables();
 
 #make the svd tables
 from SBaaS_statistics.stage02_quantification_svd_execute import stage02_quantification_svd_execute
@@ -189,13 +167,26 @@ enrichment01 = stage02_quantification_enrichment_execute(session,engine,pg_setti
 enrichment01.initialize_supportedTables();
 enrichment01.initialize_tables();
 
+#make the spls table 
+from SBaaS_statistics.stage02_quantification_spls_execute import stage02_quantification_spls_execute
+spls01 = stage02_quantification_spls_execute(session,engine,pg_settings.datadir_settings);
+spls01.initialize_supportedTables();
+spls01.initialize_tables();
+
+#make the pairWisePLS tables
+from SBaaS_statistics.stage02_quantification_pairWisePLS_execute import stage02_quantification_pairWisePLS_execute
+pairWisePLS01 = stage02_quantification_pairWisePLS_execute(session,engine,pg_settings.datadir_settings);
+pairWisePLS01.initialize_supportedTables();
+#pairWisePLS01.drop_tables();
+pairWisePLS01.initialize_tables();
+
 analysis_ids_run = [
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+        #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
         #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
-        #'ALEsKOs01_0',
+        'ALEsKOs01_0',
         #'ALEsKOs01_0_11',
         #'ALEsKOs01',
         #"rpomut02",
@@ -374,662 +365,146 @@ r_calc = r_interface();
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-    #perform a gene_set_enrichment analysis:
-    enrichment01.reset_dataStage02_quantification_enrichment(
-        tables_I = ['data_stage02_quantification_geneSetEnrichment'],
-        analysis_id_I = analysis_id,
-        warn_I = False,
-        );
-
-    for row in algorithm_test:
-        print("running algorithm " + row['enrichment_algorithm']);
-        print("running statistic " + row['test_description']);        
-        enrichment01.execute_geneSetEnrichment(
-            analysis_id_I = analysis_id,
-            calculated_concentration_units_I=['log2(FC)'],
-            experiment_ids_I=[],
-            time_points_I=[],
-            sample_name_abbreviations_I=[],
-            component_names_I=[],
-            enrichment_method_I='topGO',
-            enrichment_options_I={
-                'pvalue_threshold':0.05,
-                'GO_database':'GO.db',
-                'enrichment_algorithm':row['enrichment_algorithm'],
-                'test_description':row['test_description'],
-                'GO_ontology':"BP",
-                'GO_annotation':"annFUN.org",
-                'GO_annotation_mapping':"org.EcK12.eg.db",
-                'GO_annotation_id' :'alias'},
-            pvalue_threshold_I = 0.05,
-            pvalue_corrected_description_I = "bonferroni",
-            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-            r_calc_I=r_calc
-            );
-
-
-    #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
-    #       tables_I = ['data_stage02_quantification_pairWiseTable'], 
-    #       analysis_id_I = analysis_id,
-    #       warn_I=True);
-
-    #pairWiseTable01.execute_pairwiseTableAverages(analysis_id,
-    #        sample_name_abbreviations_I=[],
-    #        calculated_concentration_units_I=['log2(FC)'],
-    #        component_names_I=[],
-    #        redundancy_I=True,
-    #        value_I = 'mean');
-    
-    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-    #        tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
-    #        analysis_id_I = analysis_id,
-    #        warn_I=True);
-    #pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
-    #        sample_name_abbreviations_I=[],
-    #        calculated_concentration_units_I=['log2(FC)'],
-    #        component_names_I=[],
-    #        pvalue_corrected_description_I = "bonferroni",
-    #        redundancy_I=True,
-    #        distance_measure_I='pearson',
-    #        value_I = 'mean',
-    #        r_calc_I=r_calc);
-
-    #pwt01.reset_dataStage02_quantification_pairWiseTest(analysis_id)
-    #pwt01.execute_pairwiseTestReplicates(analysis_id,
-    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
-    #        test_description_I = "Two Sample t-test",
-    #        ci_level_I = 0.95,
-    #        pvalue_corrected_description_I = "bonferroni",
-    #        r_calc_I=r_calc
-    #        );
-
-    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-    #        tables_I = [], 
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id,
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    r_calc_I=r_calc
-    #   );
-
-    ## perform an ANOVA on the normalized data set
-    #anova01.reset_dataStage02_quantification_anova(analysis_id);
-    #anova01.execute_anova(analysis_id,
-    #    calculated_concentration_units_I=[
-    #        'umol*gDW-1_glog_normalized',
-    #        ],
-    #        ci_level_I = 0.95,
-    #        pvalue_corrected_description_I = "bonferroni",
-    #    r_calc_I=r_calc);
-
-    ##remove components with missing values
-    #dpprep01.execute_deleteFeaturesWithMissingValues(
-    #        analysis_id_I = analysis_id,
-    #        calculated_concentration_units_I=['umol*gDW-1'],
-    #        value_I = None,
-    #        operator_I='NA',
-    #        set_used_false_I = False,
-    #     );
-
-    ##import the log2(fold change) for differentially expressed genes as the mean
-    #dppave01.import_dataStage01RNASequencingGeneExpDiff_foldChange(
-    #    analysis_id,
-    #    geneID2componentName_I = {},
-    #    gene2componentGroupName_I = {},
-    #    sna2snaRNASequencing_I = {},
-    #    experimentID2experimentIDRNASequencing_I = {},
-    #    sample_name_abbreviations_base_I = ['OxicEvo04EcoliGlc'],
-    #    experiment_ids_base_I = ['ALEsKOs01'],
-    #    add_self_vs_self_I = True,
-    #    fold_change_log2_threshold_I = 2,
-    #    q_value_threshold_I = 0.05,
+    # # perform a pls-da analysis
+    #pairWisePLS01.reset_dataStage02_quantification_pairWisePLS(
+    #    tables_I = ['data_stage02_quantification_pairWisePLS_coefficients',
+    #                'data_stage02_quantification_pairWisePLS_loadings',
+    #                'data_stage02_quantification_pairWisePLS_loadingsResponse',
+    #                'data_stage02_quantification_pairWisePLS_scores',
+    #                'data_stage02_quantification_pairWisePLS_validation',
+    #                'data_stage02_quantification_pairWisePLS_vip'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
     #    );
-    
-    #dppave01.reset_stage02_quantification_dataPreProcessing_averages(
-    #      tables_I = [
-    #                  'data_stage02_quantification_dataPreProcessing_averages',
-    #                  'data_stage02_quantification_dataPreProcessing_averages_im',
-    #                  'data_stage02_quantification_dataPreProcessing_averages_mv',
-    #                  ],
-    #      analysis_id_I = analysis_id,
-    #      warn_I=False);
-    #dppave01.import_dataStage01RNASequencingGeneExpDiffFpkmTracking(
-    #    analysis_id_I = analysis_id,
-    #    analysisID2analysisIDRNASequencing_I = {"ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01":"ALEsKOs01_0_evo04_11_evo04Evo01"},
-    #    );
-    ##fill in any remaining missing values with 0
-    ##i.e., no fold-change
-    #dppave01.execute_imputeMissingValues(
-    #   analysis_id,
-    #    feature_I = 'mean',
-    #   imputation_method_I = 'value',
-    #   imputation_options_I = {'value':0.0},
-    #   );
-    ##count the number of missing values
-    #dppave01.reset_stage02_quantification_dataPreProcessing_averages(
-    #       tables_I = ['data_stage02_quantification_dataPreProcessing_averages_mv',
-    #                   ],
-    #       analysis_id_I = analysis_id,
-    #       warn_I=False);
-    #for row in mv_value_operator:
-    #   dppave01.execute_countMissingValues(
-    #       analysis_id,
-    #       feature_I = row['feature'],
-    #       value_I = row['value'],
-    #       operator_I = row['operator'],
-    #   );
-    ##fill in any remaining missing values with a low number
-    #dppave01.execute_imputeMissingValues(
-    #   analysis_id,
-    #   feature_I = 'mean',
-    #   imputation_method_I = 'min_data',
-    #   imputation_options_I = {'scale':1.0},
-    #   #imputation_method_I = 'value',
-    #   #imputation_options_I = {'value':1e-6},
-    #   );
-    #dppave01.execute_normalization(
-    #        analysis_id,
-    #        calculated_concentration_units_I=[],
-    #        feature_I = 'mean',
-    #        normalization_method_I='log2',
-    #        normalization_options_I={},
-    #        r_calc_I=r_calc
-    #        );
-
-    ##get the replicate data and check for missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #       tables_I = [
-    #                   'data_stage02_quantification_dataPreProcessing_replicates',
-    #                   'data_stage02_quantification_dataPreProcessing_replicates_im',
-    #                   'data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                   ],
-    #       analysis_id_I = analysis_id,
-    #       warn_I=False);
-    #dpprep01.import_dataStage01QuantificationReplicates(analysis_id);
-    #dpprep01.import_dataStage01RNASequencingGenesFpkmTracking(
-    #   analysis_id,
-    #   sns2snsRNASequencing_I={
-    #        'OxicEvo04EcoliGlcM9_Broth-4':'140818_0_OxicEvo04EcoliGlcM9_Broth-4',
-    #        'OxicEvo04EcoliGlcM9_Broth-5':'140818_0_OxicEvo04EcoliGlcM9_Broth-5',
-    #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-1':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-1',
-    #        'OxicEvo04Evo01EPEcoliGlcM9_Broth-2':'140815_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-2',
-    #        'OxicEvo04Evo02EPEcoliGlcM9_Broth-1':'140815_11_OxicEvo04Evo02EPEcoliGlcM9_Broth-1',
-    #        'OxicEvo04Evo02EPEcoliGlcM9_Broth-2':'140815_11_OxicEvo04Evo02EPEcoliGlcM9_Broth-2',
-    #        },
-    #   );
-    ##count the number of missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                    ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in mv_value_operator:
-    #    dpprep01.execute_countMissingValues(
-    #        analysis_id,
-    #        value_I = row['value'],
-    #        operator_I = row['operator'],
-    #    );
-    ##remove 0.0 values
-    #dpprep01.execute_deleteMissingValues(
-    #    analysis_id_I = analysis_id,
-    #    calculated_concentration_units_I = [],
-    #    value_I = 0.0,
-    #    operator_I = "<="
-    #    );
-    ##count the number of missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                    ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in mv_value_operator:
-    #    dpprep01.execute_countMissingValues(
-    #        analysis_id,
-    #        value_I = row['value'],
-    #        operator_I = row['operator'],
-    #    );
-    ##impute missing values
-    #dpprep01.execute_imputeMissingValues_replicatesPerCondition(
-    #    analysis_id_I = analysis_id,
-    #    calculated_concentration_units_I = ['umol*gDW-1'],
-    #    imputation_method_I = 'ameliaII',
-    #    imputation_options_I = {'n_imputations':1000,
-    #                            'geometric_imputation':True},
-    #    r_calc_I=r_calc);
-    ##count the number of missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                    ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in mv_value_operator:
-    #    dpprep01.execute_countMissingValues(
-    #        analysis_id,
-    #        value_I = row['value'],
-    #        operator_I = row['operator'],
-    #    );
-    ##fill in any remaining missing values with the LLOQ/2
-    #dpprep01.execute_imputeMissingValues(
-    #    analysis_id,
-    #    calculated_concentration_units_I = ['height_ratio'],
-    #    imputation_method_I = 'mean_feature',
-    #    imputation_options_I = {},
-    #   );
-    #dpprep01.export_rows_tables_csv(
-    #    tables_I=['data_stage02_quantification_dataPreProcessing_replicates'],
-    #    query_I={
-    #        'select':[
-    #        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
-    #         },
-    #        ],
-    #        'where':[
-    #        {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
-    #        'column_name':'analysis_id',
-    #        'value':analysis_id,
-    #        'operator':'LIKE',
-    #        'connector':'AND'
-    #        },],
-    #    },
-    #    filename_O=analysis_id+".csv",
-    #);
-    ##fill in any remaining missing values with a low number
-    #dpprep01.execute_imputeMissingValues(
-    #    analysis_id,
-    #    imputation_method_I = 'min_data',
-    #    imputation_options_I = {'scale':1.0},
-    #    #imputation_method_I = 'value',
-    #    #imputation_options_I = {'value':1e-6},
-    #    );
-    ##count the number of missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #        tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                    ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in mv_value_operator:
-    #    dpprep01.execute_countMissingValues(
-    #        analysis_id,
-    #        value_I = row['value'],
-    #        operator_I = row['operator'],
-    #    );
-    ##normalize the data
-    #dpprep01.execute_normalization(
-    #        analysis_id,
-    #        calculated_concentration_units_I=[],
-    #        normalization_method_I='log2',
-    #        normalization_options_I={},
-    #        r_calc_I=r_calc
-    #        );
-    #dpprep01.execute_normalization(
-    #        analysis_id,
-    #        calculated_concentration_units_I=['umol*gDW-1'],
-    #        normalization_method_I='glog',
-    #        normalization_options_I={
-    #            'mult':"TRUE",
-    #            'lowessnorm':"FALSE"},
-    #        r_calc_I=r_calc
-    #        );
-    ## normalize the data using a glog normalization
-    #norm01.reset_dataStage02_quantification_glogNormalized(analysis_id);
-    #norm01.execute_glogNormalization(analysis_id,r_calc_I=r_calc);
-    ## load in quantified data
-    #norm01.execute_getDataStage01PhysiologicalRatios(analysis_id);
-    #norm01.execute_getDataStage01ReplicatesMI(analysis_id);
-    ## calculate the mean, variance, lb/ub, etc. of the normalized data
-    #descstats01.reset_dataStage02_quantification_descriptiveStats(analysis_id);
-    #descstats01.execute_descriptiveStats(analysis_id,r_calc_I=r_calc);
-    ## remove metabolites with a cv>80
-    #dpprep01.execute_deleteOutliers(
-    #            analysis_id_I=analysis_id,
-    #            calculated_concentration_units_cv_I=['umol*gDW-1'],
-    #            calculated_concentration_units_delete_I=['umol*gDW-1'],
-    #            cv_threshold_I=80,
-    #            warn_I=False,
-    #            );
-
-    ### impute missing values
-    #dpprep01.execute_imputeMissingValues_replicatesPerExperiment(
-    #        analysis_id_I=analysis_id,
-    #        calculated_concentration_units_I=['umol*gDW-1'],
-    #        experiment_ids_I=[],
-    #        r_calc_I=r_calc);
-    ##count the number of missing values
-    #dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-    #       tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-    #                   ],
-    #       analysis_id_I = analysis_id,
-    #       warn_I=False);
-    #for row in mv_value_operator:
-    #   dpprep01.execute_countMissingValues(
-    #       analysis_id,
-    #       value_I = row['value'],
-    #       operator_I = row['operator'],
-    #   );
-
-    ## define histogram and count variables
-    #features_histogram = ['mean','cv','var','median','calculated_concentration'];
-    #feature_units = ['umol*gDW-1'];
-    #n_bins_histogram = [];
-    ## calculate the mean, variance, lb/ub, etc. of the normalized data
-    #descstats01.reset_dataStage02_quantification_descriptiveStats(
-    #    analysis_id,
-    #    calculated_concentration_units_I = feature_units
-    #    );
-    #descstats01.execute_descriptiveStats(
-    #    analysis_id,
-    #    calculated_concentration_units_I = feature_units,
-    #    r_calc_I = r_calc);
-    ## make a histogram of the data before and after normalization
-    #hist01.reset_dataStage02_quantification_histogram(
-    #    analysis_id_I = analysis_id,
-    #    feature_units_I = feature_units
-    #);
-    #hist01.execute_binFeatures(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_histogram,
-    #    feature_units_I = feature_units,
-    #    n_bins_I = n_bins_histogram,
-    #    );   
-
-    ## check for outliers
-    #outliers01.reset_dataStage02_quantification_outliersDeviation(analysis_id);
-    #outliers01.execute_calculateOutliersDeviation(analysis_id,
-    #            component_names_I = ['23dpg.23dpg_1.Light'],
-    #            concentration_units_I = ['umol*gDW-1'],
-    #            deviation_I = 0.2,
-    #            method_I = 'var');
-    #outliers01.execute_calculateOutliersPCA(analysis_id,
-    #            concentration_units_I = ['umol*gDW-1'],
-    #            r_calc_I=r_calc);
-
-    ## check for outliers using SVD
-    #svd01.reset_dataStage02_quantification_svd(
-    #        tables_I = [], 
-    #        analysis_id_I = analysis_id,
-    #        );
-    #for k in svd_method:
-    #    svd01.execute_svd(analysis_id,
-    #        concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        r_calc_I=r_calc,
-    #        svd_method_I = k,
-    #        );
-
-    ## check for outliers using oneClassSVM
-    #outliers01.execute_calculateOutliersOneClassSVM(
-    #    analysis_id,
-    #    calculated_concentration_units_I = ['FPKM_log2_normalized'],
-    #    );
-
-    ## calculate the covariance of the dataset
-    #covariance01.reset_dataStage02_quantification_covariance(
-    #        tables_I = [
-    #            'data_stage02_quantification_covariance_samples',
-    #            'data_stage02_quantification_covariance_features',
-    #            'data_stage02_quantification_covariance_samples_mahalanobis',
-    #            'data_stage02_quantification_covariance_features_mahalanobis',
-    #            'data_stage02_quantification_covariance_samples_score',
-    #            'data_stage02_quantification_covariance_features_score',
-    #            ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in covariance_model:
-    #    covariance01.execute_covariance(
-    #        analysis_id,
-    #        data_matrix_shape_I=row['data_matrix_shape'],
-    #        covariance_model_I=row['model'],
-    #        covariance_method_I=row['method'],
-    #        covariance_options_I=row['options'],
-    #        #calculated_concentration_units_I=['FPKM_log2_normalized'],
-    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        );
-
-    #apply a tree classifer
-    #tree01.reset_dataStage02_quantification_tree(
-    #        tables_I = [
-    #            'data_stage02_quantification_tree_impfeat',
-    #            'data_stage02_quantification_tree_responseClassification',
-    #            'data_stage02_quantification_tree_hyperparameter',
-    #            ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    
-    #for row in tree_hyperparameters:
-    #    tree01.execute_treeHyperparameter(
-    #        analysis_id,
-    #        pipeline_id_I=row['pipeline_id'],
-    #        param_dist_I=row['param_dist'],
-    #        test_size_I = 0.,
-    #        metric_method_I = row['metric_method'],
-    #        metric_options_I = row['metric_options'],
-    #        crossval_method_I = row['crossval_method'],
-    #        crossval_options_I = row['crossval_options'],
-    #        hyperparameter_method_I = row['hyperparameter_method'],
-    #        hyperparameter_options_I = row['hyperparameter_options'],
-    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        );
-    #for row in tree_model:
-    #    tree01.execute_tree(
-    #        analysis_id,
-    #        pipeline_id_I=row['pipeline_id'],
-    #        test_size_I = 0.,
-    #        impfeat_methods_I=row['impfeat_methods'],
-    #        response_class_methods_I=row['response_class_methods'],
-    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        );
-
-    ##apply a svm classifer
-    #svm01.reset_dataStage02_quantification_svm(
-    #        tables_I = [
-    #            'data_stage02_quantification_svm_hyperparameter',
-    #            ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);    
-    #for row in svm_hyperparameters:
-    #    svm01.execute_svmHyperparameter(
-    #        analysis_id,
-    #        pipeline_id_I=row['pipeline_id'],
-    #        param_dist_I=row['param_dist'],
-    #        test_size_I = 0.,
-    #        metric_method_I = row['metric_method'],
-    #        metric_options_I = row['metric_options'],
-    #        crossval_method_I = row['crossval_method'],
-    #        crossval_options_I = row['crossval_options'],
-    #        hyperparameter_method_I = row['hyperparameter_method'],
-    #        hyperparameter_options_I = row['hyperparameter_options'],
-    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        );
-    #svm01.reset_dataStage02_quantification_svm(
-    #        tables_I = [
-    #            'data_stage02_quantification_svm_impfeat',
-    #            'data_stage02_quantification_svm_responseClassification',
-    #            ],
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #for row in svm_model:
-    #    svm01.execute_svm(
-    #        analysis_id,
-    #        pipeline_id_I=row['pipeline_id'],
-    #        test_size_I = 0.,
-    #        impfeat_methods_I=row['impfeat_methods'],
-    #        response_class_methods_I=row['response_class_methods'],
-    #        calculated_concentration_units_I=['FPKM_log2_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        );
-
-    ## check for groupings of samples and outliers in the normalized data set using PCA
-    #pca01.reset_dataStage02_quantification_pca_scores(analysis_id);
-    #pca01.reset_dataStage02_quantification_pca_loadings(analysis_id);
-    #pca01.reset_dataStage02_quantification_pca_validation(analysis_id);
-    #for k,v in pca_model_method.items():
-    #    pca01.execute_pca(analysis_id,
-    #        #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        concentration_units_I=['FPKM_log2_normalized'],
-    #        r_calc_I=r_calc,             
-    #        pca_model_I = k,
-    #        pca_method_I = v,
-    #        imputeMissingValues="TRUE",
-    #        cv="q2",
-    #        ncomps="7",
-    #        #scale="none",
-    #        #center="FALSE",
-    #        scale="uv",
-    #        center="TRUE",
-    #        segments="10",
-    #        nruncv="1",
-    #        crossValidation_type="krzanowski",
-    #        );
-
-    ## perform a pair-wise comparison of each sample in the normalized data set
-    #pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
-    #        tables_I = [], 
-    #        analysis_id_I = analysis_id);
-    #pairWiseTable01.execute_pairwiseTableReplicates(analysis_id);
-    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-    #        tables_I = [], 
-    #        analysis_id_I = analysis_id);
-    ##pairWiseCorrelation01.execute_pairwiseCorrelationReplicates(analysis_id);
-    #pwt01.execute_pairwiseTestReplicates(analysis_id,
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    calculated_concentration_units_FC_I= {'umol*gDW-1_glog_normalized':'umol*gDW-1'},
-    #    test_description_I = "Two Sample t-test",
-    #    ci_level_I = 0.95,
-    #    redundancy_I=False,
-    #    pvalue_corrected_description_I = "bonferroni",
-    #    r_calc_I=r_calc);
-
-    ## bin the data
-    #hist01.reset_dataStage02_quantification_histogram(analysis_id_I = analysis_id);
-    #hist01.execute_binFeatures(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_histogram,
-    #    feature_units_I = feature_units,
-    #    n_bins_I = n_bins_histogram,
-    #    );
-
-    ## count the data
-    #count01.reset_dataStage02_quantification_countCorrelationProfile(analysis_id_I = analysis_id);
-    #count01.execute_countElementsInFeatures_correlationProfile(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_countCorrelationProfile,
-    #    feature_units_I = feature_units,
-    #    distance_measures_I = distance_measures,
-    #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
-    #    );
-    #count01.reset_dataStage02_quantification_countCorrelationTrend(analysis_id_I = analysis_id);
-    #count01.execute_countElementsInFeatures_correlationTrend(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_countCorrelationTrend,
-    #    feature_units_I = feature_units,
-    #    distance_measures_I = distance_measures,
-    #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
-    #    );
-    #count01.reset_dataStage02_quantification_countCorrelationPattern(analysis_id_I = analysis_id);
-    #count01.execute_countElementsInFeatures_correlationPattern(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_countCorrelationPattern,
-    #    feature_units_I = feature_units,
-    #    distance_measures_I = distance_measures,
-    #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
-    #    );
-
-    ## perform a pls-da analysis
-    #pls01.reset_dataStage02_quantification_pls_scores(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_loadings(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_validation(analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_vip(analysis_id_I=analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_loadingsResponse(analysis_id_I=analysis_id);
-    #pls01.reset_dataStage02_quantification_pls_coefficients(analysis_id_I=analysis_id);
     #for k,v in pls_model_method.items():
-    #    pls01.execute_plsda(
-    #        analysis_id_I = analysis_id,
-    #        #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        concentration_units_I=['FPKM_log2_normalized'],
-    #        r_calc_I=r_calc,
-    #        pls_model_I = k,
-    #        method = v,
-    #        response_I = None,
-    #        factor_I= "sample_name_abbreviation",
-    #        ncomp = 7,
-    #        Y_add = "NULL",
-    #        scale = "TRUE",
-    #        validation = "CV",
-    #        segments = 5,
-    #        #segments = 10,
-    #        stripped = "FALSE",
-    #        lower = 0.5,
-    #        upper = 0.5, 
-    #        trunc_pow = "FALSE", 
-    #        weights = "NULL",
-    #        p_method = "fdr",
-    #        nperm = 999);
-
-    ## perform a correlation analysis
-    #heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
-    #heatmap01.execute_heatmap(
-    #    analysis_id,
-    #    #concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    concentration_units_I=['FPKM_log2_normalized'],
-    #    sample_name_shorts_I=[],
-    #    #component_names_I=['cit.cit_2.Light',
-    #    #                   'akg.akg_1.Light',
-    #    #                   'fum.fum_1.Light',
-    #    #                   'glx.glx_1.Light',
-    #    #                   'icit.icit_2.Light',
-    #    #                   'mal-L.mal-L_1.Light',
-    #    #                   'succ.succ_1.Light',
-    #    #                   'acon-C.acon-C_1.Light'],
-    #    order_componentNameBySampleNameShort_I = True,
-    #    );
-    #heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);
-    #heatmap01.execute_heatmap_descriptiveStats(
-    #    analysis_id,
-    #    concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    concentration_units_I=['FPKM_log2_normalized'],
-    #    sample_name_abbreviations_I=[],
-    #    #component_names_I=['cit.cit_2.Light',
-    #    #                   'akg.akg_1.Light',
-    #    #                   'fum.fum_1.Light',
-    #    #                   'glx.glx_1.Light',
-    #    #                   'icit.icit_2.Light',
-    #    #                   'mal-L.mal-L_1.Light',
-    #    #                   'succ.succ_1.Light',
-    #    #                   'acon-C.acon-C_1.Light'],
-    #    order_componentNameBySampleNameAbbreviation_I = True,
-    #    value_I = 'mean'
-    #    );
+    #     pairWisePLS01.execute_pairWise_plsda(
+    #         analysis_id_I = analysis_id,
+    #         calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #         r_calc_I=r_calc,
+    #         pls_model_I = k,
+    #         method = v,
+    #         response_I = None,
+    #         factor_I= "sample_name_abbreviation",
+    #         ncomp = 7,
+    #         Y_add = "NULL",
+    #         scale = "TRUE",
+    #         validation = "CV",
+    #         segments = 10,
+    #         stripped = "FALSE",
+    #         lower = 0.5,
+    #         upper = 0.5, 
+    #         trunc_pow = "FALSE", 
+    #         weights = "NULL",
+    #         p_method = "fdr",
+    #         nperm = 999);
     
+    ##search for the optimal spls parameters
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    #spls01.execute_splsHyperparameter(
+    #    analysis_id_I=analysis_id,
+    #    pipeline_id_I='splsda_R_scaleAndCenter',
+    #    param_dist_I={"kappa": 0.5,
+    #                    "K": [1,2,3,4,5],
+    #                    "eta": [0.1,.3,.5,.7,.9],
+    #                    "classifier":'lda',
+    #                'scale_x':"FALSE",
+    #                    },
+    #    test_size_I = 0.,
+    #    metric_method_I = 'error_rate',
+    #    metric_options_I = None,
+    #    crossval_method_I = 'v-fold',
+    #    crossval_options_I = {'fold':5
+    #                            },
+    #    hyperparameter_method_I = 'GridSearchCV',
+    #    hyperparameter_options_I = {
+    #        'plot_it':"FALSE", 'n_core':2,
+    #        },
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    experiment_ids_I=[],
+    #    sample_name_abbreviations_I=[],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    time_points_I=[],
+    #    r_calc_I=r_calc
+    #    );
+    ##perform a spls analysis
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_impfeat',
+    #                'data_stage02_quantification_spls_scores',
+    #                'data_stage02_quantification_spls_loadings',
+    #                'data_stage02_quantification_spls_loadingsResponse'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    #spls01.execute_spls(
+    #    analysis_id_I=analysis_id,
+    #    pipeline_id_I='splsda_mixOmics_R_scaleAndCenter',
+    #    test_size_I = 0.,
+    #    impfeat_methods_I=[
+    #        {'coefficients':'feature_importance','impfeat_options':None},
+    #        {'VIP':'feature_importance','impfeat_options':None}],
+    #    response_class_methods_I=[],
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    experiment_ids_I=[],
+    #    sample_name_abbreviations_I=[],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    time_points_I=[],
+    #    r_calc_I=r_calc
+    #    )
+
+    ##perform a gene_set_enrichment analysis:
+    #enrichment01.reset_dataStage02_quantification_enrichment(
+    #    tables_I = ['data_stage02_quantification_geneSetEnrichment'],
+    #    analysis_id_I = analysis_id,
+    #    warn_I = False,
+    #    );
+
+    #for row in algorithm_test:
+    #    print("running algorithm " + row['enrichment_algorithm']);
+    #    print("running statistic " + row['test_description']);        
+    #    enrichment01.execute_geneSetEnrichment(
+    #        analysis_id_I = analysis_id,
+    #        calculated_concentration_units_I=['log2(FC)'],
+    #        experiment_ids_I=[],
+    #        time_points_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        component_names_I=[],
+    #        enrichment_method_I='topGO',
+    #        enrichment_options_I={
+    #            'pvalue_threshold':0.05,
+    #            'GO_database':'GO.db',
+    #            'enrichment_algorithm':row['enrichment_algorithm'],
+    #            'test_description':row['test_description'],
+    #            'GO_ontology':"BP",
+    #            'GO_annotation':"annFUN.org",
+    #            'GO_annotation_mapping':"org.EcK12.eg.db",
+    #            'GO_annotation_id' :'alias'},
+    #        pvalue_threshold_I = 0.05,
+    #        pvalue_corrected_description_I = "bonferroni",
+    #        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+    #        r_calc_I=r_calc
+    #        );
+    
+
+#pairWisePLS01.export_dataStage02QuantificationPairWisePLSScoresAndLoadings_js(analysis_id_I=analysis_id);
+#pairWisePLS01.export_dataStage02QuantificationPairWisePLSBiPlotAndValidation_js(analysis_id_I=analysis_id);
+#pairWisePLS01.export_dataStage02QuantificationPairWisePLSVIPs_js(analysis_id_I=analysis_id);
+#pairWisePLS01.export_dataStage02QuantificationPairWisePLSLoadings_js(analysis_id_I=analysis_id);
+pairWisePLS01.export_dataStage02QuantificationPairWisePLSSPlot_js(analysis_id_I=analysis_id);
+
+
+#pls01.export_dataStage02QuantificationPLSScores_js(analysis_id_I=analysis_id);
+#pca01.export_dataStage02QuantificationPCAScores_js(analysis_id_I=analysis_id);
+    
+#pls01.export_dataStage02QuantificationPLSLoadings_js(analysis_id_I=analysis_id);
+#pca01.export_dataStage02QuantificationPCALoadings_js(analysis_id_I=analysis_id);
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');

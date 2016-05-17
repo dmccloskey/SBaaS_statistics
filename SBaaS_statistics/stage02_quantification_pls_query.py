@@ -180,6 +180,18 @@ class stage02_quantification_pls_query(sbaas_template_query):
             return data_scores_O, data_loadings_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_rows_analysisID_dataStage02QuantificationPLSScores(self, analysis_id_I,axis_I=3):
+        """get data from analysis ID"""
+        try:
+            # query scores
+            data_scores = self.session.query(data_stage02_quantification_pls_scores).filter(
+                    data_stage02_quantification_pls_scores.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_pls_scores.axis<=axis_I,
+                    data_stage02_quantification_pls_scores.used_.is_(True)).all();
+            data_scores_O = [d.__repr__dict__() for d in data_scores];
+            return data_scores_O;
+        except SQLAlchemyError as e:
+            print(e);
     def get_rows_analysisID_dataStage02QuantificationPLSLoadings(self, analysis_id_I,axis_I=3):
         """get data from analysis ID"""
         try:
@@ -188,11 +200,7 @@ class stage02_quantification_pls_query(sbaas_template_query):
                     data_stage02_quantification_pls_loadings.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_pls_loadings.axis<=axis_I,
                     data_stage02_quantification_pls_loadings.used_.is_(True)).all();
-            data_loadings_O = [];
-            for d in data_loadings: 
-                data_1 = {};
-                data_1 = d.__repr__dict__();
-                data_loadings_O.append(data_1);
+            data_loadings_O = [d.__repr__dict__() for d in data_loadings];
             return data_loadings_O;
         except SQLAlchemyError as e:
             print(e);
@@ -228,26 +236,7 @@ class stage02_quantification_pls_query(sbaas_template_query):
             return data_loadings_O;
         except SQLAlchemyError as e:
             print(e);
-    def initialize_dataStage02_quantification_pls(self):
-        try:
-            data_stage02_quantification_pls_scores.__table__.create(self.engine,True);
-            data_stage02_quantification_pls_loadings.__table__.create(self.engine,True);
-            data_stage02_quantification_pls_validation.__table__.create(self.engine,True);
-            data_stage02_quantification_pls_vip.__table__.create(self.engine,True);
-            data_stage02_quantification_pls_coefficients.__table__.create(self.engine,True);
-            data_stage02_quantification_pls_loadingsResponse.__table__.create(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def drop_dataStage02_quantification_pls(self):
-        try:
-            data_stage02_quantification_pls_scores.__table__.drop(self.engine,True);
-            data_stage02_quantification_pls_loadings.__table__.drop(self.engine,True);
-            data_stage02_quantification_pls_validation.__table__.drop(self.engine,True);
-            data_stage02_quantification_pls_vip.__table__.drop(self.engine,True);
-            data_stage02_quantification_pls_coefficients.__table__.drop(self.engine,True);
-            data_stage02_quantification_pls_loadingsResponse.__table__.drop(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
+
     def reset_dataStage02_quantification_pls_scores(self,analysis_id_I = None):
         try:
             if analysis_id_I:
@@ -302,304 +291,6 @@ class stage02_quantification_pls_query(sbaas_template_query):
             self.session.commit();
         except SQLAlchemyError as e:
             print(e);
-
-    def add_dataStage02QuantificationPLSScores(self, data_I):
-        '''add rows of data_stage02_quantification_pls_scores'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_scores(d
-                        #d['analysis_id'],
-                        #d['sample_name_short'],
-                        #d['response_name'],
-                        #d['score'],
-                        #d['score_response'],
-                        #d['axis'],
-                        #d['var_proportion'],
-                        #d['var_cumulative'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSScores(self,data_I):
-        '''update rows of data_stage02_quantification_pls_scores'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_scores).filter(
-                            data_stage02_quantification_pls_scores.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'sample_name_short':d['sample_name_short'],
-                            'response_name':d['response_name'],
-                            'score':d['score'],
-                            'score_response':d['score_response'],
-                            'axis':d['axis'],
-                            'var_proportion':d['var_proportion'],
-                            'var_cumulative':d['var_cumulative'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_options':d['pls_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def add_dataStage02QuantificationPLSLoadings(self, data_I):
-        '''add rows of data_stage02_quantification_pls_loadings'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_loadings(d
-                        #d['analysis_id'],
-                        #d['component_group_name'],
-                        #d['component_name'],
-                        #d['loadings'],
-                        #d['axis'],
-                        #d['correlations'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSLoadings(self,data_I):
-        '''update rows of data_stage02_quantification_pls_loadings'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_loadings).filter(
-                            data_stage02_quantification_pls_loadings.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'component_group_name':d['component_group_name'],
-                            'component_name':d['component_name'],
-                            'loadings':d['loadings'],
-                            'axis':d['axis'],
-                            'correlations':d['correlations'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_options':d['pls_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();         
-    def add_dataStage02QuantificationPLSValidation(self, data_I):
-        '''add rows of data_stage02_quantification_pls_validation'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_validation(d
-                        #d['analysis_id'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_msep'],
-                        #d['pls_rmsep'],
-                        #d['pls_r2'],
-                        #d['pls_r2x'],
-                        #d['pls_q2'],
-                        #d['pls_options'],
-                        #d['crossValidation_ncomp'],
-                        #d['crossValidation_method'],
-                        #d['crossValidation_options'],
-                        #d['permutation_nperm'],
-                        #d['permutation_pvalue'],
-                        #d['permutation_pvalue_corrected'],
-                        #d['permutation_pvalue_corrected_description'],
-                        #d['permutation_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSValidation(self,data_I):
-        '''update rows of data_stage02_quantification_pls_validation'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_validation).filter(
-                            data_stage02_quantification_pls_validation.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_scale':d['pls_scale'],
-                            'pls_msep':d['pls_msep'],
-                            'pls_rmsep':d['pls_rmsep'],
-                            'pls_r2':d['pls_r2'],
-                            'pls_r2x':d['pls_r2x'],
-                            'pls_q2':d['pls_q2'],
-                            'pls_options':d['pls_options'],
-                            'crossValidation_ncomp':d['crossValidation_ncomp'],
-                            'crossValidation_method':d['crossValidation_method'],
-                            'crossValidation_options':d['crossValidation_options'],
-                            'permutation_nperm':d['permutation_nperm'],
-                            'permutation_pvalue':d['permutation_pvalue'],
-                            'permutation_pvalue_corrected':d['permutation_pvalue_corrected'],
-                            'permutation_pvalue_corrected_description':d['permutation_pvalue_corrected_description'],
-                            'permutation_options':d['permutation_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def add_dataStage02QuantificationPLSVIP(self, data_I):
-        '''add rows of data_stage02_quantification_pls_vip'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_vip(d
-                        #d['analysis_id'],
-                        #d['response_name'],
-                        #d['component_group_name'],
-                        #d['component_name'],
-                        #d['pls_vip'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSVIP(self,data_I):
-        '''update rows of data_stage02_quantification_pls_vip'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_vip).filter(
-                            data_stage02_quantification_pls_vip.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'response_name':d['response_name'],
-                            'component_group_name':d['component_group_name'],
-                            'component_name':d['component_name'],
-                            'pls_vip':d['pls_vip'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_options':d['pls_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit(); 
-    def add_dataStage02QuantificationPLSCoefficients(self, data_I):
-        '''add rows of data_stage02_quantification_pls_coefficients'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_coefficients(d
-                        #d['analysis_id'],
-                        #d['response_name'],
-                        #d['component_group_name'],
-                        #d['component_name'],
-                        #d['pls_coefficients'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSCoefficients(self,data_I):
-        '''update rows of data_stage02_quantification_pls_coefficients'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_coefficients).filter(
-                            data_stage02_quantification_pls_coefficients.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'response_name':d['response_name'],
-                            'component_group_name':d['component_group_name'],
-                            'component_name':d['component_name'],
-                            'pls_coefficients':d['pls_coefficients'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_options':d['pls_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit(); 
-    def add_dataStage02QuantificationPLSLoadingsResponse(self, data_I):
-        '''add rows of data_stage02_quantification_pls_loadings'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_add = data_stage02_quantification_pls_loadingsResponse(d
-                        #d['analysis_id'],
-                        #d['response_name'],
-                        #d['loadings_response'],
-                        #d['axis'],
-                        #d['correlations_response'],
-                        #d['pls_model'],
-                        #d['pls_method'],
-                        #d['pls_options'],
-                        #d['calculated_concentration_units'],
-                        #d['used_'],
-                        #d['comment_'],
-                        );
-                    self.session.add(data_add);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
-    def update_dataStage02QuantificationPLSLoadingsResponse(self,data_I):
-        '''update rows of data_stage02_quantification_pls_loadingsResponse'''
-        if data_I:
-            for d in data_I:
-                try:
-                    data_update = self.session.query(data_stage02_quantification_pls_loadingsResponse).filter(
-                            data_stage02_quantification_pls_loadingsResponse.id.like(d['id'])).update(
-                            {
-                            'analysis_id':d['analysis_id'],
-                            'response_name':d['response_name'],
-                            'loadings_response':d['loadings_response'],
-                            'axis':d['axis'],
-                            'correlations_response':d['correlations_response'],
-                            'pls_model':d['pls_model'],
-                            'pls_method':d['pls_method'],
-                            'pls_options':d['pls_options'],
-                            'calculated_concentration_units':d['calculated_concentration_units'],
-                            'used_':d['used_'],
-                            'comment_':d['comment_'],},
-                            synchronize_session=False);
-                except SQLAlchemyError as e:
-                    print(e);
-            self.session.commit();
 
     # Query data from data_stage02_quantification_pls_validation
     def get_rows_analysisID_dataStage02QuantificationPLSValidation(self, analysis_id_I):

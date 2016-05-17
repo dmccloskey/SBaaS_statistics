@@ -1,6 +1,5 @@
 
 from .stage02_quantification_pca_io import stage02_quantification_pca_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
@@ -10,7 +9,6 @@ from matplotlib_utilities.matplot import matplot
 from listDict.listDict import listDict
 
 class stage02_quantification_pca_execute(stage02_quantification_pca_io,
-                                         #stage02_quantification_normalization_query,
                                          stage02_quantification_analysis_query):
     def execute_pca(self,analysis_id_I,experiment_ids_I=[],time_points_I=[],concentration_units_I=[],r_calc_I=None,
                     pca_model_I="pca",pca_method_I="svd",
@@ -43,13 +41,11 @@ class stage02_quantification_pca_execute(stage02_quantification_pca_io,
         else:
             concentration_units = [];
             concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
-            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
         for cu in concentration_units:
             print('calculating pca for concentration_units ' + cu);
             data = [];
             # get data:
             data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
-            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
             # will need to refactor in the future...
             if type(data)==type(listDict()):
                 data.convert_dataFrame2ListDict()

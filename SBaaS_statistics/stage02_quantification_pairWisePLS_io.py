@@ -1,7 +1,7 @@
 ﻿# System
 import json
 # SBaaS
-from .stage02_quantification_pls_query import stage02_quantification_pls_query
+from .stage02_quantification_pairWisePLS_query import stage02_quantification_pairWisePLS_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # Resources
 from io_utilities.base_importData import base_importData
@@ -13,40 +13,42 @@ from ddt_python.ddt_container_filterMenuAndChart2dAndTable import ddt_container_
 from listDict.listDict import listDict
 from python_statistics.calculate_pca import calculate_pca
 
-class stage02_quantification_pls_io(stage02_quantification_pls_query,
+class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_query,
                                     sbaas_template_io):
-    def export_dataStage02QuantificationPLSScoresAndLoadings_js(self,analysis_id_I,axis_I=3,data_dir_I='tmp'):
-        '''Export pls scores and loadings plots for axis 1 vs. 2, 1 vs 3, and 2 vs 3'''
+    def export_dataStage02QuantificationPairWisePLSScoresAndLoadings_js(self,analysis_id_I,axis_I=3,data_dir_I='tmp'):
+        '''Export pairWisePLS scores and loadings plots for axis 1 vs. 2, 1 vs 3, and 2 vs 3'''
         calculatepca = calculate_pca();
         PCs = [[1,2],[1,3],[2,3]];
         # get data:
         data_scores,data_loadings = [],[];
-        data_scores,data_loadings = self.get_RExpressionData_analysisID_dataStage02QuantificationPLSScoresLoadings(analysis_id_I,axis_I);
+        data_scores,data_loadings = self.get_RExpressionData_analysisID_dataStage02QuantificationPairWisePLSScoresLoadings(analysis_id_I,axis_I);
         # reformat the data
         data_scores_123,data_loadings_123 = [],[];
-        data_scores = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSScores(analysis_id_I,axis_I)
-        data_loadings = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I)
+        data_scores = self.get_rowAxisDict_analysisID_dataStage02QuantificationPairWisePLSScores(analysis_id_I,axis_I)
+        data_loadings = self.get_rowAxisDict_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I,axis_I)
         data_scores_123,data_loadings_123 = {},{};
         data_scores_123,data_loadings_123 = calculatepca.extract_scoresAndLoadings_2D(data_scores,data_loadings,PCs);
 
         data1_keys = [
             'analysis_id',
             'response_name',
+            'response_name_pair',
             'sample_name_short',
             'calculated_concentration_units',
             'pls_model',
             'pls_method',
-            'pls_options'
+            'pls_moptions'
                     ];
         data1_nestkeys = ['response_name'];
         data2_keys = [
             'analysis_id',
+            'response_name_pair',
             'component_name',
             'component_group_name',
             'calculated_concentration_units',
             'pls_model',
             'pls_method',
-            'pls_options'
+            'pls_moptions'
                     ];
         data2_nestkeys = ['analysis_id'];
         data1_keymap_serieslabel = 'response_name';
@@ -72,9 +74,9 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(scoresandloadings.get_allObjects());
-    def export_dataStage02QuantificationPLSBiPlotAndValidation_js(self,analysis_id_I,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPairWisePLSBiPlotAndValidation_js(self,analysis_id_I,data_dir_I='tmp'):
         '''
-        Export the bi plot for the PLS components and validation plots for the pls model
+        Export the bi plot for the PLS components and validation plots for the pairWisePLS model
         OUTPUT:
         biplot = scatterLinePlot of explained variances vs. component axis
         crossValidation plot = verticalBarPlot of MSEP, R2, and Q2 for increasing numbers of component axis
@@ -83,7 +85,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         '''
         #get the biplot data
         biplot_O = [];
-        biplot_tmp = self.get_biPlotData_analysisID_dataStage02QuantificationPLSScores(analysis_id_I);
+        biplot_tmp = self.get_biPlotData_analysisID_dataStage02QuantificationPairWisePLSScores(analysis_id_I);
         listdict = listDict(biplot_tmp);
         biplot_O = listdict.convert_listDict2ListDictValues(
             value_key_name_I = 'var_value',
@@ -91,7 +93,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             value_labels_I=['var_proportion','var_cumulative']);
         #get the validation data
         validation_O = [];
-        validation_tmp = self.get_rows_analysisID_dataStage02QuantificationPLSValidation(analysis_id_I);
+        validation_tmp = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSValidation(analysis_id_I);
         listdict = listDict(validation_tmp);
         validation_O = listdict.convert_listDict2ListDictValues(
             value_key_name_I = 'metric_value',
@@ -100,6 +102,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
 
         # define the data parameters for the biplot:
         data1_keys = ['analysis_id',
+            'response_name_pair',
                     'axis',
                     'var_label',
                     'pls_model',
@@ -113,6 +116,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
                         'featureslabel':'axis'};
         #define the data parameters for the validation
         data2_keys = ['analysis_id',
+            'response_name_pair',
                     'pls_model',
                     'pls_method',
                     'metric_label',
@@ -143,7 +147,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(biplotandvalidation.get_allObjects());
-    def export_dataStage02QuantificationPLSVIPs_js(self,analysis_id_I,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPairWisePLSVIPs_js(self,analysis_id_I,data_dir_I='tmp'):
         '''
         Export the PLS VIPs
         OUTPUT:
@@ -151,8 +155,8 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         '''
         #get the biplot data
         vip_O = [];
-        vip_O = self.get_rows_analysisID_dataStage02QuantificationPLSVIP(analysis_id_I);
-        #vip_O = self.get_VIPs_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I);
+        vip_O = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSVIP(analysis_id_I);
+        #vip_O = self.get_VIPs_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I);
 
         #initialize the ddt objects
         # make the tile objects
@@ -163,6 +167,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
 
         # define the data parameters for the biplot:
         data1_keys = ['analysis_id',
+            'response_name_pair',
                     'response_name',
                     'component_name',
                     'component_group_name',
@@ -172,7 +177,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
                     ];
         data1_nestkeys = ['component_name'];
         data1_keymap = {
-                        'xdata':'pls_vip',
+                        'xdata':'pls_mvip',
                         'ydata':'component_name',
                         'xdatalb':None,
                         'xdataub':None,
@@ -259,7 +264,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(ddtutilities.get_allObjects());
-    def export_dataStage02QuantificationPLSCoefficients_js(self,analysis_id_I,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPairWisePLSCoefficients_js(self,analysis_id_I,data_dir_I='tmp'):
         '''
         Export the PLS Coefficientss
         OUTPUT:
@@ -267,8 +272,8 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         '''
         #get the biplot data
         vip_O = [];
-        vip_O = self.get_rows_analysisID_dataStage02QuantificationPLSCoefficients(analysis_id_I);
-        #vip_O = self.get_Coefficientss_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I);
+        vip_O = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSCoefficients(analysis_id_I);
+        #vip_O = self.get_Coefficientss_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I);
 
         #initialize the ddt objects
         # make the tile objects
@@ -279,6 +284,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
 
         # define the data parameters for the biplot:
         data1_keys = ['analysis_id',
+            'response_name_pair',
                     'response_name',
                     'component_name',
                     'component_group_name',
@@ -288,7 +294,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
                     ];
         data1_nestkeys = ['component_name'];
         data1_keymap = {
-                        'xdata':'pls_coefficients',
+                        'xdata':'pls_mcoefficients',
                         'ydata':'component_name',
                         'xdatalb':None,
                         'xdataub':None,
@@ -375,7 +381,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(ddtutilities.get_allObjects());
-    def export_dataStage02QuantificationPLSSPlot_js(self,analysis_id_I,axis_I=3,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPairWisePLSSPlot_js(self,analysis_id_I,axis_I=2,data_dir_I='tmp'):
         '''
         Export the PLS S-plot of loadings (variable magnitude) vs. model correlation (variable reliability)
         for each component
@@ -384,9 +390,9 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         '''
         # get data:
         data_loadings = [];
-        data_loadings = self.get_rows_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I);
+        data_loadings = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I,axis_I);
         data_dict = {};
-        data_dict = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I);
+        data_dict = self.get_rowAxisDict_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I,axis_I);
 
         #initialize the ddt objects
         # make the tile objects
@@ -397,6 +403,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
 
         # define the data parameters for the biplot:
         data1_keys = ['analysis_id',
+            'response_name_pair',
                     'component_name',
                     'component_group_name',
                     'pls_model',
@@ -496,19 +503,19 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(ddtutilities.get_allObjects());
-    def export_dataStage02QuantificationPLSScores_js(
+    def export_dataStage02QuantificationPairWisePLSScores_js(
         self,analysis_id_I,
         axis_I=5,
         single_plot_I=False,
         absolute_value_I=True,
         data_dir_I='tmp'):
-        '''Export pls scores as a bar plot and table
+        '''Export pairWisePLS scores as a bar plot and table
         Plot 1: bar plot of scores
         Table 1:  tabular display of scores
         TODO: copy/paste from loadings
         '''
 
-        data_O = self.get_rows_analysisID_dataStage02QuantificationPLSScores(analysis_id_I,axis_I=axis_I);
+        data_O = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSScores(analysis_id_I,axis_I=axis_I);
         if absolute_value_I:
             for d in data_O:
                 d['score'] = abs(d['score']);
@@ -516,7 +523,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # get the dictColumn
         data_dict_O = {};
         if not single_plot_I:
-            data_dict_O = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSScores(
+            data_dict_O = self.get_rowAxisDict_analysisID_dataStage02QuantificationPairWisePLSScores(
                 analysis_id_I,axis_I=axis_I);
         if absolute_value_I:
             for k,v in data_dict_O.items():
@@ -526,6 +533,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # make the tile objects  
         #data1 = filter menu and table    
         data1_keys = ['analysis_id',
+            'response_name_pair',
                       'response_name',
                       'axis',
                       'sample_name_short',
@@ -544,6 +552,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         #data2 = svg
         #if single plot, data2 = filter menu, data2, and table
         data2_keys = ['analysis_id',
+            'response_name_pair',
                       'response_name',
                       'axis',
                       'sample_name_short',
@@ -600,13 +609,13 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(nsvgtable.get_allObjects());
-    def export_dataStage02QuantificationPLSLoadings_js(
+    def export_dataStage02QuantificationPairWisePLSLoadings_js(
         self,analysis_id_I,
         axis_I=5,
         single_plot_I=False,
         absolute_value_I=True,
         data_dir_I='tmp'):
-        '''Export pls loadings as a bar plot and in tabular form
+        '''Export pairWisePLS loadings as a bar plot and in tabular form
         Plot 1: bar plot of loadings
         Table 1:  tabular display of loadings data
 
@@ -614,7 +623,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         convert get_rows_... query to use of listDict as in SVD
         '''
 
-        data_O = self.get_rows_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I=axis_I);
+        data_O = self.get_rows_analysisID_dataStage02QuantificationPairWisePLSLoadings(analysis_id_I,axis_I=axis_I);
         if absolute_value_I:
             for d in data_O:
                 d['loadings'] = abs(d['loadings']);
@@ -622,7 +631,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # get the dictColumn
         data_dict_O = {};
         if not single_plot_I:
-            data_dict_O = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSLoadings(
+            data_dict_O = self.get_rowAxisDict_analysisID_dataStage02QuantificationPairWisePLSLoadings(
                 analysis_id_I,axis_I=axis_I);
         if absolute_value_I:
             for k,v in data_dict_O.items():
@@ -632,6 +641,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # make the tile objects  
         #data1 = filter menu and table    
         data1_keys = ['analysis_id',
+            'response_name_pair',
                       'component_group_name',
                       'axis',
                       'component_name',
@@ -650,6 +660,7 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         #data2 = svg
         #if single plot, data2 = filter menu, data2, and table
         data2_keys = ['analysis_id',
+            'response_name_pair',
                       'component_group_name',
                       'axis',
                       'component_name',

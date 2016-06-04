@@ -39,7 +39,7 @@ class stage02_quantification_heatmap_io(stage02_quantification_heatmap_query,sba
         ddtheatmap = ddt_container_heatmap();
         ddtheatmap.make_container_heatmap(data_O,
             svgcolorcategory='blue2gold64RBG',
-            svgcolordomain='min,0,max');
+            svgcolordomain='min,max');
 
         if data_dir_I=='tmp':
             filename_str = self.settings['visualization_data'] + '/tmp/ddt_data.js'

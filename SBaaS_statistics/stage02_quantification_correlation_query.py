@@ -141,7 +141,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationProfile.pvalue>pvalue_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationProfile.component_profile).all();
+                    data_stage02_quantification_correlationProfile.component_profile.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_profile).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -149,7 +149,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationProfile.pvalue<pvalue_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationProfile.component_profile).all();
+                    data_stage02_quantification_correlationProfile.component_profile.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_profile).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -157,7 +157,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationProfile.pvalue>=pvalue_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationProfile.component_profile).all();
+                    data_stage02_quantification_correlationProfile.component_profile.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_profile).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -165,7 +165,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationProfile.pvalue<=pvalue_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationProfile.component_profile).all();
+                    data_stage02_quantification_correlationProfile.component_profile.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -188,7 +188,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match).all();
+                    data_stage02_quantification_correlationProfile.profile_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -197,7 +197,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match).all();
+                    data_stage02_quantification_correlationProfile.profile_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -206,7 +206,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match).all();
+                    data_stage02_quantification_correlationProfile.profile_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -215,7 +215,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match).all();
+                    data_stage02_quantification_correlationProfile.profile_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -238,7 +238,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match_description != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match_description).all();
+                    data_stage02_quantification_correlationProfile.profile_match_description.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match_description).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -247,7 +247,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match_description != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match_description).all();
+                    data_stage02_quantification_correlationProfile.profile_match_description.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match_description).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -256,7 +256,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match_description != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match_description).all();
+                    data_stage02_quantification_correlationProfile.profile_match_description.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.profile_match_description).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -265,7 +265,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.profile_match_description != None).order_by(
-                    data_stage02_quantification_correlationProfile.profile_match_description).all();
+                    data_stage02_quantification_correlationProfile.profile_match_description.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -288,7 +288,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.component_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.component_match).all();
+                    data_stage02_quantification_correlationProfile.component_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -297,7 +297,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.component_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.component_match).all();
+                    data_stage02_quantification_correlationProfile.component_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -306,7 +306,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.component_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.component_match).all();
+                    data_stage02_quantification_correlationProfile.component_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationProfile.component_match).filter(
                     data_stage02_quantification_correlationProfile.analysis_id.like(analysis_id_I),
@@ -315,7 +315,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationProfile.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationProfile.used_.is_(True),
                     data_stage02_quantification_correlationProfile.component_match != None).order_by(
-                    data_stage02_quantification_correlationProfile.component_match).all();
+                    data_stage02_quantification_correlationProfile.component_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -431,7 +431,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationTrend.pvalue>pvalue_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationTrend.component_trend).all();
+                    data_stage02_quantification_correlationTrend.component_trend.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_trend).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -439,7 +439,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationTrend.pvalue<pvalue_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationTrend.component_trend).all();
+                    data_stage02_quantification_correlationTrend.component_trend.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_trend).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -447,7 +447,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationTrend.pvalue>=pvalue_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationTrend.component_trend).all();
+                    data_stage02_quantification_correlationTrend.component_trend.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_trend).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -455,7 +455,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationTrend.pvalue<=pvalue_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationTrend.component_trend).all();
+                    data_stage02_quantification_correlationTrend.component_trend.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -478,7 +478,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match).all();
+                    data_stage02_quantification_correlationTrend.trend_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -487,7 +487,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match).all();
+                    data_stage02_quantification_correlationTrend.trend_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -496,7 +496,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match).all();
+                    data_stage02_quantification_correlationTrend.trend_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -505,7 +505,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match).all();
+                    data_stage02_quantification_correlationTrend.trend_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -528,7 +528,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match_description != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match_description).all();
+                    data_stage02_quantification_correlationTrend.trend_match_description.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match_description).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -537,7 +537,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match_description != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match_description).all();
+                    data_stage02_quantification_correlationTrend.trend_match_description.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match_description).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -546,7 +546,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match_description != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match_description).all();
+                    data_stage02_quantification_correlationTrend.trend_match_description.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.trend_match_description).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -555,7 +555,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.trend_match_description != None).order_by(
-                    data_stage02_quantification_correlationTrend.trend_match_description).all();
+                    data_stage02_quantification_correlationTrend.trend_match_description.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -578,7 +578,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.component_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.component_match).all();
+                    data_stage02_quantification_correlationTrend.component_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -587,7 +587,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.component_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.component_match).all();
+                    data_stage02_quantification_correlationTrend.component_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -596,7 +596,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.component_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.component_match).all();
+                    data_stage02_quantification_correlationTrend.component_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationTrend.component_match).filter(
                     data_stage02_quantification_correlationTrend.analysis_id.like(analysis_id_I),
@@ -605,7 +605,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationTrend.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationTrend.used_.is_(True),
                     data_stage02_quantification_correlationTrend.component_match != None).order_by(
-                    data_stage02_quantification_correlationTrend.component_match).all();
+                    data_stage02_quantification_correlationTrend.component_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -642,7 +642,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationPattern.pvalue>pvalue_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationPattern.component_pattern).all();
+                    data_stage02_quantification_correlationPattern.component_pattern.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_pattern).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -650,7 +650,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationPattern.pvalue<pvalue_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationPattern.component_pattern).all();
+                    data_stage02_quantification_correlationPattern.component_pattern.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_pattern).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -658,7 +658,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationPattern.pvalue>=pvalue_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationPattern.component_pattern).all();
+                    data_stage02_quantification_correlationPattern.component_pattern.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_pattern).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -666,7 +666,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.calculated_concentration_units.like(calculated_concentration_units_I),
                     data_stage02_quantification_correlationPattern.pvalue<=pvalue_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True)).order_by(
-                    data_stage02_quantification_correlationPattern.component_pattern).all();
+                    data_stage02_quantification_correlationPattern.component_pattern.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -689,7 +689,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match).all();
+                    data_stage02_quantification_correlationPattern.pattern_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -698,7 +698,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match).all();
+                    data_stage02_quantification_correlationPattern.pattern_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -707,7 +707,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match).all();
+                    data_stage02_quantification_correlationPattern.pattern_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -716,7 +716,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match).all();
+                    data_stage02_quantification_correlationPattern.pattern_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -739,7 +739,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match_description != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match_description).all();
+                    data_stage02_quantification_correlationPattern.pattern_match_description.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match_description).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -748,7 +748,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match_description != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match_description).all();
+                    data_stage02_quantification_correlationPattern.pattern_match_description.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match_description).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -757,7 +757,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match_description != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match_description).all();
+                    data_stage02_quantification_correlationPattern.pattern_match_description.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.pattern_match_description).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -766,7 +766,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.pattern_match_description != None).order_by(
-                    data_stage02_quantification_correlationPattern.pattern_match_description).all();
+                    data_stage02_quantification_correlationPattern.pattern_match_description.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;
@@ -789,7 +789,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.component_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.component_match).all();
+                    data_stage02_quantification_correlationPattern.component_match.asc()).all();
             elif comparator_I == '<':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -798,7 +798,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.component_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.component_match).all();
+                    data_stage02_quantification_correlationPattern.component_match.asc()).all();
             elif comparator_I == '>=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -807,7 +807,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient>=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.component_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.component_match).all();
+                    data_stage02_quantification_correlationPattern.component_match.asc()).all();
             elif comparator_I == '<=':
                 data = self.session.query(data_stage02_quantification_correlationPattern.component_match).filter(
                     data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
@@ -816,7 +816,7 @@ class stage02_quantification_correlation_query(sbaas_template_query):
                     data_stage02_quantification_correlationPattern.correlation_coefficient<=correlation_coefficient_I,
                     data_stage02_quantification_correlationPattern.used_.is_(True),
                     data_stage02_quantification_correlationPattern.component_match != None).order_by(
-                    data_stage02_quantification_correlationPattern.component_match).all();
+                    data_stage02_quantification_correlationPattern.component_match.asc()).all();
             else:
                 print(comparator_I + " not yet supported");
                 return None;

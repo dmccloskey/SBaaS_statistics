@@ -497,7 +497,8 @@ for analysis_id in analysis_ids_run:
 #pairWisePLS01.export_dataStage02QuantificationPairWisePLSBiPlotAndValidation_js(analysis_id_I=analysis_id);
 #pairWisePLS01.export_dataStage02QuantificationPairWisePLSVIPs_js(analysis_id_I=analysis_id);
 #pairWisePLS01.export_dataStage02QuantificationPairWisePLSLoadings_js(analysis_id_I=analysis_id);
-pairWisePLS01.export_dataStage02QuantificationPairWisePLSSPlot_js(analysis_id_I=analysis_id);
+#pairWisePLS01.export_dataStage02QuantificationPairWisePLSSPlot_js(analysis_id_I=analysis_id);
+pairWisePLS01.export_dataStage02QuantificationPairWisePLSScores_js(analysis_id_I=analysis_id,absolute_value_I=False);
 
 
 #pls01.export_dataStage02QuantificationPLSScores_js(analysis_id_I=analysis_id);

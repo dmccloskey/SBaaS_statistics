@@ -12,16 +12,19 @@ from SBaaS_rnasequencing.stage01_rnasequencing_geneExpDiff_query import stage01_
 # Resources
 from python_statistics.calculate_interface import calculate_interface
 import numpy as np
+from math import sqrt
 
 class stage02_quantification_dataPreProcessing_averages_io(stage02_quantification_dataPreProcessing_averages_query,
                                     sbaas_template_io #abstract io methods
                                     ):
     #Query data from Requencing:
     def import_dataStage01ResequencingMutationsAnnotated(self,
-                                                        
+                analysis_id_I,   
                 mutationID2componentName_I = {},
                 mutationGenes2componentGroupName_I = {},
-                sna2snRequencing_I = {}
+                sna2snRequencing_I = {},
+                frequency_threshold_I = 0.1,
+                frequency_var_I = 0.01,
                 ):
         '''get the mutation_frequency data from SBaaS_resequencing
         INPUT:
@@ -33,8 +36,10 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                                 'OxicEvo04pgiEcoli13CGlc':'OxicEvo04pgiEcoliGlc',
                                 'OxicEvo04sdhCBEcoli13CGlc':'OxicEvo04sdhCBEcoliGlc',
                                 'OxicEvo04tpiAEcoli13CGlc':'OxicEvo04tpiAEcoliGlc'}
+        frequency_threshold_I = float, lower limit of mutation frequency
+        frequency_var_I = float, estimated variation of mutation frequency calls
         OUTPUT:
-        TODO:...
+ 
         '''
         resequencing_gd_query = stage01_resequencing_gd_query(self.session,self.engine,self.settings);
         genomediff = genome_diff();
@@ -51,6 +56,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
             mutation_frequencies = resequencing_gd_query.get_mutations_experimentIDAndSampleName_dataStage01ResequencingMutationsAnnotated(analysis_row['experiment_id'],sample_name);
             # map the data
             for mutation_frequency in mutation_frequencies:
+                if mutation_frequency['mutation_frequency']<frequency_threshold_I: continue;
                 row = {};
                 row['analysis_id']=analysis_id_I;
                 row['experiment_id']=analysis_row['experiment_id'];
@@ -62,8 +68,8 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 row['sample_name_abbreviation']=analysis_row['sample_name_abbreviation'];
                 #component mapping                
                 mutation_id = genomediff._make_mutationID(
-                    mutation_frequency['mutation_genes,mutation_frequency'],
-                    mutation_frequency['mutation_type,mutation_frequency'],
+                    mutation_frequency['mutation_genes'],
+                    mutation_frequency['mutation_type'],
                     mutation_frequency['mutation_position']
                     );
                 mutation_genes = genomediff._make_mutationGenesStr(mutation_frequency['mutation_genes'])
@@ -78,22 +84,24 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 row['calculated_concentration_units']='Frequency';
                 #descriptive statistics map
                 data_mean,data_median = mutation_frequency['mutation_frequency'],mutation_frequency['mutation_frequency'];
-                data_var = 0.2;
+                data_var = frequency_var_I;
                 if data_mean:
                     data_cv = sqrt(data_var)/data_mean*100;
-                    data_lb = data_mean - sqrt(data_var)
+                    data_lb = data_mean - sqrt(data_var);
+                    if data_lb < 0.: data_lb = 0.;
                     data_ub = data_mean + sqrt(data_var)
+                    if data_ub > 1.: data_ub = 1.0;
                 else:
                     data_cv = None;
                     data_lb = None;
                     data_ub = None;
                 row['test_stat']=None;
                 row['test_description']=None;
-                row['pvalue']=None;
-                row['pvalue_corrected']=None;
+                row['pvalue']=0.;
+                row['pvalue_corrected']=0.;
                 row['pvalue_corrected_description']=None;
-                row['mean']=mean;
-                row['var']=var;
+                row['mean']=data_mean;
+                row['var']=data_var;
                 row['cv']=data_cv;
                 row['n']=1;
                 row['ci_lb']=data_lb;
@@ -101,12 +109,23 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 row['ci_level']=0.95;
                 row['min']=None;
                 row['max']=None;
-                row['median']=median;
+                row['median']=data_median;
                 row['iq_1']=None;
                 row['iq_3']=None;              
                 data_O.append(row);
+        # remove any duplicates
+        #TODO: refactor data_stage01_resequencing_mutationsAnnotated to remove duplicate rows
+        data_db = [];
+        unique_constraint = set();
+        for row in data_O:
+            unique_str = ','.join([row['component_name'],row['sample_name_abbreviation'],\
+                row['experiment_id'],row['time_point'],row['analysis_id'],\
+                row['calculated_concentration_units']])
+            if not unique_str in unique_constraint:
+                unique_constraint.add(unique_str);
+                data_db.append(row);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_db);
     #Query data from RNASequencing:
     def import_dataStage01RNASequencingGeneExpDiffFpkmTracking(self,
                 analysis_id_I,

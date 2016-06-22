@@ -278,7 +278,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
         data_O = output specified by output_O and dictColumn_I
         '''
 
-        tables = ['data_stage02_quantification_data_stage02_quantification_descriptiveStats'];
+        tables = ['data_stage02_quantification_descriptiveStats'];
         # get the listDict data
         data_O = [];
         query = {};
@@ -396,6 +396,32 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 data_stage02_quantification_descriptiveStats.experiment_id.like(experiment_id_I),
                 data_stage02_quantification_descriptiveStats.time_point.like(time_point_I),
                 data_stage02_quantification_descriptiveStats.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation.asc(),
+                data_stage02_quantification_descriptiveStats.component_name.asc(),
+                ).all();
+            data_O=[d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentName_dataStage02QuantificationDescriptiveStats(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                experiment_id_I,
+                sample_name_abbreviation_I,
+                time_point_I,
+                component_name_I,
+            ):
+        """query unique rows from data_stage02_quantification_descriptiveStats"""
+        try:
+            data = self.session.query(data_stage02_quantification_descriptiveStats
+                ).filter(
+                data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                data_stage02_quantification_descriptiveStats.experiment_id.like(experiment_id_I),
+                data_stage02_quantification_descriptiveStats.time_point.like(time_point_I),
+                data_stage02_quantification_descriptiveStats.sample_name_abbreviation.like(sample_name_abbreviation_I),
+                data_stage02_quantification_descriptiveStats.component_name.like(component_name_I),
                 data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
                 data_stage02_quantification_descriptiveStats.sample_name_abbreviation.asc(),
                 data_stage02_quantification_descriptiveStats.component_name.asc(),

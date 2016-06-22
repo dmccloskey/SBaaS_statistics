@@ -98,7 +98,9 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
         self.add_rows_table('data_stage02_quantification_heatmap',heatmap_O);
         self.add_rows_table('data_stage02_quantification_dendrogram',dendrogram_col_O);
         self.add_rows_table('data_stage02_quantification_dendrogram',dendrogram_row_O);
-    def execute_heatmap_descriptiveStats(self, analysis_id_I,calculated_concentration_units_I=[],
+    def execute_heatmap_descriptiveStats(self,
+                analysis_id_I,
+                calculated_concentration_units_I=[],
                 sample_name_abbreviations_I=[],
                 component_names_I=[],
                 row_pdist_metric_I='euclidean',row_linkage_method_I='complete',

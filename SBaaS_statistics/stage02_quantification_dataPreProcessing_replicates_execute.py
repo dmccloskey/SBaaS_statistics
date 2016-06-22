@@ -12,7 +12,8 @@ from python_statistics.calculate_interface import calculate_interface
 from listDict.listDict import listDict
 import copy
 
-class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quantification_dataPreProcessing_replicates_io,
+class stage02_quantification_dataPreProcessing_replicates_execute(
+                                            stage02_quantification_dataPreProcessing_replicates_io,
                                            stage02_quantification_analysis_query):
     def execute_countMissingValues(self,
                 analysis_id_I,
@@ -226,6 +227,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         python_calc = calculate_statisticsDescriptive();
+        quantification_descriptiveStats_query=stage02_quantification_descriptiveStats_query(self.session,self.engine,self.settings);
+        quantification_descriptiveStats_query.initialize_supportedTables();
+
         data_O = [];
         data_normalized = [];
         data_normalizations = [];
@@ -270,6 +274,41 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                     d['calculated_concentration_units'] = normalized_units;
                     d['imputation_method'] = None;
                 data_normalized.extend(data);
+            elif normalization_method_I in ["FC-median",\
+                "FC-mean","FC-mode","log2(FC-median)","log2(FC-mean)","log2(FC-mode)"]:
+                for d in data:
+                    #query the mean/meadian from descriptive stats
+                    desc_stats = [];
+                    desc_stats = quantification_descriptiveStats_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentName_dataStage02QuantificationDescriptiveStats(
+                        analysis_id_I,
+                        cu,
+                        normalization_options_I['experiment_id_FC'],
+                        normalization_options_I['sample_name_abbreviation_FC'],
+                        normalization_options_I['time_point_FC'],
+                        d['component_name']
+                        )
+                    ##check
+                    #if d['component_name'] == '6pgc.6pgc_1.Light':
+                    #    print('check');
+                    if normalization_method_I in ["FC-median","log2(FC-median)"]:
+                        data_1 = desc_stats[0]['median'];
+                    elif normalization_method_I in ["FC-mean","log2(FC-mean)"]:
+                        data_1 = desc_stats[0]['mean'];
+                    elif normalization_method_I in ["FC-mode","log2(FC-mode)"]:
+                        data_1 = desc_stats[0]['mode'];
+                    normalized_value = python_calc.calculate_foldChange(
+                            data_1,
+                            d['calculated_concentration'],
+                            type_I = normalization_options_I['type'], # e.g., 'relative'
+                            scale_values_I = normalization_options_I['scale_values'], # e.g. None
+                            scale_fold_change_I = normalization_options_I['scale_fold_change'], #e.g. "log2"
+                            );
+                    normalized_units = ('%s_%s_%s' %(d['calculated_concentration_units'],normalization_method_I,'normalized'));
+                    d['calculated_concentration'] = normalized_value;
+                    d['calculated_concentration_units'] = normalized_units;
+                    d['imputation_method'] = None;
+                    d['used_'] = True;
+                data_normalized.extend(data);
             else:
                 print('normalization_method_I not recognized');
                 continue;
@@ -282,7 +321,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(stage02_quanti
                 "normalization_options":normalization_options_I,
                 'calculated_concentration_units':cu,
                 "used_":True,
-                'comment_I':None
+                'comment_':None
                 };
             data_normalizations.append(tmp);
         self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_normalized);

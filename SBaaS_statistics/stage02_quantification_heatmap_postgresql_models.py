@@ -64,7 +64,7 @@ class data_stage02_quantification_dendrogram(Base):
             'icoord':self.icoord,
             'dcoord':self.dcoord,
             'ivl':self.ivl,
-            'colors':self.ivl,
+            'colors':self.colors,
             'pdist_metric':self.pdist_metric,
             'linkage_method':self.linkage_method,
             'value_units':self.value_units,

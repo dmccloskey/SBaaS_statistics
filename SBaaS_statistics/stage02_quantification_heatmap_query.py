@@ -51,22 +51,28 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_rows_analysisID_dataStage02QuantificationDendrogram(self,analysis_id_I):
+        '''Query rows from data_stage02_quantification_dendrogram'''
+        try:
+            data = self.session.query(data_stage02_quantification_dendrogram).filter(
+                    data_stage02_quantification_dendrogram.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dendrogram.used_).all();
+            data_O = [d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
     def reset_dataStage02_quantification_heatmap(self,analysis_id_I = None):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_heatmap).filter(data_stage02_quantification_heatmap.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_heatmap).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     def reset_dataStage02_quantification_dendrogram(self,analysis_id_I = None):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_dendrogram).filter(data_stage02_quantification_dendrogram.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_dendrogram).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
 
@@ -119,18 +125,14 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_heatmap_descriptiveStats).filter(data_stage02_quantification_heatmap_descriptiveStats.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_heatmap_descriptiveStats).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     def reset_dataStage02_quantification_dendrogram_descriptiveStats(self,analysis_id_I = None):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_dendrogram_descriptiveStats).filter(data_stage02_quantification_dendrogram_descriptiveStats.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_dendrogram_descriptiveStats).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     

@@ -360,121 +360,12 @@ algorithm_test = [
     ]
 
 
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();
+## Load R once
+#from r_statistics.r_interface import r_interface
+#r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-
-    sna2snRequencing = {"OxicEvo04EcoliGlc":"140401_0_OxicEvo04EcoliGlcM9_Broth-1",
-    "OxicEvo04Evo01EPEcoliGlc":"140807_11_OxicEvo04Evo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04Evo02EPEcoliGlc":"140807_11_OxicEvo04Evo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04gndEcoliGlc":"140401_0_OxicEvo04gndEcoliGlcM9_Broth-1",
-    "OxicEvo04gndEvo01EPEcoliGlc":"140807_11_OxicEvo04gndEvo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04gndEvo02EPEcoliGlc":"140807_11_OxicEvo04gndEvo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04gndEvo03EPEcoliGlc":"140807_11_OxicEvo04gndEvo03EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEcoliGlc":"140401_0_OxicEvo04pgiEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo01J01EcoliGlc":"140702_1_OxicEvo04pgiEvo01J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo01J02EcoliGlc":"140702_2_OxicEvo04pgiEvo01J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo01EPEcoliGlc":"140807_11_OxicEvo04pgiEvo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo02J01EcoliGlc":"140702_1_OxicEvo04pgiEvo02J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo02J02EcoliGlc":"140702_2_OxicEvo04pgiEvo02J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo02J03EcoliGlc":"140702_3_OxicEvo04pgiEvo02J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo02EPEcoliGlc":"140807_11_OxicEvo04pgiEvo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo03J01EcoliGlc":"140702_1_OxicEvo04pgiEvo03J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo03J02EcoliGlc":"140702_2_OxicEvo04pgiEvo03J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo03J03EcoliGlc":"140702_3_OxicEvo04pgiEvo03J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo03EPEcoliGlc":"140807_11_OxicEvo04pgiEvo03EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo04J01EcoliGlc":"140702_1_OxicEvo04pgiEvo04J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo04J02EcoliGlc":"140702_2_OxicEvo04pgiEvo04J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo04J03EcoliGlc":"140702_3_OxicEvo04pgiEvo04J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo04EPEcoliGlc":"140807_11_OxicEvo04pgiEvo04EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo05J01EcoliGlc":"140702_1_OxicEvo04pgiEvo05J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo05J02EcoliGlc":"140702_2_OxicEvo04pgiEvo05J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo05J03EcoliGlc":"140702_3_OxicEvo04pgiEvo05J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo05EPEcoliGlc":"140807_11_OxicEvo04pgiEvo05EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo06J01EcoliGlc":"140702_1_OxicEvo04pgiEvo06J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo06J02EcoliGlc":"140702_2_OxicEvo04pgiEvo06J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo06J03EcoliGlc":"140702_3_OxicEvo04pgiEvo06J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo06EPEcoliGlc":"140807_11_OxicEvo04pgiEvo06EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo07J01EcoliGlc":"140702_1_OxicEvo04pgiEvo07J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo07J02EcoliGlc":"140702_2_OxicEvo04pgiEvo07J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo07J03EcoliGlc":"140702_3_OxicEvo04pgiEvo07J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo07EPEcoliGlc":"140807_11_OxicEvo04pgiEvo07EPEcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo08J01EcoliGlc":"140702_1_OxicEvo04pgiEvo08J01EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo08J02EcoliGlc":"140702_2_OxicEvo04pgiEvo08J02EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo08J03EcoliGlc":"140702_3_OxicEvo04pgiEvo08J03EcoliGlcM9_Broth-1",
-    "OxicEvo04pgiEvo08EPEcoliGlc":"140807_11_OxicEvo04pgiEvo08EPEcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEcoliGlc":"140401_0_OxicEvo04ptsHIcrrEcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo01J01EcoliGlc":"140702_1_OxicEvo04ptsHIcrrEvo01J01EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo01J03EcoliGlc":"140702_3_OxicEvo04ptsHIcrrEvo01J03EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo01EPEcoliGlc":"140807_11_OxicEvo04ptsHIcrrEvo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo02J01EcoliGlc":"140702_1_OxicEvo04ptsHIcrrEvo02J01EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo02J03EcoliGlc":"140702_3_OxicEvo04ptsHIcrrEvo02J03EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo02EPEcoliGlc":"140807_11_OxicEvo04ptsHIcrrEvo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo03J01EcoliGlc":"140702_1_OxicEvo04ptsHIcrrEvo03J01EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo03J03EcoliGlc":"140702_3_OxicEvo04ptsHIcrrEvo03J03EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo03J04EcoliGlc":"140702_4_OxicEvo04ptsHIcrrEvo03J04EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo03EPEcoliGlc":"140807_11_OxicEvo04ptsHIcrrEvo03EPEcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo04J01EcoliGlc":"140702_1_OxicEvo04ptsHIcrrEvo04J01EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo04J03EcoliGlc":"140702_3_OxicEvo04ptsHIcrrEvo04J03EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo04J04EcoliGlc":"140702_4_OxicEvo04ptsHIcrrEvo04J04EcoliGlcM9_Broth-1",
-    "OxicEvo04ptsHIcrrEvo04EPEcoliGlc":"140807_11_OxicEvo04ptsHIcrrEvo04EPEcoliGlcM9_Broth-1",
-    "OxicEvo04sdhCBEcoliGlc":"140401_0_OxicEvo04sdhCBEcoliGlcM9_Broth-1",
-    "OxicEvo04sdhCBEvo01EPEcoliGlc":"140807_11_OxicEvo04sdhCBEvo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04sdhCBEvo02EPEcoliGlc":"140807_11_OxicEvo04sdhCBEvo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04sdhCBEvo03EPEcoliGlc":"140807_11_OxicEvo04sdhCBEvo03EPEcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEcoliGlc":"140401_0_OxicEvo04tpiAEcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo01J01EcoliGlc":"140702_1_OxicEvo04tpiAEvo01J01EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo01J03EcoliGlc":"140702_3_OxicEvo04tpiAEvo01J03EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo01EPEcoliGlc":"140807_11_OxicEvo04tpiAEvo01EPEcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo02J01EcoliGlc":"140702_1_OxicEvo04tpiAEvo02J01EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo02J03EcoliGlc":"140702_3_OxicEvo04tpiAEvo02J03EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo02EPEcoliGlc":"140807_11_OxicEvo04tpiAEvo02EPEcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo03J01EcoliGlc":"140702_1_OxicEvo04tpiAEvo03J01EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo03J03EcoliGlc":"140702_3_OxicEvo04tpiAEvo03J03EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo03EPEcoliGlc":"140807_11_OxicEvo04tpiAEvo03EPEcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo04J01EcoliGlc":"140702_1_OxicEvo04tpiAEvo04J01EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo04J03EcoliGlc":"140702_3_OxicEvo04tpiAEvo04J03EcoliGlcM9_Broth-1",
-    "OxicEvo04tpiAEvo04EPEcoliGlc":"140807_11_OxicEvo04tpiAEvo04EPEcoliGlcM9_Broth-1",
-    }
-    mv_value_operator = [
-    {'value':None,'operator':'NA','feature':'mean'},
-    {'value':None,'operator':'NA','feature':'median'},
-    {'value':None,'operator':'NA','feature':'pvalue'},
-    {'value':None,'operator':'NA','feature':'pvalue_corrected'},
-    ]
-    #pass 1:
-    #get the fold change data and check for missing values
-    dppave01.reset_stage02_quantification_dataPreProcessing_averages(
-          tables_I = [
-                      'data_stage02_quantification_dataPreProcessing_averages',
-                      'data_stage02_quantification_dataPreProcessing_averages_im',
-                      'data_stage02_quantification_dataPreProcessing_averages_mv',
-                      ],
-          analysis_id_I = analysis_id,
-          warn_I=False);
-    #import the mutation frequency as the mean
-    dppave01.import_dataStage01ResequencingMutationsAnnotated(
-        analysis_id,
-        sna2snRequencing_I = sna2snRequencing,
-        frequency_threshold_I = 0.1,
-        frequency_var_I = 0.01,
-        );
-    #count the number of missing values
-    dppave01.reset_stage02_quantification_dataPreProcessing_averages(
-           tables_I = ['data_stage02_quantification_dataPreProcessing_averages_mv',
-                       ],
-           analysis_id_I = analysis_id,
-           warn_I=False);
-    for row in mv_value_operator:
-       dppave01.execute_countMissingValues(
-           analysis_id,
-           feature_I = row['feature'],
-           value_I = row['value'],
-           operator_I = row['operator'],
-       );
 
     # # perform a pls-da analysis
     #pairWisePLS01.reset_dataStage02_quantification_pairWisePLS(
@@ -649,7 +540,7 @@ for analysis_id in analysis_ids_run:
 #    );
 
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_chordDiagram_js(
-#    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
+#    "ALEsKOs01_0_evo04_0_11_evo04pgi",
 #    query_I = 
 #    {'where':[
 #        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
@@ -666,10 +557,16 @@ for analysis_id in analysis_ids_run:
 #            },
 #        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
 #        'column_name':'calculated_concentration_units',
-#        'value':'FPKM_log2_normalized',
+#        'value':'umol*gDW-1_glog_normalized',
 #        'operator':'LIKE',
 #        'connector':'AND'
 #            },
+#        {"table_name":'data_stage02_quantification_pairWiseTable_replicates',
+#        'column_name':'component_group_name',
+#        'value':"('{atp}'::text[])",
+#        'operator':'=ANY',
+#        'connector':'AND'
+#            },#
 #    ]
 #    },
 #    );
@@ -702,3 +599,5 @@ for analysis_id in analysis_ids_run:
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
 #pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+
+heatmap01.export_dataStage02QuantificationDendrogram_js('ALEsKOs01_0');

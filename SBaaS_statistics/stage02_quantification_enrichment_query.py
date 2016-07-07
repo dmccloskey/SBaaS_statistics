@@ -46,6 +46,66 @@ class stage02_quantification_enrichment_query(sbaas_template_query,
             print(e);
 
     #Query rows:
+    def get_rows_analysisID_dataStage02QuantificationGeneSetEnrichment(self,
+                analysis_id_I = [],
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        
+        # get the listDict data
+        data_O = [];
+        tables = ['data_stage02_quantification_geneSetEnrichment'];
+
+        # make the query
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'"GO_term"',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'enrichment_method',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'test_description',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'sample_name_abbreviation',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+
     def get_rows_componentNames_dataStage02QuantificationEnrichmentClasses(self,
                 component_names_I = [],
                 query_I={},

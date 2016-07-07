@@ -15,10 +15,10 @@ from python_statistics.calculate_pca import calculate_pca
 
 class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_query,
                                     sbaas_template_io):
-    def export_dataStage02QuantificationPairWisePLSScoresAndLoadings_js(self,analysis_id_I,axis_I=3,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPairWisePLSScoresAndLoadings_js(self,analysis_id_I,axis_I=2,data_dir_I='tmp'):
         '''Export pairWisePLS scores and loadings plots for axis 1 vs. 2, 1 vs 3, and 2 vs 3'''
         calculatepca = calculate_pca();
-        PCs = [[1,2],[1,3],[2,3]];
+        PCs = [[1,2]];
         # get data:
         data_scores,data_loadings = [],[];
         data_scores,data_loadings = self.get_RExpressionData_analysisID_dataStage02QuantificationPairWisePLSScoresLoadings(analysis_id_I,axis_I);
@@ -37,7 +37,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
             'calculated_concentration_units',
             'pls_model',
             'pls_method',
-            'pls_moptions'
+            'pls_options'
                     ];
         data1_nestkeys = ['response_name'];
         data2_keys = [
@@ -48,7 +48,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
             'calculated_concentration_units',
             'pls_model',
             'pls_method',
-            'pls_moptions'
+            'pls_options'
                     ];
         data2_nestkeys = ['analysis_id'];
         data1_keymap_serieslabel = 'response_name';
@@ -505,7 +505,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
             file.write(ddtutilities.get_allObjects());
     def export_dataStage02QuantificationPairWisePLSScores_js(
         self,analysis_id_I,
-        axis_I=5,
+        axis_I=2,
         single_plot_I=False,
         absolute_value_I=True,
         data_dir_I='tmp'):
@@ -611,7 +611,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
             file.write(nsvgtable.get_allObjects());
     def export_dataStage02QuantificationPairWisePLSLoadings_js(
         self,analysis_id_I,
-        axis_I=5,
+        axis_I=2,
         single_plot_I=False,
         absolute_value_I=True,
         data_dir_I='tmp'):

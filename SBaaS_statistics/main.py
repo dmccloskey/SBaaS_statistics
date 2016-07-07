@@ -167,6 +167,12 @@ enrichment01 = stage02_quantification_enrichment_execute(session,engine,pg_setti
 enrichment01.initialize_supportedTables();
 enrichment01.initialize_tables();
 
+#make the correlation tables 
+from SBaaS_statistics.stage02_quantification_correlation_execute import stage02_quantification_correlation_execute
+corr01 = stage02_quantification_correlation_execute(session,engine,pg_settings.datadir_settings);
+corr01.initialize_supportedTables();
+corr01.initialize_tables();
+
 #make the spls table 
 from SBaaS_statistics.stage02_quantification_spls_execute import stage02_quantification_spls_execute
 spls01 = stage02_quantification_spls_execute(session,engine,pg_settings.datadir_settings);
@@ -180,8 +186,11 @@ pairWisePLS01.initialize_supportedTables();
 #pairWisePLS01.drop_tables();
 pairWisePLS01.initialize_tables();
 
+
+
 analysis_ids_run = [
-    "ALEsKOs01_DNAResequencing_0_11",
+    #"ALEsKOs01_DNAResequencing_0_11",
+    'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
         #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
@@ -493,21 +502,8 @@ for analysis_id in analysis_ids_run:
     #        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
     #        r_calc_I=r_calc
     #        );
-    
 
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSScoresAndLoadings_js(analysis_id_I=analysis_id);
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSBiPlotAndValidation_js(analysis_id_I=analysis_id);
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSVIPs_js(analysis_id_I=analysis_id);
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSLoadings_js(analysis_id_I=analysis_id);
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSSPlot_js(analysis_id_I=analysis_id);
-#pairWisePLS01.export_dataStage02QuantificationPairWisePLSScores_js(analysis_id_I=analysis_id,absolute_value_I=False);
-
-
-#pls01.export_dataStage02QuantificationPLSScores_js(analysis_id_I=analysis_id);
-#pca01.export_dataStage02QuantificationPCAScores_js(analysis_id_I=analysis_id);
-    
-#pls01.export_dataStage02QuantificationPLSLoadings_js(analysis_id_I=analysis_id);
-#pca01.export_dataStage02QuantificationPCALoadings_js(analysis_id_I=analysis_id);
+#enrichment01.export_dataStage02QuantificationGeneSetEnrichment_js(analysis_id_I = 'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB');
 
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
 #norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');

@@ -5,6 +5,7 @@ from SBaaS_base.sbaas_template_io import sbaas_template_io
 #Resources
 from ddt_python.ddt_container_filterMenuAndChart2dAndTable import ddt_container_filterMenuAndChart2dAndTable
 from listDict.listDict import listDict
+from math import log10
 
 class stage02_quantification_enrichment_io(stage02_quantification_enrichment_query,
                                     sbaas_template_io):
@@ -16,21 +17,38 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
         Table
         '''
         
-        #data_O = self.get_rows_analysisID_dataStage02QuantificationGeneSetEnrichment(
-        #    analysis_id_I,
-        #    query_I = query_I);
+        data_O = self.get_rows_analysisID_dataStage02QuantificationGeneSetEnrichment(
+            analysis_id_I,
+            query_I = query_I);
+        for d in data_O:
+            d['pvalue']=-log10(d['pvalue']);
 
         # make the tile objects  
         #data1 = filter menu and table    
-        data1_keys = [
+        data1_keys = ['analysis_id',
+                    'experiment_id',
+                    'sample_name_abbreviation',
+                    'time_point',
+                    'calculated_concentration_units',
+                    'GO_id','GO_term',
+                    'GO_database',
+                    'GO_annotation',
+                    'GO_annotation_mapping',
+                    'GO_annotation_id',
+                    'GO_ontology',
+                    'enrichment_method',
+                    'test_description'
                     ];
-        data1_nestkeys = [];
+        data1_nestkeys = ['GO_term'];
         data1_keymap = {
-            'xdata':'component_name',
-            'ydata':'singular_value_index',
-            'rowslabel':'component_name',
-            'columnslabel':'singular_value_index',
-            'tooltipdata':'component_name',
+            'xdata':'sample_name_abbreviation',
+            'ydata':'pvalue',
+            'serieslabel':'sample_name_abbreviation',
+            'featureslabel':'GO_term',
+            'rowslabel':'GO_term',
+            'columnslabel':'pvalue',
+            'tooltiplabel':'GO_definition',
+            'tooltipdata':'pvalue',
             };     
         
         nsvgtable = ddt_container_filterMenuAndChart2dAndTable();
@@ -45,21 +63,27 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
                 data_table_keys=None,
                 data_table_nestkeys=None,
                 data_table_keymap=None,
-                data_svg=data_dict_O,
+                data_svg=None,
                 data_table=None,
                 svgtype='verticalbarschart2d_01',
                 tabletype='responsivetable_01',
-                svgx1axislabel='',
-                svgy1axislabel='',
+                svgx1axislabel='GO term',
+                svgy1axislabel='-log10(p-value)',
                 tablekeymap = [data1_keymap],
                 svgkeymap = [data1_keymap], #calculated on the fly
                 formtile2datamap=[0],
                 tabletile2datamap=[0],
-                svgtile2datamap=[], #calculated on the fly
+                svgtile2datamap=[0], #calculated on the fly
                 svgfilters=None,
                 svgtileheader='Gene Set Enrichment Analysis',
                 tablefilters=None,
-                tableheaders=None
+                tableheaders=None,
+                svgparameters_I= {
+                            "svgmargin":{ 'top': 50, 'right': 250, 'bottom': 250, 'left': 50 },
+                            "svgwidth":750,
+                            "svgheight":450,
+                            'colclass':"col-sm-12"
+                            }
                 );
 
         if data_dir_I=='tmp':

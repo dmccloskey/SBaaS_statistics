@@ -121,6 +121,16 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_rows_analysisID_dataStage02QuantificationDendrogramDescriptiveStats(self,analysis_id_I):
+        '''Query rows from data_stage02_quantification_dendrogram_descriptiveStats'''
+        try:
+            data = self.session.query(data_stage02_quantification_dendrogram_descriptiveStats).filter(
+                    data_stage02_quantification_dendrogram_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dendrogram_descriptiveStats.used_).all();
+            data_O = [d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
     def reset_dataStage02_quantification_heatmap_descriptiveStats(self,analysis_id_I = None):
         try:
             if analysis_id_I:

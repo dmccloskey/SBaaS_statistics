@@ -38,20 +38,12 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
 
         # instantiate helper classes
         calculateinterface = calculate_interface()
-        #stage02quantificationnormalizationquery = stage02_quantification_normalization_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-        #stage02quantificationnormalizationquery.initialize_supportedTables();
-        #stage02quantificationanalysisquery = stage02_quantification_analysis_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-        #stage02quantificationanalysisquery.initialize_supportedTables();
         dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         
         # instantiate data lists
         data_O=[]; #samples/features cov_matrix and precision_matrix
         data_impfeat_O=[]; #samples/features mahal_dist
         data_response_class_O=[]; #samples/features score
-        ## get the analysis information
-        #analysis_info = [];
-        #analysis_info = stage02quantificationanalysisquery.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
-        #analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
 
         # query metabolomics data from glogNormalization
         # get concentration units
@@ -59,15 +51,11 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            #calculated_concentration_units = stage02quantificationnormalizationquery.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
-            #calculated_concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
             calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu in calculated_concentration_units:
             #print('calculating tree for calculated_concentration_units ' + cu);
             data = [];
             # get data:
-            #data = stage02quantificationnormalizationquery.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
-            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
             data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,
                 cu,
@@ -245,8 +233,6 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
 
         # instantiate helper classes
         calculateinterface = calculate_interface()
-        #stage02quantificationnormalizationquery = stage02_quantification_normalization_query(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-        #stage02quantificationnormalizationquery.initialize_supportedTables();
         dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         
         # instantiate data lists
@@ -257,13 +243,11 @@ class stage02_quantification_tree_execute(stage02_quantification_tree_io):
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            #calculated_concentration_units = stage02quantificationnormalizationquery.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
             calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu in calculated_concentration_units:
             #print('calculating tree for calculated_concentration_units ' + cu);
             data = [];
             # get data:
-            #data = stage02quantificationnormalizationquery.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
             data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
                 analysis_id_I,
                 cu,

@@ -132,7 +132,9 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 geneID2componentName_I = {},
                 gene2componentGroupName_I = {},
                 snaRNASequencing2sna_I = {},
-                analysisID2analysisIDRNASequencing_I = {}
+                analysisID2analysisIDRNASequencing_I = {},
+                n_I=2,ci_level_I=0.95
+
                 ):
         '''get the the genes.fpkm_tracking data from SBaaS_rnasequencing
         INPUT:
@@ -186,7 +188,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
             row['mean']=fpkm['FPKM'];
             
             # assuming the ci_level is 0.95
-            row['ci_level']=0.95;
+            row['ci_level']=ci_level_I;
             #TODO: move to stats module
             # assuming the stdev ~= stdErr
             #TODO: query the # of samples used
@@ -196,10 +198,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
             else: cv = 0;
             row['var']=var;
             row['cv']=cv;
-
-            row['var']=None;
-            row['cv']=None;
-            row['n']=None;
+            row['n']=n_I;
             row['ci_lb']=fpkm['FPKM_conf_lo'];
             row['ci_ub']=fpkm['FPKM_conf_hi'];
             row['min']=None;

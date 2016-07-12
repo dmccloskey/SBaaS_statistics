@@ -507,7 +507,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
         self,analysis_id_I,
         axis_I=2,
         single_plot_I=False,
-        absolute_value_I=True,
+        absolute_value_I=False,
         data_dir_I='tmp'):
         '''Export pairWisePLS scores as a bar plot and table
         Plot 1: bar plot of scores
@@ -613,7 +613,7 @@ class stage02_quantification_pairWisePLS_io(stage02_quantification_pairWisePLS_q
         self,analysis_id_I,
         axis_I=2,
         single_plot_I=False,
-        absolute_value_I=True,
+        absolute_value_I=False,
         data_dir_I='tmp'):
         '''Export pairWisePLS loadings as a bar plot and in tabular form
         Plot 1: bar plot of loadings

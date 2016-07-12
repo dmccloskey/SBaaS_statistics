@@ -59,10 +59,7 @@ class stage02_quantification_svm_query(sbaas_template_query,
             data = self.session.query(data_stage02_quantification_svm_pipeline).filter(
                     data_stage02_quantification_svm_pipeline.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_svm_pipeline.used_.is_(True)).all();
-            rows_O = [];
-            if data: 
-                for d in data:
-                    rows_O.append(d.__repr__dict__());
+            rows_O = [d.__repr__dict__() for d in data];
             return rows_O;
         except SQLAlchemyError as e:
             print(e);

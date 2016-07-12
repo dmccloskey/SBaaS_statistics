@@ -190,8 +190,8 @@ pairWisePLS01.initialize_tables();
 
 analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
-    'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-        #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
         #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
@@ -502,12 +502,7 @@ for analysis_id in analysis_ids_run:
     #        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
     #        r_calc_I=r_calc
     #        );
-
-#enrichment01.export_dataStage02QuantificationGeneSetEnrichment_js(analysis_id_I = 'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB');
-
-#norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",'umol*gDW-1_glog_normalized');
-#norm01.export_dataStage02QuantificationGlogNormalizedPairWiseReplicates_js("CollinsLab_MousePlasma01_WBC",'uM_glog_normalized');
-
+    
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
 #    #query_I = {},
@@ -595,5 +590,3 @@ for analysis_id in analysis_ids_run:
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
 #pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
-
-heatmap01.export_dataStage02QuantificationDendrogram_js('ALEsKOs01_0');

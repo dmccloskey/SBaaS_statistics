@@ -191,8 +191,7 @@ pairWisePLS01.initialize_tables();
 analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
     #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
-        #'ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01',
+        'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
         #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
@@ -371,43 +370,22 @@ algorithm_test = [
 
 ## Load R once
 #from r_statistics.r_interface import r_interface
-#r_calc = r_interface();
+#r_calc = r_interface();#get RNAsequencing data
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-    # # perform a pls-da analysis
-    #pairWisePLS01.reset_dataStage02_quantification_pairWisePLS(
-    #    tables_I = ['data_stage02_quantification_pairWisePLS_coefficients',
-    #                'data_stage02_quantification_pairWisePLS_loadings',
-    #                'data_stage02_quantification_pairWisePLS_loadingsResponse',
-    #                'data_stage02_quantification_pairWisePLS_scores',
-    #                'data_stage02_quantification_pairWisePLS_validation',
-    #                'data_stage02_quantification_pairWisePLS_vip'],
-    #    analysis_id_I=analysis_id,
-    #    warn_I=False,
-    #    );
-    #for k,v in pls_model_method.items():
-    #     pairWisePLS01.execute_pairWise_plsda(
-    #         analysis_id_I = analysis_id,
-    #         calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #         r_calc_I=r_calc,
-    #         pls_model_I = k,
-    #         method = v,
-    #         response_I = None,
-    #         factor_I= "sample_name_abbreviation",
-    #         ncomp = 7,
-    #         Y_add = "NULL",
-    #         scale = "TRUE",
-    #         validation = "CV",
-    #         segments = 10,
-    #         stripped = "FALSE",
-    #         lower = 0.5,
-    #         upper = 0.5, 
-    #         trunc_pow = "FALSE", 
-    #         weights = "NULL",
-    #         p_method = "fdr",
-    #         nperm = 999);
+    # perform a correlation analysis
+    heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
+    heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
+    heatmap01.execute_heatmap(
+        analysis_id,
+        calculated_concentration_units_I=['count_cuffnorm_log2_normalized'],
+        sample_name_shorts_I=[],
+        component_names_I=[],
+        order_componentNameBySampleNameShort_I = False,
+        order_sample_name_shorts_I=False,
+        order_component_names_I=False,);
     
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(

@@ -9,6 +9,7 @@ from io_utilities.base_importData import base_importData
 from io_utilities.base_exportData import base_exportData
 #SBaaS_rnasequencing
 from SBaaS_rnasequencing.stage01_rnasequencing_genesFpkmTracking_query import stage01_rnasequencing_genesFpkmTracking_query
+from SBaaS_rnasequencing.stage01_rnasequencing_genesCountTable_query import stage01_rnasequencing_genesCountTable_query
 #SBaaS_quantification
 from SBaaS_quantification.stage01_quantification_replicates_query import stage01_quantification_replicates_query
 from SBaaS_quantification.stage01_quantification_replicatesMI_query import stage01_quantification_replicatesMI_query
@@ -73,6 +74,64 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                 data_O.append(row);
         # add data to the DB
         self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
+    def import_dataStage01RNASequencingGenesCountTable(self,
+                analysis_id_I,
+                geneShortName2componentName_I = {},
+                geneShortName2componentGroupName_I = {},
+                snsRNASequencing2sns_I = {},
+                analysisID2analysisIDRNASequencing_I = {},
+                ):
+        '''get the the genes.fpkm_tracking data from SBaaS_rnasequencing
+        INPUT:
+        geneShortName2componentName_I = {}, mapping of gene_short_name to component_name
+        geneShortName2componentGroupName_I = {}, mapping of gene_short_name to component_group_name
+        snsRNASequencing2sns_I = {
+                                'OxicEvo04Ecoli13CGlc':'OxicEvo04EcoliGlc',
+                                'OxicEvo04gndEcoli13CGlc':'OxicEvo04gndEcoliGlc',
+                                'OxicEvo04pgiEcoli13CGlc':'OxicEvo04pgiEcoliGlc',
+                                'OxicEvo04sdhCBEcoli13CGlc':'OxicEvo04sdhCBEcoliGlc',
+                                'OxicEvo04tpiAEcoli13CGlc':'OxicEvo04tpiAEcoliGlc'}
+        OUTPUT:
+        '''
+        rnasequencing_genesCountTable_query = stage01_rnasequencing_genesCountTable_query(self.session,self.engine,self.settings);
+        data_O = [];
+        # get the analysis information
+        analysis_rows = [];
+        analysis_rows = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
+        sns2tp = {r['sample_name_short']:r['time_point'] for r in analysis_rows};
+        # query fpkm data:
+        if analysisID2analysisIDRNASequencing_I: analysis_id=analysisID2analysisIDRNASequencing_I[analysis_id_I]
+        else: analysis_id=analysis_id_I;
+        fpkms = [];
+        fpkms = rnasequencing_genesCountTable_query.get_rows_analysisID_dataStage01RNASequencingGenesCountTable(analysis_id);
+        # map the data
+        for fpkm in fpkms:
+            row = {};
+            row['analysis_id']=analysis_id;
+            row['experiment_id']=fpkm['experiment_id'];
+            if snsRNASequencing2sns_I: sample_name = snsRNASequencing2sns_I[fpkm['sample_name']];
+            else: sample_name = fpkm['sample_name'];
+            row['sample_name_short']=sample_name;
+
+            row['time_point']=sns2tp[sample_name];
+
+            if geneShortName2componentName_I:
+                row['component_name']=geneShortName2componentName_I[fpkm['gene_id']];
+            else:
+                row['component_name']=fpkm['gene_short_name'] + '_' + fpkm['gene_id'];
+            if geneShortName2componentGroupName_I:
+                row['component_group_name']=geneShortName2componentGroupName_I[fpkm['gene_short_name']];
+            else:
+                row['component_group_name']=fpkm['gene_short_name'];
+                
+            row["imputation_method"]=None;
+            row['calculated_concentration']=fpkm['value'];
+            row['calculated_concentration_units']=fpkm['value_units']+'_cuffnorm';
+            row['used_']=fpkm['used_']
+            row['comment_']=fpkm['comment_'];                
+            data_O.append(row);
+        # add data to the DB
+        if data_O: self.add_rows_table('data_stage02_quantification_dataPreProcessing_replicates',data_O);
 
     #Query data from quantification:    
     def import_dataStage01QuantificationReplicates(self,

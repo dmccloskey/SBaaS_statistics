@@ -273,6 +273,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                     d['calculated_concentration'] = normalized_value;
                     d['calculated_concentration_units'] = normalized_units;
                     d['imputation_method'] = None;
+                    d['used_'] = True;
                 data_normalized.extend(data);
             elif normalization_method_I in ["FC-median",\
                 "FC-mean","FC-mode","log2(FC-median)","log2(FC-mean)","log2(FC-mode)"]:

@@ -80,6 +80,7 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                 geneShortName2componentGroupName_I = {},
                 snsRNASequencing2sns_I = {},
                 analysisID2analysisIDRNASequencing_I = {},
+                geneShortNames_I=[]
                 ):
         '''get the the genes.fpkm_tracking data from SBaaS_rnasequencing
         INPUT:
@@ -91,6 +92,8 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
                                 'OxicEvo04pgiEcoli13CGlc':'OxicEvo04pgiEcoliGlc',
                                 'OxicEvo04sdhCBEcoli13CGlc':'OxicEvo04sdhCBEcoliGlc',
                                 'OxicEvo04tpiAEcoli13CGlc':'OxicEvo04tpiAEcoliGlc'}
+        analysisID2analysisIDRNASequencing = {}, mapping of statistics analysis ID to RNAseq analysis ID
+        geneShortNames_I = list of gene_short_names to include
         OUTPUT:
         '''
         rnasequencing_genesCountTable_query = stage01_rnasequencing_genesCountTable_query(self.session,self.engine,self.settings);
@@ -106,6 +109,7 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
         fpkms = rnasequencing_genesCountTable_query.get_rows_analysisID_dataStage01RNASequencingGenesCountTable(analysis_id);
         # map the data
         for fpkm in fpkms:
+            if geneShortNames_I and not fpkm['gene_short_name'] in geneShortNames_I: continue
             row = {};
             row['analysis_id']=analysis_id;
             row['experiment_id']=fpkm['experiment_id'];

@@ -20,8 +20,9 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
         data_O = self.get_rows_analysisID_dataStage02QuantificationGeneSetEnrichment(
             analysis_id_I,
             query_I = query_I);
+        #dynamically add -log10(p-value)
         for d in data_O:
-            d['pvalue']=-log10(d['pvalue']);
+            d['log10(pvalue)']=-log10(d['pvalue']);
 
         # make the tile objects  
         #data1 = filter menu and table    
@@ -42,7 +43,7 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
         data1_nestkeys = ['GO_term'];
         data1_keymap = {
             'xdata':'sample_name_abbreviation',
-            'ydata':'pvalue',
+            'ydata':'log10(pvalue)',
             'serieslabel':'sample_name_abbreviation',
             'featureslabel':'GO_term',
             'rowslabel':'GO_term',
@@ -68,7 +69,7 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
                 svgtype='verticalbarschart2d_01',
                 tabletype='responsivetable_01',
                 svgx1axislabel='GO term',
-                svgy1axislabel='-log10(p-value)',
+                svgy1axislabel='log10(pvalue)',
                 tablekeymap = [data1_keymap],
                 svgkeymap = [data1_keymap], #calculated on the fly
                 formtile2datamap=[0],

@@ -375,17 +375,17 @@ algorithm_test = [
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-    # perform a correlation analysis
-    heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
-    heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
-    heatmap01.execute_heatmap(
-        analysis_id,
-        calculated_concentration_units_I=['count_cuffnorm_log2_normalized'],
-        sample_name_shorts_I=[],
-        component_names_I=[],
-        order_componentNameBySampleNameShort_I = False,
-        order_sample_name_shorts_I=False,
-        order_component_names_I=False,);
+    ## perform a correlation analysis
+    #heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
+    #heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
+    #heatmap01.execute_heatmap(
+    #    analysis_id,
+    #    calculated_concentration_units_I=['count_cuffnorm_log2_normalized'],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    order_componentNameBySampleNameShort_I = False,
+    #    order_sample_name_shorts_I=False,
+    #    order_component_names_I=False,);
     
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(
@@ -568,3 +568,6 @@ for analysis_id in analysis_ids_run:
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
 #pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+
+#heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
+descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)

@@ -2,6 +2,7 @@
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_pairWiseCorrelation_io import stage02_quantification_pairWiseCorrelation_io
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from python_statistics.calculate_correlation import calculate_correlation
 from listDict.listDict import listDict
@@ -63,10 +64,10 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             else:
                 sample_name_abbreviations=[];
                 if hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
-                    calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+                    sample_name_abbreviations = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                     analysis_id_I,cu);
                 elif hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
-                    calculated_concentration_units = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+                    sample_name_abbreviations = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
                     analysis_id_I,cu);
                 else:
                     print('query instance does not have the required method.');
@@ -94,6 +95,11 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                             analysis_id_I,cu,sna_2);
                     else:
                         print('query instance does not have the required method.');
+
+                    #extract out the values 
+                    #TODO: incorporate into the actual query
+                    data_1 = [d[value_I] for d in data_1]
+                    data_2 = [d[value_I] for d in data_2]
 
                     if len(data_1)==len(data_2):
                         #calculate the correlation coefficient
@@ -139,6 +145,140 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     data_pairwise_O.extend(data_listDict.get_listDict());
 
         self.add_rows_table('data_stage02_quantification_pairWiseCorrelation',data_pairwise_O);
+    def execute_pairwiseCorrelationFeaturesAverages(self,analysis_id_I,
+            sample_name_abbreviations_I=[],
+            calculated_concentration_units_I=[],
+            component_names_I=[],
+            pvalue_corrected_description_I = "bonferroni",
+            redundancy_I=True,
+            distance_measure_I='pearson',
+            value_I = 'mean',
+            r_calc_I=None,
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'):
+        '''execute pairwiseCorrelation
+        INPUT:
+        analysis_id_I = string
+        concentration_units_I = [] of strings
+        component_names_I = [] of strings
+        redundancy_I = boolean, default=True
+        distance_measure_I = 'spearman' or 'pearson'
+        value_I = string, e.g., value from descriptiveStats to use 'mean','median','pvalue',etc.
+        query_object_descStats_I = query objects to select the data descriptive statistics data
+            options: 'stage02_quantification_descriptiveStats_query'
+                     'stage02_quantification_dataPreProcessing_averages_query'
+        '''
+
+        print('execute_pairwiseCorrelation...')
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query};
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
+
+        data_pairwise_O = [];
+        calculatecorrelation = calculate_correlation();
+        # get concentration units
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
+        else:
+            calculated_concentration_units = [];
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
+        for cu_cnt,cu in enumerate(calculated_concentration_units):
+            print('calculating pairwiseCorrelation for concentration_units ' + cu);
+            component_names,component_group_names = [],[];
+            if hasattr(query_instance_descStats, 'get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                component_names,component_group_names = query_instance_descStats.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+            elif hasattr(query_instance_descStats, 'get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                component_names,component_group_names = query_instance_descStats.get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+            else:
+                print('query instance does not have the required method.');
+            #if component_names_I:
+            #    component_names = component_names_I;
+            for cn_1_cnt,cn_1 in enumerate(component_names):
+                    
+                data_O=[];
+                #pass 1: calculate the pairwise correlations
+                if redundancy_I: list_2 = component_names;
+                else: list_2 = component_names[cn_1_cnt+1:];
+                for cnt,cn_2 in enumerate(list_2):
+                    if redundancy_I: cn_2_cnt = cnt;
+                    else: cn_2_cnt = cn_1_cnt+cnt+1;
+                    
+                    data_1,data_2 = [],[];
+                    if hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages'):
+                        data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingAverages(
+                            analysis_id_I,cu,cn_1);
+                        data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingAverages(
+                            analysis_id_I,cu,cn_2);
+                    elif hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats'):
+                        data_1 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDescriptiveStats(
+                            analysis_id_I,cu,cn_1);
+                        data_2 = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDescriptiveStats(
+                            analysis_id_I,cu,cn_2);
+                    else:
+                        print('query instance does not have the required method.');
+                        
+                    #extract out the values 
+                    #TODO: incorporate into the actual query
+                    data_1 = [d[value_I] for d in data_1];
+                    data_2 = [d[value_I] for d in data_2];
+
+                    if len(data_1)==len(data_2):
+                        #calculate the correlation coefficient
+                        if distance_measure_I=='pearson':
+                            rho,pval = calculatecorrelation.calculate_correlation_pearsonr(data_1,data_2);
+                        elif distance_measure_I=='spearman':
+                            rho,pval = calculatecorrelation.calculate_correlation_spearmanr(data_1,data_2);
+                        else:
+                            print("distance measure not recognized");
+                            return;
+                    else:
+                        print('the number of components in sn_1 and sn_2 are not equal.');
+
+                    #check for nan in rho
+                    if np.isnan(rho): rho = 0.0;
+
+                    # add data to database
+                    tmp = {'analysis_id':analysis_id_I,
+                        'value_name':value_I,
+                        'component_name_1':cn_1,
+                        'component_name_2':cn_2,
+                        'component_group_name_1':component_group_names[cn_1_cnt],
+                        'component_group_name_2':component_group_names[cn_2_cnt],
+                        'distance_measure':distance_measure_I,
+                        'correlation_coefficient':rho,
+                        'pvalue':pval,
+                        'calculated_concentration_units':cu,
+                        'used_':True,
+                        'comment_':None};
+                    data_O.append(tmp)
+                
+                if data_O:
+                    # Pass 2: calculate the corrected p-values
+                    data_listDict = listDict(data_O);
+                    data_listDict.convert_listDict2DataFrame();
+                    pvalues = data_listDict.dataFrame['pvalue'].get_values();
+                    # call R
+                    r_calc.clear_workspace();
+                    r_calc.make_vectorFromList(pvalues,'pvalues');
+                    pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+                    # add in the corrected p-values
+                    data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                    data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                    data_listDict.convert_dataFrame2ListDict();
+                    data_pairwise_O.extend(data_listDict.get_listDict());
+
+        self.add_rows_table('data_stage02_quantification_pairWiseCorrelationFeatures',data_pairwise_O);
     def execute_pairwiseCorrelationReplicates(self,analysis_id_I,
             sample_name_abbreviations_I=[],
             sample_name_shorts_I=[],

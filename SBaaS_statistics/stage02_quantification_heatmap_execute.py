@@ -109,7 +109,11 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
                 order_sample_name_abbreviations_I=False,
                 order_component_names_I=False,
                 value_I = 'mean',
-                query_object_descStats_I = 'stage02_quantification_descriptiveStats_query'):
+                query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+                #testing...does not seem to have any benefit...
+                export_dendrogram_I = False,
+                convert_idCoord2DistanceAndNode_I = False
+                ):
         '''Execute hierarchical cluster on row and column data corresponding
         INPUT:
         analysis_id_I = string, analysis id
@@ -126,6 +130,8 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
         query_object_descStats_I = query objects to select the data descriptive statistics data
             options: 'stage02_quantification_descriptiveStats_query'
                      'stage02_quantification_dataPreProcessing_averages_query'
+        export_dendrogram_I = boolean, if True, the dendrogram will be exported
+        convert_idCoord2DistanceAndNode_I = boolean, if True, convert from i/dcoord to distance/node
         '''
 
         print('executing heatmap from descriptiveStats...');
@@ -204,5 +210,14 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
             dendrogram_row_1['comment_']=None;
             dendrogram_row_O.append(dendrogram_row_1);
         self.add_rows_table('data_stage02_quantification_heatmap_descriptiveStats',heatmap_O);
-        self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_col_O);
-        self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_row_O);
+        #Testing direct export of dendrogram
+        if export_dendrogram_I:
+            self.export_dataStage02QuantificationDendrogramDescriptiveStats_js(
+                analysis_id_I,
+                data_I=[dendrogram_col_O[0],dendrogram_row_O[0]]
+                );
+        else:
+            self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_col_O);
+            self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_row_O);
+        #self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_col_O);
+        #self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_row_O);

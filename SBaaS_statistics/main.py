@@ -47,33 +47,6 @@ from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_qua
 analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.datadir_settings);
 analysis01.initialize_supportedTables();
 analysis01.initialize_dataStage02_quantification_analysis();
-#read the analyses from .csv
-#analysis01.import_rows_table_add_csv('data_stage02_quantification_analysis',pg_settings.datadir_settings['workspace_data']+'/_input/151128_Quantification_ALEsKOs01_analysis01_test.csv');
-#analysis01.reset_dataStage02_quantification_analysis("ALEsKOs01_0_test");
-#analysis01.export_rows_tables_table_js(
-#    tables_I=['data_stage02_quantification_analysis'],
-#    query_I ={
-#            #'select':{'data_stage02_quantification_analysis':'analysis_id'},
-#            'select':[{'table_name':'data_stage02_quantification_analysis'}],
-#              'where':[{'table_name':'data_stage02_quantification_analysis',
-#                        'column_name':'analysis_id',
-#                        'value':"'ALEsKOs01_0'",
-#                        'operator':'LIKE',
-#                        'connector':'AND'
-#                        },
-#                        ],
-#              #'group_by':{'data_stage02_quantification_analysis':'analysis_id'},
-#              'order_by':[{'table_name':'data_stage02_quantification_analysis',
-#                            'column_name':'analysis_id',
-#                            'order':'ASC',
-#                            },
-#                        ],
-#              'limit':10.0,
-#               },
-#    data_dir_I = 'tmp',
-#    );
-
-
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute
@@ -190,8 +163,9 @@ pairWisePLS01.initialize_tables();
 
 analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
+    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
     #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-        'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
+        #'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
         #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
@@ -368,12 +342,51 @@ algorithm_test = [
     ]
 
 
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();#get RNAsequencing data
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();#get RNAsequencing data
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+      
+   # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+   #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
+   #         analysis_id_I = analysis_id,
+   #         warn_I=False);
+   # pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
+   #         sample_name_abbreviations_I=[],
+   #         calculated_concentration_units_I=['log2(FC)'],
+   #         component_names_I=[],
+   #         pvalue_corrected_description_I = "bonferroni",
+   #         redundancy_I=True,
+   #         distance_measure_I='pearson',
+   #         value_I = 'mean',
+   #         r_calc_I=r_calc,
+   #         query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'
+   #);
+    
+    #normalize the data
+    dpprep01.execute_normalization(
+            analysis_id,
+       calculated_concentration_units_I = ['count_cuffnorm','fpkm_cuffnorm'],
+            normalization_method_I='log2',
+            normalization_options_I={},
+            r_calc_I=r_calc
+            );
+
+    #heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
+    #heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);
+    #heatmap01.execute_heatmap_descriptiveStats(
+    #    analysis_id,
+    #    calculated_concentration_units_I=['log2(FC)'],
+    #    sample_name_abbreviations_I=[],
+    #    component_names_I=[],
+    #    order_componentNameBySampleNameAbbreviation_I = True,
+    #    order_sample_name_abbreviations_I=False,
+    #    order_component_names_I=False,
+    #    value_I = 'mean',
+    #    query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+    #    export_dendrogram_I = True)
 
     ## perform a correlation analysis
     #heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
@@ -570,4 +583,4 @@ for analysis_id in analysis_ids_run:
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
-descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
+#descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)

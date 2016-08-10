@@ -112,13 +112,18 @@ class stage02_quantification_heatmap_io(stage02_quantification_heatmap_query,sba
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(ddtheatmap.get_allObjects());
-    def export_dataStage02QuantificationDendrogramDescriptiveStats_js(self,analysis_id_I,data_dir_I='tmp'):
-        '''Export data as a dendrogram'''
+    def export_dataStage02QuantificationDendrogramDescriptiveStats_js(self,analysis_id_I,data_dir_I='tmp',data_I=[]):
+        '''Export data as a dendrogram
+        INPUT:
+        analysis_id_I
+        data_I = dendrogram data directly from the calculation
+        data_dir_I'''
 
         data_col_O = [];
         data_row_O = [];
         #get the dendrogram data for the analysis
-        data_tmp = self.get_rows_analysisID_dataStage02QuantificationDendrogramDescriptiveStats(analysis_id_I);
+        if data_I: data_tmp = data_I;
+        else: data_tmp = self.get_rows_analysisID_dataStage02QuantificationDendrogramDescriptiveStats(analysis_id_I);
 
         #convert from i/dcoord to distance/node
         for i,d in enumerate(data_tmp):

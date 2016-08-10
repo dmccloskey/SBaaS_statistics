@@ -17,6 +17,8 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
         tables_supported = {
                             'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
                             'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
+                            'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures,
+                            #'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures_replicates,
                         };
         self.set_supportedTables(tables_supported);
 

@@ -174,7 +174,8 @@ class data_stage02_quantification_dendrogram_descriptiveStats(Base):
     id = Column(Integer, Sequence('data_stage02_quantification_dendrogram_descriptiveStats_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     leaves = Column(postgresql.ARRAY(Float))
-    icoord = Column(postgresql.JSON)
+    icoord = Column(postgresql.JSON) #allowable byte size is exceeded for large data sets
+                                     #test using posgresql.BYTEA
     dcoord = Column(postgresql.JSON)
     ivl = Column(postgresql.ARRAY(String(100)))
     colors = Column(postgresql.ARRAY(String(25)))

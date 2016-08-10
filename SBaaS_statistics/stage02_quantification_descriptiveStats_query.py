@@ -380,6 +380,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
+    
     def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDescriptiveStats(self,
                 analysis_id_I,
                 calculated_concentration_units_I,
@@ -401,6 +402,21 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 data_stage02_quantification_descriptiveStats.component_name.asc(),
                 ).all();
             data_O=[d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDescriptiveStats(self, analysis_id_I,calculated_concentration_units_I,component_name_I):
+        """get rows by analysis_id, calculated_concentration_units, and component_name from data_stage02_quantification_descriptiveStats_averages"""
+        #Tested
+        try:
+            data = self.session.query(
+                    data_stage02_quantification_descriptiveStats_averages).filter(
+                    data_stage02_quantification_descriptiveStats_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats_averages.component_name.like(component_name_I),
+                    data_stage02_quantification_descriptiveStats_averages.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats_averages.sample_name_abbreviation.asc()).all();
+            data_O = [d.__repr__dict__() for d in data];
             return data_O;
         except SQLAlchemyError as e:
             print(e);

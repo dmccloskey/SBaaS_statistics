@@ -306,6 +306,7 @@ class stage02_quantification_count_io(stage02_quantification_count_query,
         
         # visualization parameters
         data1_keys = [
+                      'analysis_id',
                       'feature_id',
                       'feature_units',
                       'distance_measure',
@@ -318,7 +319,9 @@ class stage02_quantification_count_io(stage02_quantification_count_query,
             'zdata':'frequency',
             'rowslabel':'element_id',
             'columnslabel':'feature_id',};
-        data2_keys = ['feature_id',
+        data2_keys = [
+                      'analysis_id',
+                      'feature_id',
                       'feature_units',
                       'distance_measure',
                       'correlation_coefficient_threshold',
@@ -331,7 +334,7 @@ class stage02_quantification_count_io(stage02_quantification_count_query,
         data2_keymap = {
                 'xdata':'element_id',
                 'ydata':'frequency',
-                'serieslabel':'feature_id',
+                'serieslabel':'analysis_id',
                 'featureslabel':'element_id',
                 'ydatalb':None,
                 'ydataub':None};

@@ -906,5 +906,31 @@ class stage02_quantification_correlation_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_componentNamesAndPatternMatchDescriptionAndCorrelationCoefficient_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnits_dataStage02QuantificationCorrelationPattern(self,analysis_id_I,
+        calculated_concentration_units_I,distance_measure_I):
+        '''Query rows that are used from the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_correlationPattern.component_name,
+                    data_stage02_quantification_correlationPattern.correlation_coefficient,
+                    data_stage02_quantification_correlationPattern.pattern_match_description).filter(
+                    data_stage02_quantification_correlationPattern.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_correlationPattern.distance_measure.like(distance_measure_I),
+                    data_stage02_quantification_correlationPattern.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_correlationPattern.used_.is_(True),
+                    data_stage02_quantification_correlationPattern.pattern_match_description != None).order_by(
+                    data_stage02_quantification_correlationPattern.component_name.asc(),
+                    data_stage02_quantification_correlationPattern.pattern_match_description.asc(),
+                    data_stage02_quantification_correlationPattern.correlation_coefficient.asc()).all();
+            rows_O = [];
+            if data: 
+                for d in data:
+                    tmp = {};
+                    tmp['pattern_match_description']=d.pattern_match_description;
+                    tmp['correlation_coefficient']=d.correlation_coefficient;
+                    tmp['component_name']=d.component_name;
+                    rows_O.append(tmp)
+            return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
    
 

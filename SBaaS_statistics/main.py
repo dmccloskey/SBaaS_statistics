@@ -146,6 +146,12 @@ corr01 = stage02_quantification_correlation_execute(session,engine,pg_settings.d
 corr01.initialize_supportedTables();
 corr01.initialize_tables();
 
+#make the count tables 
+from SBaaS_statistics.stage02_quantification_count_execute import stage02_quantification_count_execute
+count01 = stage02_quantification_count_execute(session,engine,pg_settings.datadir_settings);
+count01.initialize_supportedTables();
+count01.initialize_tables();
+
 #make the spls table 
 from SBaaS_statistics.stage02_quantification_spls_execute import stage02_quantification_spls_execute
 spls01 = stage02_quantification_spls_execute(session,engine,pg_settings.datadir_settings);
@@ -163,8 +169,8 @@ pairWisePLS01.initialize_tables();
 
 analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
-    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
-    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
+    #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
+    'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
         #'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
         #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
         #'ALEsKOs01_0_11_evo04pgi',
@@ -342,12 +348,36 @@ algorithm_test = [
     ]
 
 
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();#get RNAsequencing data
+## Load R once
+#from r_statistics.r_interface import r_interface
+#r_calc = r_interface();#get RNAsequencing data
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+
+    # count parameters
+    feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];
+    features_countCorrelationProfile = ['profile_match', 'component_match', 'profile_match_description'];
+    features_countCorrelationTrend = ['trend_match', 'component_match', 'trend_match_description'];
+    features_countCorrelationPattern = ['pattern_match', 'component_match', 'pattern_match_description'];
+    distance_measures=[
+        #'spearman',
+        'pearson'
+        ];
+    correlation_coefficient_thresholds={
+        '>':0.88,
+        #'<':-0.8,
+        } #correlation_coefficient > 0.88 = pvalue < 0.05
+
+    # count the patterns
+    count01.reset_dataStage02_quantification_countCorrelationPattern(analysis_id_I = analysis_id);
+    count01.execute_countElementsInFeatures_correlationPattern(
+        analysis_id_I = analysis_id,
+        features_I = features_countCorrelationPattern,
+        feature_units_I = feature_units,
+        distance_measures_I = distance_measures,
+        correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
+        );
       
    # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
    #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
@@ -364,15 +394,6 @@ for analysis_id in analysis_ids_run:
    #         r_calc_I=r_calc,
    #         query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'
    #);
-    
-    #normalize the data
-    dpprep01.execute_normalization(
-            analysis_id,
-       calculated_concentration_units_I = ['count_cuffnorm','fpkm_cuffnorm'],
-            normalization_method_I='log2',
-            normalization_options_I={},
-            r_calc_I=r_calc
-            );
 
     #heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
     #heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);

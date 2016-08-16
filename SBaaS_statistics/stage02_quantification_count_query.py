@@ -334,7 +334,9 @@ class stage02_quantification_count_query(sbaas_template_query):
         try:
             data = self.session.query(data_stage02_quantification_countCorrelationPattern).filter(
                     data_stage02_quantification_countCorrelationPattern.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_countCorrelationPattern.used_.is_(True)).all();
+                    data_stage02_quantification_countCorrelationPattern.used_.is_(True)).order_by(
+                    data_stage02_quantification_countCorrelationPattern.analysis_id.asc(),
+                    data_stage02_quantification_countCorrelationPattern.element_id.asc()).all();
             rows_O = [];
             if data: 
                 for d in data:
@@ -347,7 +349,10 @@ class stage02_quantification_count_query(sbaas_template_query):
         try:
             data = self.session.query(data_stage02_quantification_countCorrelationPattern).filter(
                     data_stage02_quantification_countCorrelationPattern.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_countCorrelationPattern.used_.is_(True)).all();
+                    data_stage02_quantification_countCorrelationPattern.used_.is_(True)).order_by(
+                    data_stage02_quantification_countCorrelationPattern.analysis_id.asc(),
+                    data_stage02_quantification_countCorrelationPattern.element_id.asc()).all();
+            rows_O = [];
             rows_O = {};
             if data: 
                 for d in data:

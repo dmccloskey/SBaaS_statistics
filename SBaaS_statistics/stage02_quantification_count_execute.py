@@ -206,6 +206,8 @@ class stage02_quantification_count_execute(
         supported_comparators = ['>','<']
         data_O = [];
         calculatecount = calculate_count();
+        #TODO: query the data
+
         #count each element of eachfeature
         for features_cnt,features in enumerate(features_I):
             if features == 'pattern_match':
@@ -234,9 +236,13 @@ class stage02_quantification_count_execute(
                             if not k in supported_comparators:
                                 print(k + " not yet supported");
                                 continue;
-                            #get all the data for the analysis
+                            #get all the data for the analysis that meet the thresholds
                             data_count = [];
-                            data_count= self.get_allPatternMatchDescription_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnitsAndComparatorAndCorrelationCoefficient_dataStage02QuantificationCorrelationPattern(analysis_id_I,feature_units,distance,k,v);
+                            data_count = self.get_allPatternMatchDescription_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnitsAndComparatorAndCorrelationCoefficient_dataStage02QuantificationCorrelationPattern(analysis_id_I,feature_units,distance,k,v);
+                            #count the number of components that meet none of the thresholds
+                            unchanged_count = [];
+                            unchanged_count = self._countUnchangedElementsInFeatures_correlationPattern(analysis_id_I,feature_units,distance,k,v);
+                            data_count.extend(unchanged_count);
                             #count the elements of each feature
                             if data_count:
                                 elements_unqiue,elements_count ,elements_count_fraction = calculatecount.count_elements(data_count);
@@ -246,6 +252,7 @@ class stage02_quantification_count_execute(
                                         features,feature_units,
                                         distance,correlationCoefficient_threshold_string,
                                         elements_unqiue,elements_count,elements_count_fraction)) ;
+
             elif features == 'component_match':
                 for feature_units in feature_units_I:
                     for distance in distance_measures_I:
@@ -265,10 +272,32 @@ class stage02_quantification_count_execute(
                                         features,feature_units,
                                         distance,correlationCoefficient_threshold_string,
                                         elements_unqiue,elements_count,elements_count_fraction)) ;
+
             else:
                 print("feature not yet supported");
         #add the data to the database
         self.add_dataStage02QuantificationCountCorrelationPattern(data_O);
+    def _countUnchangedElementsInFeatures_correlationPattern(
+        self,analysis_id_I,feature_units,distance,comparator,value):
+        '''Count the number of components that do not meet the given thresholds
+        '''
+        data_count = [];
+        component_correlations = [];
+        component_correlations = self.get_componentNamesAndPatternMatchDescriptionAndCorrelationCoefficient_analysisIDAndDistanceMeasureAndCalculatedConcentrationUnits_dataStage02QuantificationCorrelationPattern(
+            analysis_id_I,feature_units,distance)
+        unchanged_dict = {};
+        for component_correlation in component_correlations:
+            if not component_correlation['component_name'] in unchanged_dict.keys():
+                unchanged_dict[component_correlation['component_name']]=0;
+            if comparator=='>':
+                if component_correlation['correlation_coefficient']>value:
+                    unchanged_dict[component_correlation['component_name']]+=1
+            elif comparator=='<':
+                if component_correlation['correlation_coefficient']<value:
+                    unchanged_dict[component_correlation['component_name']]+=1
+        for component,cnt in unchanged_dict.items():
+            if cnt==0: data_count.append('unchanged');
+        return data_count;
 
     def execute_countElementsInFeatures_replicates(self,
             analysis_id_I,

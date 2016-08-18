@@ -107,8 +107,8 @@ class stage02_quantification_histogram_execute(
                     data_hist = [];
                     if hasattr(query_instance_descStats, 'get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                         data_hist = query_instance_descStats.get_allMedians_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,feature_units);
-                    #elif hasattr(query_instance_descStats, 'get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
-                    #    data_hist = query_instance_descStats.get_allMeans_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
+                    elif hasattr(query_instance_descStats, 'get_allMedians_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                        data_hist = query_instance_descStats.get_allMedians_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,feature_units);
                     else:
                         print('query instance does not have the required method.');
                     #make the bins for the histogram

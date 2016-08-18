@@ -27,6 +27,7 @@ sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_isotopomer')
 sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_statistics')
 sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_models')
 sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_MFA')
+sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_COBRA')
 sys.path.append(pg_settings.datadir_settings['github']+'/SBaaS_thermodynamics')
 # SBaaS dependencies paths:
 sys.path.append(pg_settings.datadir_settings['github']+'/sequencing_utilities')
@@ -165,24 +166,17 @@ pairWisePLS01.initialize_supportedTables();
 #pairWisePLS01.drop_tables();
 pairWisePLS01.initialize_tables();
 
-
+#make the histogram table
+from SBaaS_statistics.stage02_quantification_histogram_execute import stage02_quantification_histogram_execute
+hist01 = stage02_quantification_histogram_execute(session,engine,pg_settings.datadir_settings);
+hist01.initialize_supportedTables();
+hist01.initialize_tables();
 
 analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
     #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
-    'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-        #'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
-        #"ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01",
-        #'ALEsKOs01_0_11_evo04pgi',
-        #"ALEsKOs01_0-1-2-11_evo04pgiEvo01",
-        #'ALEsKOs01_0_evo04_0_11_evo04pgi',
-        #'ALEsKOs01_0',
-        #'ALEsKOs01_0_11',
-        #'ALEsKOs01',
-        #"rpomut02",
-        #"chemoCLim01",
-        #"chemoNLim01",
-        #"rpomut01",
+    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
+    'ALEsKOs01_sampledFluxes_0_11_evo04',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -209,15 +203,6 @@ distance_measures=[
     'pearson'
     ];
 correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient > 0.88 = pvalue < 0.05
-
-#RNAsequencing
-mv_value_operator = [
-    {'value':None,'operator':'NA','feature':'mean'},
-    #{'value':0.0,'operator':'<='},
-    ]
-features_histogram = ['calculated_concentration'];
-feature_units = ['FPKM','FPKM_log2_normalized'];
-n_bins_histogram = [];
 
 covariance_model = [
     {'data_matrix_shape':'featuresBySamples','model':"MinCovDet",'method':"MinCovDet",'options':None},
@@ -348,36 +333,59 @@ algorithm_test = [
     ]
 
 
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();#get RNAsequencing data
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
+
+# define histogram and count variables
+features_histogram = [
+    'mean',
+    'median'
+];
+feature_units = ['mmol*gDCW-1*hr-1'];
+n_bins_histogram = [];
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-
-    # count parameters
-    feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];
-    features_countCorrelationProfile = ['profile_match', 'component_match', 'profile_match_description'];
-    features_countCorrelationTrend = ['trend_match', 'component_match', 'trend_match_description'];
-    features_countCorrelationPattern = ['pattern_match', 'component_match', 'pattern_match_description'];
-    distance_measures=[
-        #'spearman',
-        'pearson'
-        ];
-    correlation_coefficient_thresholds={
-        '>':0.88,
-        #'<':-0.8,
-        } #correlation_coefficient > 0.88 = pvalue < 0.05
-
-    # count the patterns
-    count01.reset_dataStage02_quantification_countCorrelationPattern(analysis_id_I = analysis_id);
-    count01.execute_countElementsInFeatures_correlationPattern(
+    
+    dppave01.execute_normalization(
         analysis_id_I = analysis_id,
-        features_I = features_countCorrelationPattern,
-        feature_units_I = feature_units,
-        distance_measures_I = distance_measures,
-        correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
-        );
+        feature_I = 'mean',
+        calculated_concentration_units_I=['mmol*gDW-1*hr-1'],
+        normalization_method_I="FC-mean",
+        normalization_options_I={
+        'type':"geometric", #required due to + and - flux values
+        'scale_values':None,
+        'scale_fold_change':None, #cannot use any log normalization on -
+                                  #values
+        'sample_name_abbreviation_FC':'OxicEvo04EcoliGlc',
+        'experiment_id_FC':'ALEsKOs01',
+        'time_point_FC':'0'},
+        r_calc_I=r_calc) 
+
+    ## count parameters
+    #feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];
+    #features_countCorrelationProfile = ['profile_match', 'component_match', 'profile_match_description'];
+    #features_countCorrelationTrend = ['trend_match', 'component_match', 'trend_match_description'];
+    #features_countCorrelationPattern = ['pattern_match', 'component_match', 'pattern_match_description'];
+    #distance_measures=[
+    #    #'spearman',
+    #    'pearson'
+    #    ];
+    #correlation_coefficient_thresholds={
+    #    '>':0.88,
+    #    #'<':-0.8,
+    #    } #correlation_coefficient > 0.88 = pvalue < 0.05
+
+    ## count the patterns
+    #count01.reset_dataStage02_quantification_countCorrelationPattern(analysis_id_I = analysis_id);
+    #count01.execute_countElementsInFeatures_correlationPattern(
+    #    analysis_id_I = analysis_id,
+    #    features_I = features_countCorrelationPattern,
+    #    feature_units_I = feature_units,
+    #    distance_measures_I = distance_measures,
+    #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
+    #    );
       
    # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
    #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 

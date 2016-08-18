@@ -197,6 +197,58 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                     d['calculated_concentration_units'] = normalized_units;
                     d['imputation_method'] = None;
                 data_normalized.extend(data);
+            #TODO: add support for LB,UB,IQ1,IQ3,Min,Max
+            elif normalization_method_I in ["FC-median",\
+                "FC-mean","FC-mode","log2(FC-median)","log2(FC-mean)","log2(FC-mode)"]:
+                #query the sample data to perform the fold-change
+                dpave_list = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingAverages(
+                        analysis_id_I,
+                        cu,
+                        normalization_options_I['experiment_id_FC'],
+                        normalization_options_I['sample_name_abbreviation_FC'],
+                        normalization_options_I['time_point_FC'],
+                        )
+                dpave_dict = {row['component_name']:row for row in dpave_list};
+                for d in data:
+                    #query the mean/meadian from descriptive stats
+                    desc_stats = [];
+                    #desc_stats = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentName_dataStage02QuantificationDataPreProcessingAverages(
+                    #    analysis_id_I,
+                    #    cu,
+                    #    normalization_options_I['experiment_id_FC'],
+                    #    normalization_options_I['sample_name_abbreviation_FC'],
+                    #    normalization_options_I['time_point_FC'],
+                    #    d['component_name']
+                    #    )
+                    desc_stats = dpave_dict[d['component_name']];
+                    ##check
+                    #if d['component_name'] == '6pgc.6pgc_1.Light':
+                    #    print('check');
+                    if normalization_method_I in ["FC-median","log2(FC-median)"]:
+                        data_1 = desc_stats['median'];
+                    elif normalization_method_I in ["FC-mean","log2(FC-mean)"]:
+                        data_1 = desc_stats['mean'];
+                    elif normalization_method_I in ["FC-mode","log2(FC-mode)"]:
+                        data_1 = desc_stats['mode'];
+                    normalized_value = python_calc.calculate_foldChange(
+                            data_1,
+                            d[feature_I],
+                            type_I = normalization_options_I['type'], # e.g., 'relative'
+                            scale_values_I = normalization_options_I['scale_values'], # e.g. None
+                            scale_fold_change_I = normalization_options_I['scale_fold_change'], #e.g. "log2"
+                            );
+                    if 'min_value' in normalization_options_I.keys():
+                        if normalized_value < normalization_options_I['min_value']:
+                            normalized_value = normalization_options_I['min_value']
+                    if 'max_value' in normalization_options_I.keys():
+                        if normalized_value > normalization_options_I['max_value']:
+                            normalized_value = normalization_options_I['max_value']
+                    normalized_units = ('%s_%s_%s' %(d['calculated_concentration_units'],normalization_method_I,'normalized'));
+                    d[feature_I] = normalized_value;
+                    d['calculated_concentration_units'] = normalized_units;
+                    d['imputation_method'] = None;
+                    d['used_'] = True;
+                data_normalized.extend(data);
             else:
                 print('normalization_method_I not recognized');
                 continue;

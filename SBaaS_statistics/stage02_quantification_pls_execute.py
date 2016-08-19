@@ -1,39 +1,41 @@
 
 from .stage02_quantification_pls_io import stage02_quantification_pls_io
-from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
-from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from listDict.listDict import listDict
+import copy
 
-class stage02_quantification_pls_execute(stage02_quantification_pls_io,
-                                         #stage02_quantification_normalization_query,
-                                         stage02_quantification_analysis_query):
+class stage02_quantification_pls_execute(stage02_quantification_pls_io):
     #TODO:
     #1. refactor into execute_plsHyperparameter
     #2. refactor into execute_pls
-    def execute_plsda(self,analysis_id_I,
-                    concentration_units_I=[],
-                    r_calc_I=None,
-                    pls_model_I = 'PLS-DA',
-                    response_I = None,
-                    factor_I= "sample_name_abbreviation",
-                    ncomp = 5,
-                    Y_add = "NULL",
-                    scale = "TRUE",
-                    #validation = "LOO",
-                    validation = "CV",
-                    segments = 10,
-                    method = "cppls",
-                    stripped = "FALSE",
-                    lower = 0.5,
-                    upper = 0.5, 
-                    trunc_pow = "FALSE", 
-                    weights = "NULL",
-                    p_method = "fdr",
-                    nperm = 999):
+    def execute_plsda(self,
+            analysis_id_I,
+            concentration_units_I=[],
+            r_calc_I=None,
+            pls_model_I = 'PLS-DA',
+            response_I = None,
+            factor_I= "sample_name_abbreviation",
+            ncomp = 5,
+            Y_add = "NULL",
+            scale = "TRUE",
+            #validation = "LOO",
+            validation = "CV",
+            segments = 10,
+            method = "cppls",
+            stripped = "FALSE",
+            lower = 0.5,
+            upper = 0.5, 
+            trunc_pow = "FALSE", 
+            weights = "NULL",
+            p_method = "fdr",
+            nperm = 999,
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            ):
         '''execute pls using R
         INPUT:
         analysis_id_I
@@ -48,7 +50,17 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io,
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         
-        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
+                        'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
+
+        descStats_replicate_keys = ['median','iq_1','iq_3','min','max']
         
         data_scores_O = [];
         data_loadings_O = [];
@@ -56,23 +68,47 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io,
         data_vip_O = [];
         data_coefficients_O = [];
         data_loadings_factors_O = [];
-        # get the analysis information
-        analysis_info = [];
-        analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
-        # query metabolomics data from glogNormalization
         # get concentration units
         if concentration_units_I:
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
-            #concentration_units = self.get_concentrationUnits_analysisID_dataStage02GlogNormalized(analysis_id_I);
+            #concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         for cu in concentration_units:
             print('calculating pls for concentration_units ' + cu);
             data = [];
             # get data:
-            data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
-            #data = self.get_RExpressionData_analysisIDAndUnits_dataStage02GlogNormalized(analysis_id_I,cu);
+            #data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+                data = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                data_tmp = [];
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+                for d in data_tmp:
+                    for i,k in enumerate(descStats_replicate_keys):
+                        tmp = copy.copy(d);
+                        tmp['calculated_concentration']=tmp[k];
+                        tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                        data.append(tmp);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                data_tmp = [];
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+                for d in data_tmp:
+                    for i,k in enumerate(descStats_replicate_keys):
+                        tmp = copy.copy(d);
+                        tmp['calculated_concentration']=tmp[k];
+                        tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+            else:
+                print('query instance does not have the required method.');
+            
             # will need to refactor in the future...
             if type(data)==type(listDict()):
                 data.convert_dataFrame2ListDict()

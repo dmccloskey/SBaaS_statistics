@@ -192,8 +192,15 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
             elif normalization_method_I in ["log2","log10","ln","abs","exp","exp2","^10","^2","sqrt"]:
                 for d in data:
                     normalized_value = python_calc.scale_values(d[feature_I],normalization_method_I);
+                    d[feature_I] = normalized_value;
+                    if type(feature_I)==type(''):
+                        normalized_value = python_calc.scale_values(d[feature_I],normalization_method_I);
+                        d[feature_I] = normalized_value;
+                    elif type(feature_I)==type([]):
+                        for feature in feature_I:
+                            normalized_value = python_calc.scale_values(d[feature],normalization_method_I);
+                            d[feature] = normalized_value;
                     normalized_units = ('%s_%s_%s' %(d['calculated_concentration_units'],normalization_method_I,'normalized'));
-                    d['calculated_concentration'] = normalized_value;
                     d['calculated_concentration_units'] = normalized_units;
                     d['imputation_method'] = None;
                 data_normalized.extend(data);
@@ -212,14 +219,6 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                 for d in data:
                     #query the mean/meadian from descriptive stats
                     desc_stats = [];
-                    #desc_stats = self.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentName_dataStage02QuantificationDataPreProcessingAverages(
-                    #    analysis_id_I,
-                    #    cu,
-                    #    normalization_options_I['experiment_id_FC'],
-                    #    normalization_options_I['sample_name_abbreviation_FC'],
-                    #    normalization_options_I['time_point_FC'],
-                    #    d['component_name']
-                    #    )
                     desc_stats = dpave_dict[d['component_name']];
                     ##check
                     #if d['component_name'] == '6pgc.6pgc_1.Light':
@@ -230,21 +229,38 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
                         data_1 = desc_stats['mean'];
                     elif normalization_method_I in ["FC-mode","log2(FC-mode)"]:
                         data_1 = desc_stats['mode'];
-                    normalized_value = python_calc.calculate_foldChange(
+                    if type(feature_I)==type(''):
+                        normalized_value = python_calc.calculate_foldChange(
                             data_1,
                             d[feature_I],
                             type_I = normalization_options_I['type'], # e.g., 'relative'
                             scale_values_I = normalization_options_I['scale_values'], # e.g. None
                             scale_fold_change_I = normalization_options_I['scale_fold_change'], #e.g. "log2"
                             );
-                    if 'min_value' in normalization_options_I.keys():
-                        if normalized_value < normalization_options_I['min_value']:
-                            normalized_value = normalization_options_I['min_value']
-                    if 'max_value' in normalization_options_I.keys():
-                        if normalized_value > normalization_options_I['max_value']:
-                            normalized_value = normalization_options_I['max_value']
+                        if 'min_value' in normalization_options_I.keys():
+                            if normalized_value < normalization_options_I['min_value']:
+                                normalized_value = normalization_options_I['min_value']
+                        if 'max_value' in normalization_options_I.keys():
+                            if normalized_value > normalization_options_I['max_value']:
+                                normalized_value = normalization_options_I['max_value']
+                        d[feature_I] = normalized_value;
+                    elif type(feature_I)==type([]):
+                        for feature in feature_I:
+                            normalized_value = python_calc.calculate_foldChange(
+                                data_1,
+                                d[feature],
+                                type_I = normalization_options_I['type'], # e.g., 'relative'
+                                scale_values_I = normalization_options_I['scale_values'], # e.g. None
+                                scale_fold_change_I = normalization_options_I['scale_fold_change'], #e.g. "log2"
+                                );
+                            if 'min_value' in normalization_options_I.keys():
+                                if normalized_value < normalization_options_I['min_value']:
+                                    normalized_value = normalization_options_I['min_value']
+                            if 'max_value' in normalization_options_I.keys():
+                                if normalized_value > normalization_options_I['max_value']:
+                                    normalized_value = normalization_options_I['max_value']
+                            d[feature] = normalized_value;
                     normalized_units = ('%s_%s_%s' %(d['calculated_concentration_units'],normalization_method_I,'normalized'));
-                    d[feature_I] = normalized_value;
                     d['calculated_concentration_units'] = normalized_units;
                     d['imputation_method'] = None;
                     d['used_'] = True;

@@ -380,7 +380,6 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
-    
     def get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDescriptiveStats(self,
                 analysis_id_I,
                 calculated_concentration_units_I,
@@ -443,6 +442,41 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 data_stage02_quantification_descriptiveStats.component_name.asc(),
                 ).all();
             data_O=[d.__repr__dict__() for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);
+    def get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,
+                analysis_id_I,calculated_concentration_units_I,
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                component_names_I=[],
+                component_group_names_I=[],
+                time_points_I=[],):
+        """get analysis_id, experiment_id, sample_name_abbreviation, time_point, component_name, component_group_name,
+        [descriptive_statistics], and calculated_concentration units from data_stage02_quantification_descriptiveStats
+        INPUT:
+        analysis_id
+        calculated_concentration_units
+        OPTIONAL INPUT:
+        experiment_ids_I
+        sample_name_abbreviations_I
+        time_points_I
+        """
+        try:
+            data = self.session.query(data_stage02_quantification_descriptiveStats).filter(
+                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats.used_.is_(True)).all();
+            data_O = [];
+            if data:
+                data_O = listDict(listDict_I=[d.__repr__dict__() for d in data]);
+                data_O.convert_listDict2DataFrame();
+                data_O.filterIn_byDictList({'experiment_id':experiment_ids_I,
+                                            'sample_name_abbreviation':sample_name_abbreviations_I,
+                                           'component_name':component_names_I,
+                                           'component_group_name':component_group_names_I,
+                                           'time_point':time_points_I,
+                                           });
             return data_O;
         except SQLAlchemyError as e:
             print(e);

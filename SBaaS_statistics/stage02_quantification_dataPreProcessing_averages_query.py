@@ -964,6 +964,23 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_allCVs_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+            analysis_id_I,
+            calculated_concentration_units_I):
+        '''Query all CVs by analysis_id and calculated_concentration_units that are used'''
+        try:
+            data = self.session.query(data_stage02_quantification_dataPreProcessing_averages.cv).filter(
+                    data_stage02_quantification_dataPreProcessing_averages.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_dataPreProcessing_averages.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_dataPreProcessing_averages.used_.is_(True)).order_by(
+                    data_stage02_quantification_dataPreProcessing_averages.cv).all();
+            rows_O = [];
+            if data: 
+                for d in data:
+                    rows_O.append(d.cv);
+            return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
     def get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(self, analysis_id_I):
         """query calculated_concentration_units by analysis id from """
         try:

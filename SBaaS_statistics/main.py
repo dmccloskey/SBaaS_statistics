@@ -176,7 +176,7 @@ analysis_ids_run = [
     #"ALEsKOs01_DNAResequencing_0_11",
     #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
     #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-    'ALEsKOs01_sampledFluxes_0_11_evo04',
+    'ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04gnd',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -337,31 +337,39 @@ algorithm_test = [
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
-# define histogram and count variables
-features_histogram = [
-    'mean',
-    'median'
-];
-feature_units = ['mmol*gDCW-1*hr-1'];
-n_bins_histogram = [];
-
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    
-    dppave01.execute_normalization(
-        analysis_id_I = analysis_id,
-        feature_I = 'mean',
-        calculated_concentration_units_I=['mmol*gDW-1*hr-1'],
-        normalization_method_I="FC-mean",
-        normalization_options_I={
-        'type':"geometric", #required due to + and - flux values
-        'scale_values':None,
-        'scale_fold_change':None, #cannot use any log normalization on -
-                                  #values
-        'sample_name_abbreviation_FC':'OxicEvo04EcoliGlc',
-        'experiment_id_FC':'ALEsKOs01',
-        'time_point_FC':'0'},
-        r_calc_I=r_calc) 
+
+    # perform a pls-da analysis
+    pls01.reset_dataStage02_quantification_pls_scores(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_loadings(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_validation(analysis_id);
+    pls01.reset_dataStage02_quantification_pls_vip(analysis_id_I=analysis_id);
+    pls01.reset_dataStage02_quantification_pls_loadingsResponse(analysis_id_I=analysis_id);
+    pls01.reset_dataStage02_quantification_pls_coefficients(analysis_id_I=analysis_id);
+    for k,v in pls_model_method.items():
+        pls01.execute_plsda(
+            analysis_id_I = analysis_id,
+            concentration_units_I=['mmol*gDW-1*hr-1'],
+            r_calc_I=r_calc,
+            pls_model_I = k,
+            method = v,
+            response_I = None,
+            factor_I= "sample_name_abbreviation",
+            ncomp = 7,
+            Y_add = "NULL",
+            scale = "TRUE",
+            validation = "CV",
+            segments = 10,
+            stripped = "FALSE",
+            lower = 0.5,
+            upper = 0.5, 
+            trunc_pow = "FALSE", 
+            weights = "NULL",
+            p_method = "fdr",
+            nperm = 999,
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+    );
 
     ## count parameters
     #feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];

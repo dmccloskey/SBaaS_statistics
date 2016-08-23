@@ -1,10 +1,13 @@
 
 from .stage02_quantification_pairWisePLS_io import stage02_quantification_pairWisePLS_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from listDict.listDict import listDict
+import copy
 
 class stage02_quantification_pairWisePLS_execute(stage02_quantification_pairWisePLS_io,):
     #TODO:
@@ -33,7 +36,9 @@ class stage02_quantification_pairWisePLS_execute(stage02_quantification_pairWise
                     trunc_pow = "FALSE", 
                     weights = "NULL",
                     p_method = "fdr",
-                    nperm = 999):
+                    nperm = 999,
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            ):
         '''execute a pairwise pls using R
         INPUT:
         analysis_id_I
@@ -57,22 +62,49 @@ class stage02_quantification_pairWisePLS_execute(stage02_quantification_pairWise
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         
-        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
-        quantification_dataPreProcessing_replicates_query.initialize_supportedTables();
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
+                        'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
 
+        descStats_replicate_keys = ['median','iq_1','iq_3','min','max']
         data_pairwise_O = [];
         # get concentration units
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            #concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             print('calculating pairwisePls for concentration_units ' + cu);
             # get sample_name_abbreviations:
-            sample_name_abbreviations=[];
-            sample_name_abbreviations=quantification_dataPreProcessing_replicates_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,cu);
+            if sample_name_abbreviations_I:
+                sample_name_abbreviations = sample_name_abbreviations_I;
+            else:
+                sample_name_abbreviations=[];
+                #sample_name_abbreviations=quantification_dataPreProcessing_replicates_query.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                #    analysis_id_I,cu);
+                if hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+                    sample_name_abbreviations = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+                elif hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                    sample_name_abbreviations = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+                elif hasattr(query_instance_descStats, 'get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                    sample_name_abbreviations = query_instance_descStats.get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+                else:
+                    print('query instance does not have the required method.');
             #if sample_name_abbreviation_control_I:
             #    sample_name_abbreviations_1 = [sna for sna in [sample_name_abbreviation_control_I]];
             #    if len(sample_name_abbreviations_1)<1:
@@ -96,11 +128,54 @@ class stage02_quantification_pairWisePLS_execute(stage02_quantification_pairWise
 
                     # get data:
                     data_1,data_2 = [],[];
-                    data_1 = quantification_dataPreProcessing_replicates_query.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
-                        analysis_id_I,cu,sna_1);
-                    data_2 = quantification_dataPreProcessing_replicates_query.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
-                        analysis_id_I,cu,sna_2);
-                    data_1.extend(data_2);
+                    #data_1 = quantification_dataPreProcessing_replicates_query.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                    #    analysis_id_I,cu,sna_1);
+                    #data_2 = quantification_dataPreProcessing_replicates_query.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                    #    analysis_id_I,cu,sna_2);
+                    if hasattr(query_instance_descStats, 'get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates'):
+                        data_1 = query_instance_descStats.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                            analysis_id_I,cu,sna_1);
+                        data_2 = query_instance_descStats.get_rowsAndSampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingReplicates(
+                            analysis_id_I,cu,sna_2);
+                        data_1.extend(data_2);
+                    elif hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats'):
+                        data_1_tmp = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(
+                            analysis_id_I,cu,sna_1);
+                        data_2_tmp = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(
+                            analysis_id_I,cu,sna_2);
+                        if type(data_1_tmp)==type(listDict()):
+                            data_1_tmp.convert_dataFrame2ListDict()
+                            data_1_tmp = data_1_tmp.get_listDict();
+                        if type(data_2_tmp)==type(listDict()):
+                            data_2_tmp.convert_dataFrame2ListDict()
+                            data_2_tmp = data_2_tmp.get_listDict();
+                        data_1_tmp.extend(data_2_tmp);
+                        for d in data_1_tmp:
+                            for i,k in enumerate(descStats_replicate_keys):
+                                tmp = copy.copy(d);
+                                tmp['calculated_concentration']=tmp[k];
+                                tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                                data_1.append(tmp);
+                    elif hasattr(query_instance_descStats, 'get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages'):
+                        data_1_tmp = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
+                            analysis_id_I,cu,sna_1);
+                        data_2_tmp = query_instance_descStats.get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDataPreProcessingAverages(
+                            analysis_id_I,cu,sna_2);
+                        if type(data_1_tmp)==type(listDict()):
+                            data_1_tmp.convert_dataFrame2ListDict()
+                            data_1_tmp = data_1_tmp.get_listDict();
+                        if type(data_2_tmp)==type(listDict()):
+                            data_2_tmp.convert_dataFrame2ListDict()
+                            data_2_tmp = data_2_tmp.get_listDict();
+                        data_1_tmp.extend(data_2_tmp);
+                        for d in data_1_tmp:
+                            for i,k in enumerate(descStats_replicate_keys):
+                                tmp = copy.copy(d);
+                                tmp['calculated_concentration']=tmp[k];
+                                tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                                data_1.append(tmp);
+                    else:
+                        print('query instance does not have the required method.');
 
                     # call R
                     #TODO: add option parameters

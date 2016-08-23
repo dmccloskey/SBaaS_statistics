@@ -92,6 +92,9 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io):
             elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
                 data_tmp = [];
                 data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+                if type(data_tmp)==type(listDict()):
+                    data_tmp.convert_dataFrame2ListDict()
+                    data_tmp = data_tmp.get_listDict();
                 for d in data_tmp:
                     for i,k in enumerate(descStats_replicate_keys):
                         tmp = copy.copy(d);
@@ -101,11 +104,15 @@ class stage02_quantification_pls_execute(stage02_quantification_pls_io):
             elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
                 data_tmp = [];
                 data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+                if type(data_tmp)==type(listDict()):
+                    data_tmp.convert_dataFrame2ListDict()
+                    data_tmp = data_tmp.get_listDict();
                 for d in data_tmp:
                     for i,k in enumerate(descStats_replicate_keys):
                         tmp = copy.copy(d);
                         tmp['calculated_concentration']=tmp[k];
                         tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                        data.append(tmp);
             else:
                 print('query instance does not have the required method.');
             

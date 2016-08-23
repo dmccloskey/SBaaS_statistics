@@ -2,11 +2,14 @@
 from .stage02_quantification_pca_io import stage02_quantification_pca_io
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
 from matplotlib_utilities.matplot import matplot
 from listDict.listDict import listDict
+import copy
 
 class stage02_quantification_pca_execute(stage02_quantification_pca_io,
                                          stage02_quantification_analysis_query):
@@ -19,15 +22,26 @@ class stage02_quantification_pca_execute(stage02_quantification_pca_io,
                     center="TRUE",
                     segments="10",
                     nruncv="1",
-                    crossValidation_type="krzanowski",):
+                    crossValidation_type="krzanowski",
+            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            ):
         '''execute pca using R'''
 
         print('execute_pca...')
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         
-        quantification_dataPreProcessing_replicates_query=stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
+                        'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
 
+        descStats_replicate_keys = ['median','iq_1','iq_3','min','max']
         data_scores_O = [];
         data_loadings_O = [];
         data_validation_O = [];
@@ -40,12 +54,47 @@ class stage02_quantification_pca_execute(stage02_quantification_pca_io,
             concentration_units = concentration_units_I;
         else:
             concentration_units = [];
-            concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            #concentration_units = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         for cu in concentration_units:
             print('calculating pca for concentration_units ' + cu);
             data = [];
             # get data:
-            data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            # get data:
+            #data = quantification_dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+                data = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,cu);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                data_tmp = [];
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I,cu);
+                if type(data_tmp)==type(listDict()):
+                    data_tmp.convert_dataFrame2ListDict()
+                    data_tmp = data_tmp.get_listDict();
+                for d in data_tmp:
+                    for i,k in enumerate(descStats_replicate_keys):
+                        tmp = copy.copy(d);
+                        tmp['calculated_concentration']=tmp[k];
+                        tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                        data.append(tmp);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                data_tmp = [];
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(analysis_id_I,cu);
+                if type(data_tmp)==type(listDict()):
+                    data_tmp.convert_dataFrame2ListDict()
+                    data_tmp = data_tmp.get_listDict();
+                for d in data_tmp:
+                    for i,k in enumerate(descStats_replicate_keys):
+                        tmp = copy.copy(d);
+                        tmp['calculated_concentration']=tmp[k];
+                        tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                        data.append(tmp);
             # will need to refactor in the future...
             if type(data)==type(listDict()):
                 data.convert_dataFrame2ListDict()

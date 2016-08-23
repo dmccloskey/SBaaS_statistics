@@ -339,61 +339,6 @@ r_calc = r_interface();
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-
-    # perform a pls-da analysis
-    pls01.reset_dataStage02_quantification_pls_scores(analysis_id);
-    pls01.reset_dataStage02_quantification_pls_loadings(analysis_id);
-    pls01.reset_dataStage02_quantification_pls_validation(analysis_id);
-    pls01.reset_dataStage02_quantification_pls_vip(analysis_id_I=analysis_id);
-    pls01.reset_dataStage02_quantification_pls_loadingsResponse(analysis_id_I=analysis_id);
-    pls01.reset_dataStage02_quantification_pls_coefficients(analysis_id_I=analysis_id);
-    for k,v in pls_model_method.items():
-        pls01.execute_plsda(
-            analysis_id_I = analysis_id,
-            concentration_units_I=['mmol*gDW-1*hr-1'],
-            r_calc_I=r_calc,
-            pls_model_I = k,
-            method = v,
-            response_I = None,
-            factor_I= "sample_name_abbreviation",
-            ncomp = 7,
-            Y_add = "NULL",
-            scale = "TRUE",
-            validation = "CV",
-            segments = 10,
-            stripped = "FALSE",
-            lower = 0.5,
-            upper = 0.5, 
-            trunc_pow = "FALSE", 
-            weights = "NULL",
-            p_method = "fdr",
-            nperm = 999,
-            query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-    );
-
-    ## count parameters
-    #feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];
-    #features_countCorrelationProfile = ['profile_match', 'component_match', 'profile_match_description'];
-    #features_countCorrelationTrend = ['trend_match', 'component_match', 'trend_match_description'];
-    #features_countCorrelationPattern = ['pattern_match', 'component_match', 'pattern_match_description'];
-    #distance_measures=[
-    #    #'spearman',
-    #    'pearson'
-    #    ];
-    #correlation_coefficient_thresholds={
-    #    '>':0.88,
-    #    #'<':-0.8,
-    #    } #correlation_coefficient > 0.88 = pvalue < 0.05
-
-    ## count the patterns
-    #count01.reset_dataStage02_quantification_countCorrelationPattern(analysis_id_I = analysis_id);
-    #count01.execute_countElementsInFeatures_correlationPattern(
-    #    analysis_id_I = analysis_id,
-    #    features_I = features_countCorrelationPattern,
-    #    feature_units_I = feature_units,
-    #    distance_measures_I = distance_measures,
-    #    correlation_coefficient_thresholds_I = correlation_coefficient_thresholds,
-    #    );
       
    # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
    #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 

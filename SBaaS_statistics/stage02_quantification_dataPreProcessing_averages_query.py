@@ -352,8 +352,130 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
         except Exception as e:
             print(e);
+    def delete_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentNames_dataStage02QuantificationDataPreProcessingAverages(self,
+            analysis_id_I,
+            calculated_concentration_units_I,
+            component_names_I,
+            warn_I=True):
+        '''delete rows from data_stage02_quantification_dataPreProcessing_averages
+        INPUT:
+        analysis_id_I = string,
+        component_names_I = [] of string
+        OUTPUT:
+        '''
+        try:
+            table = 'data_stage02_quantification_dataPreProcessing_averages';
+            querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            
+            query = {};
+            query['delete_from'] = [{'table_name':table}];
+                    
+            names_str = ','.join(component_names_I);
+            names_query = ("('{%s}'::text[])" %(names_str))
+
+            query['where'] = [{
+                    'table_name':table,
+                    'column_name':'analysis_id',
+                    'value':analysis_id_I,
+		            'operator':'LIKE',
+                    'connector':'AND'
+                    },{
+                    'table_name':table,
+                    'column_name':'component_name',
+                    'value':names_query,
+                    'operator':'=ANY',
+                    'connector':'AND'
+                    },
+                    {"table_name":table,
+                    'column_name':'calculated_concentration_units',
+                    'value':calculated_concentration_units_I,
+                    'operator':'LIKE',
+                    'connector':'AND'
+                    },
+	            ];
+            table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+            query = querydelete.make_queryFromString(table_model,query);
+            querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
+            print(e);
 
     # get unique values based on a json type query
+    def getGroup_componentNameAndCount_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
+                analysis_id_I,
+                calculated_concentration_units_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_dataPreProcessing_averages
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_dataPreProcessing_averages'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [
+            {"table_name":tables[0],
+             "column_name":'component_name',
+             },
+             {"table_name":tables[0],
+             "column_name":'component_name',
+             'aggregate_function':'count',
+             'label':'count_1',
+             },
+            ];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units',
+            'value':calculated_concentration_units_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['group_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            },
+        ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'component_name',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if not k in query.keys():
+                query[k] = [];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
     def getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
                 analysis_id_I,
                 calculated_concentration_units_I,

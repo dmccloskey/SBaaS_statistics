@@ -56,6 +56,19 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+    def get_sampleNameAbbreviations_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(self,analysis_id_I,calculated_concentration_units_I):
+        '''Querry sample_name_abbreviations that are used from the analysis'''
+        try:
+            data = self.session.query(data_stage02_quantification_descriptiveStats.sample_name_abbreviation).filter(
+                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+                    data_stage02_quantification_descriptiveStats.used_.is_(True)).group_by(
+                    data_stage02_quantification_descriptiveStats.sample_name_abbreviation).order_by(
+                    data_stage02_quantification_descriptiveStats.sample_name_abbreviation.asc()).all();
+            rows_O = [d.sample_name_abbreviation for d in data];
+            return rows_O;
+        except SQLAlchemyError as e:
+            print(e);
     # query calculated_concentration_units from data_stage02_quantification_descriptiveStats
     def get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(self,analysis_id_I):
         '''Querry calculated_concentration_units that are used from the analysis'''

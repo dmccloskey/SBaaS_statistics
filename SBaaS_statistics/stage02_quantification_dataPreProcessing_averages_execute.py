@@ -119,20 +119,41 @@ class stage02_quantification_dataPreProcessing_averages_execute(stage02_quantifi
         else:
             calculated_concentration_units = [];
             calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
-        for cu_cnt,cu in enumerate(calculated_concentration_units):
-            if set_used_false_I:
-                continue;
-                #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingAverages
-                #set used_ = False;
-            else:
-                self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndFeatureValueAndOperator_dataStage02QuantificationDataPreProcessingAverages(
+        for cu_cnt,cu in enumerate(calculated_concentration_units):            
+            if value_I is None:
+                # query a list of component_names/counts
+                cn_count = self.getGroup_componentNameAndCount_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
                     analysis_id_I = analysis_id_I,
-                    calculated_concentration_units_I = cu,
-                    feature_I = feature_I,
-                    value_I = value_I,
-                    operator_I = operator_I,
-                    warn_I=warn_I,
+                    calculated_concentration_units_I = cu
                     );
+                max_count = max([row['count_1'] for row in cn_count]); #min_count = min([row['count_1'] for row in cn_count]);
+                cn_mv = [row['component_name'] for row in cn_count if row['count_1']!=max_count];
+                # determine components with missing values
+                if set_used_false_I:
+                    continue;
+                else:
+                    #delete rows with missing components
+                    if cn_mv: self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentNames_dataStage02QuantificationDataPreProcessingAverages(
+                        analysis_id_I = analysis_id_I,
+                        calculated_concentration_units_I = cu,
+                        component_names_I = cn_mv,
+                        warn_I=warn_I
+                        )
+            else:
+                if set_used_false_I:
+                    continue;
+                    #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingAverages
+                    #set used_ = False;
+            
+                else:
+                    self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndFeatureValueAndOperator_dataStage02QuantificationDataPreProcessingAverages(
+                        analysis_id_I = analysis_id_I,
+                        calculated_concentration_units_I = cu,
+                        feature_I = feature_I,
+                        value_I = value_I,
+                        operator_I = operator_I,
+                        warn_I=warn_I,
+                        );
 
     #normalization methods
     def execute_normalization(self,

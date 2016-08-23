@@ -366,6 +366,9 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
     #Query data from RNASequencing:
     def import_dataStage02PhysiologySampledData(self,
                 analysis_id_I,
+                rxn_ids_I = [],
+                sample_name_abbreviations_I = [],
+                simulation_ids_I = [],
                 rxnID2componentName_I = {},
                 rxnID2componentGroupName_I = {},
                 snaCOBRA2sna_I = {},
@@ -399,6 +402,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
         simulation_ids = physiology_analysis_query.get_simulationID_analysisID_dataStage02PhysiologyAnalysis(analysis_id);
         #get the simulation data
         for simulation in simulation_ids:
+            if simulation_ids_I and not simulation in simulation_ids_I: continue;
             data_tmp = [];
             data_tmp = physiology_sampledData_query.get_rows_simulationID_dataStage02PhysiologySampledData(simulation);
             # map the data
@@ -413,6 +417,8 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                     sample_name=fpkm['simulation_id'];
                     time_point=analysis_dict[fpkm['simulation_id']]['time_point'];
                     experiment_id=analysis_dict[fpkm['simulation_id']]['experiment_id'];
+                if rxn_ids_I and not fpkm['rxn_id'] in rxn_ids_I: continue;
+                if sample_name_abbreviations_I and not sample_name in sample_name_abbreviations_I: continue;
                 row['sample_name_abbreviation']=sample_name;
                 row['time_point']=time_point;
                 row['experiment_id']=experiment_id;

@@ -39,9 +39,9 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
         dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
         
         # instantiate data lists
-        data_O=[]; #samples/features cov_matrix and precision_matrix
-        data_impfeat_O=[]; #samples/features mahal_dist
-        data_response_class_O=[]; #samples/features score
+        data_O=[]; #model score information
+        data_impfeat_O=[]; #features information
+        data_response_class_O=[]; #response information
 
         # query metabolomics data from glogNormalization
         # get concentration units
@@ -91,6 +91,7 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                 test_size_I=test_size_I,
                 random_state_I=calculateinterface.random_state
                 );
+
             # instantiate the output dicts
             data_O_listDict = listDict();
 
@@ -99,7 +100,10 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
             calculateinterface.fit_data2Model();
             #calculateinterface.make_dataModel(model_I,parameters_I);
             #parameters_I = calculateinterface.data_model.get_params(); #update the parameters
+
             # score the model on the test data
+            #score = ...
+            #data_O.apend(...)
 
             # extract out the response information
             for row in response_class_methods_I:
@@ -198,14 +202,11 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                 data_O_listDict.convert_dataFrame2ListDict();
                 data_impfeat_O.extend(data_O_listDict.get_listDict());
                 data_O_listDict.clear_allData();
-            #data_features_O.append(impfeat_listDict.get_listDict());
-
-            #extract out sample information
 
             # reset calculate_interface
             calculateinterface.clear_data();
         # add data to the database
-        #self.add_rows_table('data_stage02_quantification_svm_samples',data_O);
+        #self.add_rows_table('data_stage02_quantification_svm_pipelineScore',data_O);
         self.add_rows_table('data_stage02_quantification_svm_impfeat',data_impfeat_O);
         self.add_rows_table('data_stage02_quantification_svm_responseClassification',data_response_class_O);
 
@@ -303,6 +304,7 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
             
             # call the svm method
             calculateinterface.make_dataPipeline(models,parameters);
+
             # call the hyper parmaeter CV method
             calculateinterface.make_dataHyperparameterCV(
                     param_dist_I=param_dist_I,
@@ -315,7 +317,8 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                     metric_options_I=metric_options_I,
                     raise_I=False);
             calculateinterface.fit_data2HyperparameterCV();
-            # extract out the hyper parmaeter CV information
+
+            # extract out the hyper parameter CV information
             grid_scores = calculateinterface.data_hyperparameterCV.grid_scores_;
             data_O_listDict.set_listDict(grid_scores)
             data_O_listDict.convert_listDict2DataFrame()
@@ -353,3 +356,137 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
             calculateinterface.clear_data();
         # add data to the database
         self.add_rows_table('data_stage02_quantification_svm_hyperparameter',data_O);
+
+    def _extract_responseClassifications(self,):
+        '''extract out the response information
+        '''
+        pass;
+
+    def _extract_impfeatures(self,):
+        '''extract out the response information
+        '''
+        pass;
+
+    def _extract_hyperparameterCV(self,):
+        '''extract out the hyperparameter CV information
+        '''
+        pass;
+
+    def execute_svmResampling(self,analysis_id_I,
+                pipeline_id_I=None,
+                test_size_I = 0.,
+                impfeat_methods_I=[{'impfeat_method':'feature_importance','impfeat_options':None}],
+                response_class_methods_I=[{'response_class_method':'class_probability','response_class_options':None}],
+                resampling_method_I='bootstrap',
+                resampling_options_I={'nsamples':1000},
+                calculated_concentration_units_I=[],
+                experiment_ids_I=[],
+                sample_name_abbreviations_I=[],
+                sample_name_shorts_I=[],
+                component_names_I=[],
+                component_group_names_I=[],
+                time_points_I=[],
+                ):
+        '''
+        INPUT:
+        analysis_id
+        pipeline_id_I
+        impfeat_methods_I
+        response_class_methods_I
+        resampling_method_I
+        resampling_options_I
+        OPTIONAL INPUT:
+        ...
+        NOTES: test_size_I should equal 0.
+        '''
+        #print('execute_svm...')
+
+        # instantiate helper classes
+        calculateinterface = calculate_interface()
+        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        
+        # instantiate data lists
+        data_O=[]; #model score information
+        data_impfeat_O=[]; #features information
+        data_response_class_O=[]; #response information
+
+        # query metabolomics data from glogNormalization
+        # get concentration units
+        if calculated_concentration_units_I:
+            calculated_concentration_units = calculated_concentration_units_I;
+        else:
+            calculated_concentration_units = [];
+            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        for cu in calculated_concentration_units:
+            #print('calculating svm for calculated_concentration_units ' + cu);
+            data = [];
+            # get data:
+            data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                analysis_id_I,
+                cu,
+                experiment_ids_I=experiment_ids_I,
+                sample_name_abbreviations_I=sample_name_abbreviations_I,
+                sample_name_shorts_I=sample_name_shorts_I,
+                component_names_I=component_names_I,
+                component_group_names_I=component_group_names_I,
+                time_points_I=time_points_I,);
+
+            # get the model pipeline:
+            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
+            
+            # make the data matrix
+            #dim: [nsamples,nfeatures]
+            value_label = 'calculated_concentration';
+            row_labels = ['experiment_id','sample_name_abbreviation','sample_name_short','time_point'];
+            column_labels = ['component_name','component_group_name'];
+            factor_label = 'sample_name_abbreviation'
+            data_listDict.set_pivotTable(
+                value_label_I=value_label,
+                row_labels_I=row_labels,
+                column_labels_I=column_labels
+                );
+            calculateinterface.set_listDict(data_listDict);
+            calculateinterface.make_dataAndLabels(
+                row_labels_I=row_labels,
+                column_labels_I=column_labels
+                );
+            # make the train/test split
+            calculateinterface.make_trainTestSplit(
+                data_X_I=calculateinterface.data['data'],
+                data_y_I=calculateinterface.make_dataFactorFromRowLabels(factor_label), #sample_name_abbreviation
+                data_z_I=calculateinterface.data['row_indexes'],
+                test_size_I=test_size_I,
+                random_state_I=calculateinterface.random_state
+                );
+
+            # record the original row labels
+
+            for sampling_cnt in range(resampling_options_I['nsamples']):
+                # resample/permute the data
+                
+
+                # instantiate the output dicts
+                data_O_listDict = listDict();
+
+                # call the svm method
+                calculateinterface.make_dataPipeline(models,parameters);
+                calculateinterface.fit_data2Model();
+                #calculateinterface.make_dataModel(model_I,parameters_I);
+                #parameters_I = calculateinterface.data_model.get_params(); #update the parameters
+
+                #score the model
+
+                #extract impfeatures and response class information
+                self._extract_impfeatures();
+                self._extract_responseClassifications();
+
+                data_O_listDict.clear_allData();
+
+            # calculate the statistics
+
+            # calculate the pipeline p-values based on the model scores
+
+            # reset calculate_interface
+            calculateinterface.clear_data();
+
+        #add data to the database

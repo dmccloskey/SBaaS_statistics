@@ -1,6 +1,8 @@
 
 from .stage02_quantification_spls_io import stage02_quantification_spls_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
+from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
+from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from r_statistics.r_interface import r_interface
 from python_statistics.calculate_interface import calculate_interface
@@ -10,7 +12,7 @@ import numpy as np
 class stage02_quantification_spls_execute(stage02_quantification_spls_io):
 
     #TODO:
-    #add in methods for plsda
+    #add in methods for pls,plsda,pca
     def execute_spls(self,analysis_id_I,
                 pipeline_id_I=None,
                 test_size_I = 0.,
@@ -49,13 +51,12 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
         dataPreProcessing_replicates_query.initialize_supportedTables();
         
         # instantiate data lists
-        data_O=[]; #samples/features cov_matrix and precision_matrix
-        data_impfeat_O=[]; #samples/features mahal_dist
+        data_O=[]; 
+        data_impfeat_O=[]; 
         data_scores_O=[];
         data_loadings_O=[];
         data_loadingsResponse_O=[];
 
-        # query metabolomics data from glogNormalization
         # get concentration units
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
@@ -272,7 +273,9 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 component_names_I=[],
                 component_group_names_I=[],
                 time_points_I=[],
-                r_calc_I=None
+                r_calc_I=None,
+                query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            
                 ):
         '''execute spls using sciKit-learn
         INPUT:
@@ -290,7 +293,16 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         calculateinterface = calculate_interface()
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
+                        'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_descStats_I in query_objects.keys():
+            query_object_descStats = query_objects[query_object_descStats_I];
+            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+            query_instance_descStats.initialize_supportedTables();
         
         # instantiate data lists
         data_O=[];
@@ -300,23 +312,53 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
             calculated_concentration_units = calculated_concentration_units_I;
         else:
             calculated_concentration_units = [];
-            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+            else:
+                print('query instance does not have the required method.');
         for cu in calculated_concentration_units:
             #print('calculating spls for calculated_concentration_units ' + cu);
-            data = [];
-            # get data:
-            data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                cu,
-                experiment_ids_I=experiment_ids_I,
-                sample_name_abbreviations_I=sample_name_abbreviations_I,
-                sample_name_shorts_I=sample_name_shorts_I,
-                component_names_I=component_names_I,
-                component_group_names_I=component_group_names_I,
-                time_points_I=time_points_I,);
+            if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+                data_listDict = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I,
+                    cu,
+                    experiment_ids_I=experiment_ids_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    time_points_I=time_points_I,);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+                    analysis_id_I,
+                    cu,
+                    experiment_ids_I=experiment_ids_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    time_points_I=time_points_I,);
+                data_listDict = self._extract_averagesData(data_tmp);
+            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+                    analysis_id_I,
+                    cu,
+                    experiment_ids_I=experiment_ids_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    time_points_I=time_points_I,);
+                data_listDict = self._extract_averagesData(data_tmp);
+            else:
+                print('query instance does not have the required method.');
 
             # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSplsPipeline(pipeline_id_I);
+            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSPLSPipeline(pipeline_id_I);
 
             # make the data matrix
             #dim: [nsamples,nfeatures]
@@ -356,8 +398,6 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
             response = calculateinterface.data_train['response'].ravel();
             levels = data_O_listDict.convert_list2Levels(response)
             r_calc.make_vectorFromList(levels,'y');
-            r_calc.make_vectorFromList(param_dist_I['K'],'K');
-            r_calc.make_vectorFromList(param_dist_I['eta'],'eta');
 
             #iterate through the different models:
             for i,model in enumerate(models):
@@ -365,8 +405,12 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 if model=='prep' and ('center' in parameters[i].keys() or 'scale' in parameters[i].keys()):
                     r_calc.pcaMethods_scale('x','x',parameters[i]['center'],parameters[i]['scale']);
 
-                # call the hyper parmeter CV method
+                #TODO: split into internal functions
+                # call the hyper parmeter CV method and extract the CV information
                 elif model == 'splsda':
+                    r_calc.make_vectorFromList(param_dist_I['K'],'K');
+                    r_calc.make_vectorFromList(param_dist_I['eta'],'eta');
+                    # call the hyper parmeter CV method
                     r_calc.cv_splsda(
                         cvspls_O='cvspls.o',
                         x='x',
@@ -380,8 +424,21 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                         plot_it=hyperparameter_options_I['plot_it'],
                         n_core=hyperparameter_options_I['n_core']
                         );
+                    # extract the CV information
                     grid_scores = r_calc.extract_cv_splsda(cvspls_I='cvspls.o');
+                    pipeline_parameters = [];
+                    metric_scores = [];
+                    for i in range(grid_scores.shape[0]):
+                        for j in range(grid_scores.shape[1]):
+                            tmp = {};
+                            tmp['eta']=param_dist_I['eta'][i];
+                            tmp['K']=param_dist_I['K'][j];
+                            pipeline_parameters.append(tmp);
+                            metric_scores.append(grid_scores[i,j]);
                 elif model == 'sgpls':
+                    r_calc.make_vectorFromList(param_dist_I['K'],'K');
+                    r_calc.make_vectorFromList(param_dist_I['eta'],'eta');
+                    # call the hyper parmeter CV method
                     r_calc.cv_splsda(
                         cvspls_O='cvspls.o',
                         x='x',
@@ -389,51 +446,157 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                         fold = 10,
 
                         );
+                    # extract the CV information
                     grid_scores = r_calc.extract_cv_sgpls(cvspls_I='cvspls.o');
-
-            # extract out the hyper parameter CV information
-            pipeline_parameters = [];
-            metric_scores = [];
-            for i in range(grid_scores.shape[0]):
-                for j in range(grid_scores.shape[1]):
-                    tmp = {};
-                    tmp['eta']=param_dist_I['eta'][i];
-                    tmp['K']=param_dist_I['K'][j];
-                    pipeline_parameters.append(tmp);
-                    metric_scores.append(grid_scores[i,j]);
-
-            data_O_listDict.set_dictList(
-                {'metric_score':metric_scores,
-                 'pipeline_parameters':pipeline_parameters});
-            data_O_listDict.convert_dictList2DataFrame()
-
+                elif model == 'oplsda':
+                    # call the hyper parmeter CV method
+                    # extract the CV information
+                    pipeline_parameters = [];
+                    metric_scores = [];
+                elif model == 'plsda':
+                    # check/correct ncomp/segments
+                    factors_unique = data_listDict.get_uniqueValues_list(factor_label);
+                    ncomp = parameters[i]['ncomp'];
+                    segments = crossval_options_I['segments'];
+                    if len(factors_unique)<ncomp:
+                        ncomp = len(factors_unique);
+                    if len(response)<segments:
+                        segments = int(0.75*len(response));
+                    # add in additional dataframe to the R workspace required for mvr
+                    r_calc.make_dataFrameFromLists(
+                        labels_I=['y','x'],
+                        dataFrame_O = 'dataframe',
+                        )
+                    # call the hyper parmeter CV method
+                    r_calc.call_mvr(
+                        'pls.o',
+                        fit = 'y ~ x',     
+                        data = 'dataframe',  
+                        ncomp=parameters[i]['ncomp'],
+                        scale=parameters[i]['scale'],
+                        validation=crossval_options_I['validation'], #change to parameters when not performing CV
+                        segments=crossval_options_I['segments'],
+                        method=parameters[i]['method'],
+                        lower=parameters[i]['lower'],
+                        upper=parameters[i]['upper'], 
+                        weights=parameters[i]['weights'],
+                        );
+                    # extract the CV information
+                    msep_reduced,rmsep_reduced,r2_reduced,q2_reduced,r2x_reduced=r_calc.extract_mvr_performance(
+                        'pls.o',
+                        pls_model_I=model,)
+                    pipeline_parameters = [];
+                    metric_scores = [];
+                    metric_methods = [];
+                    for i in range(len(msep_reduced)): #model
+                        tmp = {};
+                        tmp['ncomp'] = i;
+                        pipeline_parameters.append(tmp);
+                        metric_scores.append(msep_reduced[i]);
+                        metric_methods.append('msep');
+                        pipeline_parameters.append(tmp);
+                        metric_scores.append(rmsep_reduced[i]);
+                        metric_methods.append('rmsep');
+                        pipeline_parameters.append(tmp);
+                        metric_scores.append(r2_reduced[i]);
+                        metric_methods.append('r2');
+                        pipeline_parameters.append(tmp);
+                        metric_scores.append(q2_reduced[i]);
+                        metric_methods.append('q2');
+                        pipeline_parameters.append(tmp);
+                        metric_scores.append(r2x_reduced[i]);
+                        metric_methods.append('r2x');
+                elif model == 'plsda-mixomics':
+                    # call the hyper parmeter CV method
+                    # extract the CV information
+                    pipeline_parameters = [];
+                    metric_scores = [];
+                    metric_methods = [];
+                    
             #convert bounds to metric_statistics:
             hyperparameter_id = list(range(len(metric_scores)));
             hyperparameter_options = [hyperparameter_options_I for id in hyperparameter_id];
             crossval_options = [crossval_options_I for id in hyperparameter_id];
+            
+            # extract out the hyper parameter CV information
+            # and add rows/columns to the output object
+            # NOTE: in R, multiple metrics can be calculated during a single CV
+            if type(metric_method_I)==type(''):
+                data_O_listDict.set_dictList(
+                    {'metric_score':metric_scores,
+                     'pipeline_parameters':pipeline_parameters});
+                data_O_listDict.convert_dictList2DataFrame()
 
-            # add in additional rows to the output data object
-            data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
-            data_O_listDict.add_column2DataFrame('test_size',test_size_I);
-            data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
-            data_O_listDict.add_column2DataFrame('used_',True);
-            data_O_listDict.add_column2DataFrame('comment_',None);
-            data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
-            data_O_listDict.add_column2DataFrame('metric_statistics',None);
-            data_O_listDict.add_column2DataFrame('metric_method',metric_method_I);
-            data_O_listDict.add_column2DataFrame('metric_options',metric_options_I);
-            data_O_listDict.add_column2DataFrame('crossval_method',crossval_method_I);
-            data_O_listDict.add_column2DataFrame('crossval_options',crossval_options);
-            data_O_listDict.add_column2DataFrame('hyperparameter_id',hyperparameter_id);
-            data_O_listDict.add_column2DataFrame('hyperparameter_method',hyperparameter_method_I);
-            data_O_listDict.add_column2DataFrame('hyperparameter_options',hyperparameter_options);
+                data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
+                data_O_listDict.add_column2DataFrame('test_size',test_size_I);
+                data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
+                data_O_listDict.add_column2DataFrame('used_',True);
+                data_O_listDict.add_column2DataFrame('comment_',None);
+                data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
+                data_O_listDict.add_column2DataFrame('metric_statistics',None);
+                data_O_listDict.add_column2DataFrame('metric_method',metric_method_I);
+                data_O_listDict.add_column2DataFrame('metric_options',metric_options_I);
+                data_O_listDict.add_column2DataFrame('crossval_method',crossval_method_I);
+                data_O_listDict.add_column2DataFrame('crossval_options',crossval_options);
+                data_O_listDict.add_column2DataFrame('hyperparameter_id',hyperparameter_id);
+                data_O_listDict.add_column2DataFrame('hyperparameter_method',hyperparameter_method_I);
+                data_O_listDict.add_column2DataFrame('hyperparameter_options',hyperparameter_options);
 
-            # add data to the database
-            data_O_listDict.convert_dataFrame2ListDict();
-            data_O.extend(data_O_listDict.get_listDict());
-            data_O_listDict.clear_allData();
+                # add data to the database
+                data_O_listDict.convert_dataFrame2ListDict();
+                data_O.extend(data_O_listDict.get_listDict());
+                data_O_listDict.clear_allData();
+            elif type(metric_method_I)==type([]):
+                data_O_listDict.set_dictList(
+                    {'metric_score':metric_scores,
+                        'metric_method':metric_method,
+                        'pipeline_parameters':pipeline_parameters});
+                data_O_listDict.convert_dictList2DataFrame()
+
+                data_O_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
+                data_O_listDict.add_column2DataFrame('test_size',test_size_I);
+                data_O_listDict.add_column2DataFrame('calculated_concentration_units',cu);
+                data_O_listDict.add_column2DataFrame('used_',True);
+                data_O_listDict.add_column2DataFrame('comment_',None);
+                data_O_listDict.add_column2DataFrame('pipeline_id',pipeline_id_I);
+                data_O_listDict.add_column2DataFrame('metric_statistics',None);
+                data_O_listDict.add_column2DataFrame('metric_options',metric_options_I);
+                data_O_listDict.add_column2DataFrame('crossval_method',crossval_method_I);
+                data_O_listDict.add_column2DataFrame('crossval_options',crossval_options);
+                data_O_listDict.add_column2DataFrame('hyperparameter_id',hyperparameter_id);
+                data_O_listDict.add_column2DataFrame('hyperparameter_method',hyperparameter_method_I);
+                data_O_listDict.add_column2DataFrame('hyperparameter_options',hyperparameter_options);
+
+                # add data to the database
+                data_O_listDict.convert_dataFrame2ListDict();
+                data_O.extend(data_O_listDict.get_listDict());
+                data_O_listDict.clear_allData();
 
             # reset calculate_interface
             calculateinterface.clear_data();
         # add data to the database
         self.add_rows_table('data_stage02_quantification_spls_hyperparameter',data_O);
+
+    def _extract_averagesData(self,
+            data_I,
+            descStats_replicate_keys = ['median','iq_1','iq_3','min','max']):
+        '''Parse data_stage02_quantification_preProcessing averages or
+        data_stage02_quantification_descriptiveStats into replicates
+        INPUT:
+        data = query data
+        descStats_replicate_keys = [] of strings, designating the column values to use as replicate points
+        OUTPUT:
+        listDict_O
+        '''
+        data = [];
+        if type(data_I)==type(listDict()):
+            data_I.convert_dataFrame2ListDict();
+        for d in data_I.listDict:
+            for i,k in enumerate(descStats_replicate_keys):
+                tmp = copy.copy(d);
+                tmp['calculated_concentration']=tmp[k];
+                tmp['sample_name_short']='%s_%s'%(tmp['sample_name_abbreviation'],i);
+                data.append(tmp);
+        data_listDict = listDict(listDict_I=data);
+        data_listDict.convert_listDict2DataFrame();
+        return data_listDict;

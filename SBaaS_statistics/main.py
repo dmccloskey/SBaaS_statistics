@@ -172,11 +172,14 @@ hist01 = stage02_quantification_histogram_execute(session,engine,pg_settings.dat
 hist01.initialize_supportedTables();
 hist01.initialize_tables();
 
+#make the outliers tables
+from SBaaS_statistics.stage02_quantification_outliers_execute import stage02_quantification_outliers_execute
+outliers01 = stage02_quantification_outliers_execute(session,engine,pg_settings.datadir_settings);
+outliers01.initialize_supportedTables();
+outliers01.initialize_tables();
+
 analysis_ids_run = [
-    #"ALEsKOs01_DNAResequencing_0_11",
-    #'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd'
-    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-    'ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04gnd',
+    'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -191,25 +194,6 @@ svd_method = {
     'svd',
     'robustSvd',
     };
-features_histogram = ['mean','cv','var','median','calculated_concentration'];
-#feature_units = ['umol*gDW-1_glog_normalized','umol*gDW-1'];
-feature_units = ['mM_glog_normalized','mM'];
-n_bins_histogram = [];
-features_countCorrelationProfile = ['profile_match', 'component_match', 'profile_match_description'];
-features_countCorrelationTrend = ['trend_match', 'component_match', 'trend_match_description'];
-features_countCorrelationPattern = ['pattern_match', 'component_match', 'pattern_match_description'];
-distance_measures=[
-    #'spearman',
-    'pearson'
-    ];
-correlation_coefficient_thresholds={'>':0.8,'<':-0.8,} #correlation_coefficient > 0.88 = pvalue < 0.05
-
-covariance_model = [
-    {'data_matrix_shape':'featuresBySamples','model':"MinCovDet",'method':"MinCovDet",'options':None},
-    {'data_matrix_shape':'featuresBySamples','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
-    {'data_matrix_shape':'samplesByFeatures','model':"MinCovDet",'method':"MinCovDet",'options':None},
-    {'data_matrix_shape':'samplesByFeatures','model':"EmpiricalCovariance",'method':"EmpiricalCovariance",'options':None},
-    ];
 
 tree_model = [
     {'pipeline_id':"AdaBoostClassifier_scikit-learn_centerAndScale",
@@ -321,21 +305,45 @@ svm_hyperparameters = [
     # },
     ];
 
-algorithm_test = [
-    #{'enrichment_algorithm':'weight01','test_description':'globaltest'},
-    #{'enrichment_algorithm':'classic','test_description':'globaltest'},
-    #{'enrichment_algorithm':'classic','test_description':'fisher'},
-    #{'enrichment_algorithm':'elim','test_description':'globaltest'},
-    {'enrichment_algorithm':'elim','test_description':'fisher'},
-    {'enrichment_algorithm':'weight','test_description':'fisher'},
-    {'enrichment_algorithm':'weight01','test_description':'fisher'},
-    {'enrichment_algorithm':'parentchild','test_description':'fisher'},
-    ]
-
-
 # Load R once
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
+
+##add in spls pipelines
+#data_O=[
+#    {'pipeline_id':'plsda_R_scaleAndCenter',
+#    'pipeline_order':1,
+#    'used_':True,'comment_':None,
+#    'pipeline_model':"plsda",
+#    'pipeline_parameters':{
+#        'method':"cppls",
+#        'ncomp':7,
+#        'Y_add':"NULL",
+#        'scale':"TRUE",
+#        'validation':"none",
+#        'segments':0, #no CV
+#        'stripped':"FALSE",
+#        'lower':0.5,
+#        'upper':0.5, 
+#        'trunc_pow':"FALSE", 
+#        'weights':"NULL",
+#        }
+#    },
+#]
+#spls01.add_rows_table('data_stage02_quantification_spls_pipeline',data_O)
+
+#define the different hyperparameter searches
+splsHyperparameters = [
+    {'pipeline_id':'plsda_R_scaleAndCenter',
+     'param_dist':{"ncomp":7},
+     'metric_method':['msep','rmsep','r2','r2x','q2'],
+     'metric_options':None,
+     'crossval_method':'CV',
+     'crossval_options':{'validation':'CV','segments':10},
+     'hyperparameter_method':'GridSearchCV',
+     'hyperparameter_options':{},
+     },
+    ];
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
@@ -355,39 +363,14 @@ for analysis_id in analysis_ids_run:
    #         r_calc_I=r_calc,
    #         query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'
    #);
-
-    #heatmap01.reset_dataStage02_quantification_heatmap_descriptiveStats(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram_descriptiveStats(analysis_id);
-    #heatmap01.execute_heatmap_descriptiveStats(
-    #    analysis_id,
-    #    calculated_concentration_units_I=['log2(FC)'],
-    #    sample_name_abbreviations_I=[],
-    #    component_names_I=[],
-    #    order_componentNameBySampleNameAbbreviation_I = True,
-    #    order_sample_name_abbreviations_I=False,
-    #    order_component_names_I=False,
-    #    value_I = 'mean',
-    #    query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-    #    export_dendrogram_I = True)
-
-    ## perform a correlation analysis
-    #heatmap01.reset_dataStage02_quantification_heatmap(analysis_id);
-    #heatmap01.reset_dataStage02_quantification_dendrogram(analysis_id);
-    #heatmap01.execute_heatmap(
-    #    analysis_id,
-    #    calculated_concentration_units_I=['count_cuffnorm_log2_normalized'],
-    #    sample_name_shorts_I=[],
-    #    component_names_I=[],
-    #    order_componentNameBySampleNameShort_I = False,
-    #    order_sample_name_shorts_I=False,
-    #    order_component_names_I=False,);
     
-    ##search for the optimal spls parameters
-    #spls01.reset_dataStage02_quantification_spls(
-    #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
-    #    analysis_id_I=analysis_id,
-    #    warn_I=False,
-    #    );
+    #search for the optimal spls parameters
+    spls01.reset_dataStage02_quantification_spls(
+        tables_I = ['data_stage02_quantification_spls_hyperparameter'],
+        analysis_id_I=analysis_id,
+        warn_I=False,
+        );
+    #spls hyperparameter search
     #spls01.execute_splsHyperparameter(
     #    analysis_id_I=analysis_id,
     #    pipeline_id_I='splsda_R_scaleAndCenter',
@@ -416,65 +399,54 @@ for analysis_id in analysis_ids_run:
     #    time_points_I=[],
     #    r_calc_I=r_calc
     #    );
-    ##perform a spls analysis
-    #spls01.reset_dataStage02_quantification_spls(
-    #    tables_I = ['data_stage02_quantification_spls_impfeat',
-    #                'data_stage02_quantification_spls_scores',
-    #                'data_stage02_quantification_spls_loadings',
-    #                'data_stage02_quantification_spls_loadingsResponse'],
-    #    analysis_id_I=analysis_id,
-    #    warn_I=False,
-    #    );
-    #spls01.execute_spls(
-    #    analysis_id_I=analysis_id,
-    #    pipeline_id_I='splsda_mixOmics_R_scaleAndCenter',
-    #    test_size_I = 0.,
-    #    impfeat_methods_I=[
-    #        {'coefficients':'feature_importance','impfeat_options':None},
-    #        {'VIP':'feature_importance','impfeat_options':None}],
-    #    response_class_methods_I=[],
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    experiment_ids_I=[],
-    #    sample_name_abbreviations_I=[],
-    #    sample_name_shorts_I=[],
-    #    component_names_I=[],
-    #    component_group_names_I=[],
-    #    time_points_I=[],
-    #    r_calc_I=r_calc
-    #    )
-
-    ##perform a gene_set_enrichment analysis:
-    #enrichment01.reset_dataStage02_quantification_enrichment(
-    #    tables_I = ['data_stage02_quantification_geneSetEnrichment'],
-    #    analysis_id_I = analysis_id,
-    #    warn_I = False,
-    #    );
-
-    #for row in algorithm_test:
-    #    print("running algorithm " + row['enrichment_algorithm']);
-    #    print("running statistic " + row['test_description']);        
-    #    enrichment01.execute_geneSetEnrichment(
-    #        analysis_id_I = analysis_id,
-    #        calculated_concentration_units_I=['log2(FC)'],
-    #        experiment_ids_I=[],
-    #        time_points_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        component_names_I=[],
-    #        enrichment_method_I='topGO',
-    #        enrichment_options_I={
-    #            'pvalue_threshold':0.05,
-    #            'GO_database':'GO.db',
-    #            'enrichment_algorithm':row['enrichment_algorithm'],
-    #            'test_description':row['test_description'],
-    #            'GO_ontology':"BP",
-    #            'GO_annotation':"annFUN.org",
-    #            'GO_annotation_mapping':"org.EcK12.eg.db",
-    #            'GO_annotation_id' :'alias'},
-    #        pvalue_threshold_I = 0.05,
-    #        pvalue_corrected_description_I = "bonferroni",
-    #        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-    #        r_calc_I=r_calc
-    #        );
+    #pls hyperparameter search
+    for row in splsHyperparameters:
+        spls01.execute_splsHyperparameter(
+            analysis_id_I=analysis_id,
+            pipeline_id_I=row['pipeline_id'],
+            param_dist_I=row['param_dist'],
+            test_size_I = 0.,
+            metric_method_I = row['metric_method'],
+            metric_options_I = row['metric_options'],
+            crossval_method_I = row['crossval_method'],
+            crossval_options_I = row['crossval_options'],
+            hyperparameter_method_I = row['hyperparameter_method'],
+            hyperparameter_options_I = row['hyperparameter_options'],
+            calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+            experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            sample_name_shorts_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            time_points_I=[],
+            r_calc_I=r_calc
+            );
+    #perform a spls analysis
+    spls01.reset_dataStage02_quantification_spls(
+        tables_I = ['data_stage02_quantification_spls_impfeat',
+                    'data_stage02_quantification_spls_scores',
+                    'data_stage02_quantification_spls_loadings',
+                    'data_stage02_quantification_spls_loadingsResponse'],
+        analysis_id_I=analysis_id,
+        warn_I=False,
+        );
+    spls01.execute_spls(
+        analysis_id_I=analysis_id,
+        pipeline_id_I='splsda_mixOmics_R_scaleAndCenter',
+        test_size_I = 0.,
+        impfeat_methods_I=[
+            {'coefficients':'feature_importance','impfeat_options':None},
+            {'VIP':'feature_importance','impfeat_options':None}],
+        response_class_methods_I=[],
+        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+        experiment_ids_I=[],
+        sample_name_abbreviations_I=[],
+        sample_name_shorts_I=[],
+        component_names_I=[],
+        component_group_names_I=[],
+        time_points_I=[],
+        r_calc_I=r_calc
+        )
     
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",

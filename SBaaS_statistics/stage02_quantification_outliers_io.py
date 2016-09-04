@@ -13,51 +13,10 @@ class stage02_quantification_outliers_io(stage02_quantification_outliers_query,
                                                    stage02_quantification_analysis_query,
                                                    stage02_quantification_descriptiveStats_query,
                                                    sbaas_template_io):
-    def export_data_stage02_quantification_outliersDeviation_csv(self, analysis_id_I, filename_O,
-                        experiment_id_I='%',
-                        sample_name_short_I='%',
-                        time_point_I='%',
-                        component_name_I='%',
-                        calculated_concentration_units_I='%'):
-        '''export data_stage01_quantification_outliers to .csv'''
-
-        data = [];
-        data = self.get_rows_unique_dataStage02QuantificationOutliersDeviation(analysis_id_I,
-                        experiment_id_I,
-                        sample_name_short_I,
-                        time_point_I,
-                        component_name_I,
-                        calculated_concentration_units_I);
-        if data:
-            # write data to file
-            export = base_exportData(data);
-            export.write_dict2csv(filename_O);
-    def export_data_stage02_quantification_outliersPCA_csv(self, analysis_id_I, filename_O,
-                        experiment_id_I='%',
-                        sample_name_short_I='%',
-                        time_point_I='%',
-                        component_name_I='%',
-                        calculated_concentration_units_I='%'):
-        '''export data_stage02_quantification_outliers to .csv'''
-
-        data = [];
-        data = self.get_rows_unique_dataStage02QuantificationOutliersPCA(analysis_id_I,
-                        experiment_id_I,
-                        sample_name_short_I,
-                        time_point_I,
-                        component_name_I,
-                        calculated_concentration_units_I);
-        if data:
-            # write data to file
-            export = base_exportData(data);
-            export.write_dict2csv(filename_O);
     def export_dataStage02QuantificationOutliersDeviation_js(self,analysis_id_I,data_dir_I='tmp'):
         '''Export data for a box and whiskers plot
         '''
 
-        #get the analysis information
-        analysis_info = [];
-        analysis_info = self.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
         #get the data for the analysis
         data_O = [];
         data_O = self.get_rows_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);

@@ -358,23 +358,11 @@ class stage02_quantification_pairWiseTest_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
-    def initialize_dataStage02_quantification_pairWiseTest(self):
-        try:
-            data_stage02_quantification_pairWiseTest.__table__.create(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def drop_dataStage02_quantification_pairWiseTest(self):
-        try:
-            data_stage02_quantification_pairWiseTest.__table__.drop(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
     def reset_dataStage02_quantification_pairWiseTest(self,analysis_id_I = None):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_pairWiseTest).filter(data_stage02_quantification_pairWiseTest.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-            else:
-                reset = self.session.query(data_stage02_quantification_pairWiseTest).delete(synchronize_session=False);
-            self.session.commit();
+                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     def add_dataStage02QuantificationPairWiseTest(self, data_I):

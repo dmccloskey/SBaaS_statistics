@@ -230,6 +230,63 @@ class data_stage02_quantification_tree_hyperparameter(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
+class data_stage02_quantification_tree_pipeline(Base):
+    __tablename__ = 'data_stage02_quantification_tree_pipeline'
+    id = Column(Integer, Sequence('data_stage02_quantification_tree_pipeline_id_seq'), primary_key=True)
+    pipeline_id = Column(String(500))
+    pipeline_model = Column(String(50))
+    pipeline_method = Column(String(50))
+    pipeline_parameters = Column(postgresql.JSON);
+    pipeline_order = Column(Integer);
+    used_ = Column(Boolean);
+    comment_ = Column(Text);
+
+    __table_args__ = (
+                      UniqueConstraint('pipeline_id',
+                                       'pipeline_model',
+                                       'pipeline_method',
+                                       'pipeline_order',
+                                       ),
+            )
+
+    def __init__(self,
+                row_dict_I,
+                ):
+        self.pipeline_method=row_dict_I['pipeline_method'];
+        self.pipeline_model=row_dict_I['pipeline_model'];
+        self.pipeline_parameters=row_dict_I['pipeline_parameters'];
+        self.pipeline_order=row_dict_I['pipeline_order'];
+        self.comment_=row_dict_I['comment_'];
+        self.used_=row_dict_I['used_'];
+        self.pipeline_id=row_dict_I['pipeline_id'];
+
+    def __set__row__(self, pipeline_id_I,
+            pipeline_model_I,
+            pipeline_method_I,
+            pipeline_parameters_I,
+            pipeline_order_I,
+            used__I,
+            comment__I,):
+        self.pipeline_pipeline_id=pipeline_id_I
+        self.pipeline_model=pipeline_model_I
+        self.pipeline_method=pipeline_method_I
+        self.pipeline_order=pipeline_order_I
+        self.pipeline_parameters=pipeline_parameters_I
+        self.used_=used__I
+        self.comment_=comment__I
+
+    def __repr__dict__(self):
+        return {'id':self.id,
+                'pipeline_id':self.pipeline_id,
+                'pipeline_model':self.pipeline_model,
+                'pipeline_method':self.pipeline_method,
+                'pipeline_order':self.pipeline_pipeline_order,
+                'pipeline_parameters':self.pipeline_parameters,
+                'used_':self.used_,
+                'comment_':self.comment_,}
+    
+    def __repr__json__(self):
+        return json.dumps(self.__repr__dict__())
 class data_stage02_quantification_tree_validation(Base):
     __tablename__ = 'data_stage02_quantification_tree_validation'
     id = Column(Integer, Sequence('data_stage02_quantification_tree_validation_id_seq'), primary_key=True)
@@ -451,64 +508,6 @@ class data_stage02_quantification_tree_features(Base):
             'calculated_concentration_units':self.calculated_concentration_units,
             'used_':self.used_,
             'comment_':self.comment_}
-    
-    def __repr__json__(self):
-        return json.dumps(self.__repr__dict__())
-
-class data_stage02_quantification_tree_pipeline(Base):
-    __tablename__ = 'data_stage02_quantification_tree_pipeline'
-    id = Column(Integer, Sequence('data_stage02_quantification_tree_pipeline_id_seq'), primary_key=True)
-    pipeline_id = Column(String(500))
-    pipeline_model = Column(String(50))
-    pipeline_method = Column(String(50))
-    pipeline_parameters = Column(postgresql.JSON);
-    pipeline_order = Column(Integer);
-    used_ = Column(Boolean);
-    comment_ = Column(Text);
-
-    __table_args__ = (
-                      UniqueConstraint('pipeline_id',
-                                       'pipeline_model',
-                                       'pipeline_method',
-                                       'pipeline_order',
-                                       ),
-            )
-
-    def __init__(self,
-                row_dict_I,
-                ):
-        self.pipeline_method=row_dict_I['pipeline_method'];
-        self.pipeline_model=row_dict_I['pipeline_model'];
-        self.pipeline_parameters=row_dict_I['pipeline_parameters'];
-        self.pipeline_order=row_dict_I['pipeline_order'];
-        self.comment_=row_dict_I['comment_'];
-        self.used_=row_dict_I['used_'];
-        self.pipeline_id=row_dict_I['pipeline_id'];
-
-    def __set__row__(self, pipeline_id_I,
-            pipeline_model_I,
-            pipeline_method_I,
-            pipeline_parameters_I,
-            pipeline_order_I,
-            used__I,
-            comment__I,):
-        self.pipeline_pipeline_id=pipeline_id_I
-        self.pipeline_model=pipeline_model_I
-        self.pipeline_method=pipeline_method_I
-        self.pipeline_order=pipeline_order_I
-        self.pipeline_parameters=pipeline_parameters_I
-        self.used_=used__I
-        self.comment_=comment__I
-
-    def __repr__dict__(self):
-        return {'id':self.id,
-                'pipeline_id':self.pipeline_id,
-                'pipeline_model':self.pipeline_model,
-                'pipeline_method':self.pipeline_method,
-                'pipeline_order':self.pipeline_pipeline_order,
-                'pipeline_parameters':self.pipeline_parameters,
-                'used_':self.used_,
-                'comment_':self.comment_,}
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())

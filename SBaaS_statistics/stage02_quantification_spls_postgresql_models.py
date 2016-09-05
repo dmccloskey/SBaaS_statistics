@@ -5,11 +5,18 @@ class data_stage02_quantification_spls_scores(Base):
     analysis_id = Column(String(500))
     sample_name_short = Column(String(100))
     response_name = Column(String(100))
+    axis = Column(Integer);
+    
+    response_class_value = Column(Float);
+    response_class_method = Column(String(50))
+    response_class_options = Column(postgresql.JSON);
+    response_class_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
+    
     score = Column(Float);
     score_response = Column(Float);
-    axis = Column(Integer);
     var_proportion = Column(Float);
     var_cumulative = Column(Float);
+
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
@@ -86,9 +93,16 @@ class data_stage02_quantification_spls_loadings(Base):
     analysis_id = Column(String(500))
     component_group_name = Column(String(100))
     component_name = Column(String(500))
-    loadings = Column(Float);
     axis = Column(Integer)
+    
+    impfeat_value = Column(Float);
+    impfeat_method = Column(String(50))
+    impfeat_options = Column(postgresql.JSON);
+    impfeat_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
+
+    loadings = Column(Float);
     correlations = Column(Float);
+
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
@@ -155,9 +169,16 @@ class data_stage02_quantification_spls_loadingsResponse(Base):
     id = Column(Integer, Sequence('data_stage02_quantification_spls_loadingsResponse_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
     response_name = Column(String(100))
-    loadings_response = Column(Float);
     axis = Column(Integer)
+    
+    impfeat_value = Column(Float);
+    impfeat_method = Column(String(50))
+    impfeat_options = Column(postgresql.JSON);
+    impfeat_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
+    
+    loadings_response = Column(Float);
     correlations_response = Column(Float);
+    
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);

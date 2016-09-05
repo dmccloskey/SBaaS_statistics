@@ -347,6 +347,27 @@ splsHyperparameters = [
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+    #for k,v in pls_model_method.items():
+    #    pls01.execute_plsda(
+    #        analysis_id_I = analysis_id,
+    #        concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #        r_calc_I=r_calc,
+    #        pls_model_I = k,
+    #        method = v,
+    #        response_I = None,
+    #        factor_I= "sample_name_abbreviation",
+    #        ncomp = 7,
+    #        Y_add = "NULL",
+    #        scale = "TRUE",
+    #        validation = "CV",
+    #        segments = 10,
+    #        stripped = "FALSE",
+    #        lower = 0.5,
+    #        upper = 0.5, 
+    #        trunc_pow = "FALSE", 
+    #        weights = "NULL",
+    #        p_method = "fdr",
+    #        nperm = 999);
       
    # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
    #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
@@ -399,28 +420,28 @@ for analysis_id in analysis_ids_run:
     #    time_points_I=[],
     #    r_calc_I=r_calc
     #    );
-    #pls hyperparameter search
-    for row in splsHyperparameters:
-        spls01.execute_splsHyperparameter(
-            analysis_id_I=analysis_id,
-            pipeline_id_I=row['pipeline_id'],
-            param_dist_I=row['param_dist'],
-            test_size_I = 0.,
-            metric_method_I = row['metric_method'],
-            metric_options_I = row['metric_options'],
-            crossval_method_I = row['crossval_method'],
-            crossval_options_I = row['crossval_options'],
-            hyperparameter_method_I = row['hyperparameter_method'],
-            hyperparameter_options_I = row['hyperparameter_options'],
-            calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            r_calc_I=r_calc
-            );
+    ##pls hyperparameter search
+    #for row in splsHyperparameters:
+    #    spls01.execute_splsHyperparameter(
+    #        analysis_id_I=analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        param_dist_I=row['param_dist'],
+    #        test_size_I = 0.,
+    #        metric_method_I = row['metric_method'],
+    #        metric_options_I = row['metric_options'],
+    #        crossval_method_I = row['crossval_method'],
+    #        crossval_options_I = row['crossval_options'],
+    #        hyperparameter_method_I = row['hyperparameter_method'],
+    #        hyperparameter_options_I = row['hyperparameter_options'],
+    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        r_calc_I=r_calc
+    #        );
     #perform a spls analysis
     spls01.reset_dataStage02_quantification_spls(
         tables_I = ['data_stage02_quantification_spls_impfeat',

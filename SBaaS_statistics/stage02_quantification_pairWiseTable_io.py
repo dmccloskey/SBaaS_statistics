@@ -188,7 +188,6 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
         data2_keymap = {
             'xdata':'calculated_concentration_1',
             'ydata':'calculated_concentration_2',
-            #'serieslabel':'singular_value_index',
             'serieslabel':'calculated_concentration_units',
             'featureslabel':'component_name',
             #'tooltiplabel':'component_name',

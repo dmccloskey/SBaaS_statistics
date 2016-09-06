@@ -329,17 +329,89 @@ r_calc = r_interface();
 #        'weights':"NULL",
 #        }
 #    },
+#    {'pipeline_id':'svdPca_R_scaleAndCenter',
+#    'pipeline_order':1,
+#    'used_':True,'comment_':None,
+#    'pipeline_model':"pca",
+#    'pipeline_method':"R",
+#    'pipeline_parameters':{
+#        'method':"svd",
+#        'ncomp':7,
+#        'imputeMissingValues':"FALSE",
+#        'scale':"uv",
+#        'center':"TRUE",
+#        'cv':"none",
+#        'segments':0, #no CV
+#        'nruncv':1.0, 
+#        'type':"krzanowski", 
+#        }
+#    },
+#    {'pipeline_id':'beysianPca_R_scaleAndCenter',
+#    'pipeline_order':1,
+#    'used_':True,'comment_':None,
+#    'pipeline_model':"pca",
+#    'pipeline_method':"R",
+#    'pipeline_parameters':{
+#        'method':"bpca",
+#        'ncomp':7,
+#        'imputeMissingValues':"FALSE",
+#        'scale':"uv",
+#        'center':"TRUE",
+#        'cv':"none",
+#        'segments':0, #no CV
+#        'nruncv':1.0, 
+#        'type':"krzanowski", 
+#        }
+#    },
+#    {'pipeline_id':'robustPca_R_scaleAndCenter',
+#    'pipeline_order':1,
+#    'used_':True,'comment_':None,
+#    'pipeline_model':"robustPca",
+#    'pipeline_method':"R",
+#    'pipeline_parameters':{
+#        'robust':True,
+#        'cor':"FALSE",
+#        'scores':"TRUE",
+#        'covmat':"NULL",
+#        'na_action':'na.omit',
+#        'center':"TRUE",
+#        'scale':"TRUE",
+#        'ncomp':7,
+#        }
+#    },
 #]
 #spls01.add_rows_table('data_stage02_quantification_spls_pipeline',data_O)
 
 #define the different hyperparameter searches
+##PLSDA using pls
+#splsHyperparameters = [
+#    {'pipeline_id':'plsda_R_scaleAndCenter',
+#     'param_dist':{"ncomp":7},
+#     'metric_method':['msep','rmsep','r2','r2x','q2'],
+#     'metric_options':None,
+#     'crossval_method':'CV',
+#     'crossval_options':{'validation':'CV','segments':10},
+#     'hyperparameter_method':'GridSearchCV',
+#     'hyperparameter_options':{},
+#     },
+#    ];
+#PCA using pcaMethods
 splsHyperparameters = [
-    {'pipeline_id':'plsda_R_scaleAndCenter',
+    {'pipeline_id':'svdPca_R_scaleAndCenter',
      'param_dist':{"ncomp":7},
-     'metric_method':['msep','rmsep','r2','r2x','q2'],
+     'metric_method':['msep','rmsep','r2','q2'],
      'metric_options':None,
      'crossval_method':'CV',
-     'crossval_options':{'validation':'CV','segments':10},
+     'crossval_options':{'type':"krzanowski",'segments':10,'cv':'q2','nruncv':1.0},
+     'hyperparameter_method':'GridSearchCV',
+     'hyperparameter_options':{},
+     },
+    {'pipeline_id':'beysianPca_R_scaleAndCenter',
+     'param_dist':{"ncomp":7},
+     'metric_method':['msep','rmsep','r2','q2'],
+     'metric_options':None,
+     'crossval_method':'CV',
+     'crossval_options':{'type':"krzanowski",'segments':10,'cv':'q2','nruncv':1.0},
      'hyperparameter_method':'GridSearchCV',
      'hyperparameter_options':{},
      },
@@ -385,13 +457,13 @@ for analysis_id in analysis_ids_run:
    #         query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'
    #);
     
-    #search for the optimal spls parameters
-    spls01.reset_dataStage02_quantification_spls(
-        tables_I = ['data_stage02_quantification_spls_hyperparameter'],
-        analysis_id_I=analysis_id,
-        warn_I=False,
-        );
-    #spls hyperparameter search
+    ##search for the optimal spls parameters
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    ##spls hyperparameter search (DEBUGGING spls methods)
     #spls01.execute_splsHyperparameter(
     #    analysis_id_I=analysis_id,
     #    pipeline_id_I='splsda_R_scaleAndCenter',
@@ -442,32 +514,80 @@ for analysis_id in analysis_ids_run:
     #        time_points_I=[],
     #        r_calc_I=r_calc
     #        );
-    #perform a spls analysis
-    spls01.reset_dataStage02_quantification_spls(
-        tables_I = ['data_stage02_quantification_spls_impfeat',
-                    'data_stage02_quantification_spls_scores',
-                    'data_stage02_quantification_spls_loadings',
-                    'data_stage02_quantification_spls_loadingsResponse'],
-        analysis_id_I=analysis_id,
-        warn_I=False,
-        );
-    spls01.execute_spls(
-        analysis_id_I=analysis_id,
-        pipeline_id_I='splsda_mixOmics_R_scaleAndCenter',
-        test_size_I = 0.,
-        impfeat_methods_I=[
-            {'coefficients':'feature_importance','impfeat_options':None},
-            {'VIP':'feature_importance','impfeat_options':None}],
-        response_class_methods_I=[],
-        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-        experiment_ids_I=[],
-        sample_name_abbreviations_I=[],
-        sample_name_shorts_I=[],
-        component_names_I=[],
-        component_group_names_I=[],
-        time_points_I=[],
-        r_calc_I=r_calc
-        )
+    ##perform a spls analysis
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_impfeat',
+    #                'data_stage02_quantification_spls_scores',
+    #                'data_stage02_quantification_spls_loadings',
+    #                'data_stage02_quantification_spls_loadingsResponse',
+    #                'data_stage02_quantification_spls_axis'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    ##PLSDA
+    #spls01.execute_spls(
+    #    analysis_id_I=analysis_id,
+    #    pipeline_id_I='plsda_R_scaleAndCenter',
+    #    test_size_I = 0.,
+    #    loadings_methods_I=[
+    #        {'metric_method':'loadings','metric_options':None},
+    #        {'metric_method':'correlations','metric_options':None}],
+    #    impfeat_methods_I=[
+    #        {'impfeat_method':'coefficients','impfeat_options':None},
+    #        {'impfeat_method':'VIP','impfeat_options':None},],
+    #    scores_methods_I=[
+    #        {'metric_method':'scores','metric_options':None},
+    #        {'metric_method':'scores_response','metric_options':None},
+    #        #{'metric_method':'explained_variance','metric_options':None},
+    #        ],
+    #    loadings_response_methods_I=[
+    #        {'metric_method':'loadings_response','metric_options':None},
+    #        {'metric_method':'correlations_response','metric_options':None},
+    #        ],
+    #    axis_metric_methods_I=[
+    #        {'metric_method':'var_proportional','metric_options':None},
+    #        {'metric_method':'var_cumulative','metric_options':None},
+    #        ],
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    experiment_ids_I=[],
+    #    sample_name_abbreviations_I=[],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    time_points_I=[],
+    #    r_calc_I=r_calc
+    #    )
+    #PCA
+    for pipeline_id in [
+        #'svdPca_R_scaleAndCenter',
+        #'robustPca_R_scaleAndCenter',
+        'beysianPca_R_scaleAndCenter']:
+        spls01.execute_spls(
+            analysis_id_I=analysis_id,
+            pipeline_id_I=pipeline_id,
+            test_size_I = 0.,
+            loadings_methods_I=[
+                {'metric_method':'loadings','metric_options':None},
+                #{'metric_method':'correlations','metric_options':None}
+                ],
+            impfeat_methods_I=[],
+            scores_methods_I=[
+                {'metric_method':'scores','metric_options':None},
+                ],
+            loadings_response_methods_I=[],
+            axis_metric_methods_I=[
+                {'metric_method':'var_proportional','metric_options':None},
+                {'metric_method':'var_cumulative','metric_options':None},
+                ],
+            calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+            experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            sample_name_shorts_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            time_points_I=[],
+            r_calc_I=r_calc
+            )
     
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
@@ -559,3 +679,5 @@ for analysis_id in analysis_ids_run:
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
+
+spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);

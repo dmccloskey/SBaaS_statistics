@@ -5,24 +5,25 @@ class data_stage02_quantification_spls_scores(Base):
     analysis_id = Column(String(500))
     sample_name_short = Column(String(100))
     response_name = Column(String(100))
+    test_size = Column(Float);
     axis = Column(Integer);
     
-    response_class_value = Column(Float);
-    response_class_method = Column(String(50))
-    response_class_options = Column(postgresql.JSON);
-    response_class_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
-    
-    score = Column(Float);
-    score_response = Column(Float);
-    var_proportion = Column(Float);
-    var_cumulative = Column(Float);
+    metric_value = Column(Float);
+    metric_method = Column(String(50))
+    metric_options = Column(postgresql.JSON);
+    metric_statistics = Column(postgresql.JSON); #std, zmetric_options, pvalue, etc.
 
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
-    __table_args__ = (UniqueConstraint('analysis_id','sample_name_short','response_name','axis',
+    __table_args__ = (UniqueConstraint('analysis_id',
+                        'test_size',
+                                       'sample_name_short',
+                                       'metric_method',
+                                       'response_name',
+                                       'axis',
                                        'calculated_concentration_units',
                                        'pipeline_id'),
             )
@@ -30,14 +31,15 @@ class data_stage02_quantification_spls_scores(Base):
     def __init__(self,
                 row_dict_I,
                 ):
-        self.var_proportion=row_dict_I['var_proportion'];
         self.analysis_id=row_dict_I['analysis_id'];
+        self.test_size=row_dict_I['test_size'];
         self.sample_name_short=row_dict_I['sample_name_short'];
         self.response_name=row_dict_I['response_name'];
-        self.score=row_dict_I['score'];
-        self.score_response=row_dict_I['score_response'];
         self.axis=row_dict_I['axis'];
-        self.var_cumulative=row_dict_I['var_cumulative'];
+        self.metric_value=row_dict_I['metric_value'];
+        self.metric_method=row_dict_I['metric_method'];
+        self.metric_options=row_dict_I['metric_options'];
+        self.metric_statistics=row_dict_I['metric_statistics'];
         self.pipeline_id=row_dict_I['pipeline_id'];
         self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
         self.used_=row_dict_I['used_'];
@@ -47,11 +49,11 @@ class data_stage02_quantification_spls_scores(Base):
                  analysis_id_I,
                  sample_name_short_I,
                 response_name_I,
-                score_I,
-                score_response_I,
+                metric_options_I,
+                metric_statistics_I,
                 axis_I,
-                var_proportion_I,
-                var_cumulative_I,
+                metric_method_I,
+                metric_value_I,
                 pipeline_id_I,
                 calculated_concentration_units_I,
                 used__I,
@@ -59,11 +61,11 @@ class data_stage02_quantification_spls_scores(Base):
         self.analysis_id=analysis_id_I
         self.sample_name_short=sample_name_short_I
         self.response_name=response_name_I
-        self.score=score_I
-        self.score_response=score_response_I
+        self.metric_options=metric_options_I
+        self.metric_statistics=metric_statistics_I
         self.axis=axis_I
-        self.var_proportion=var_proportion_I
-        self.var_cumulative=var_cumulative_I
+        self.metric_method=metric_method_I
+        self.metric_value=metric_value_I
         self.pipeline_id=pipeline_id_I
         self.calculated_concentration_units=calculated_concentration_units_I
         self.used_=used__I
@@ -73,13 +75,14 @@ class data_stage02_quantification_spls_scores(Base):
         return {
             'id':self.id,
             'analysis_id':self.analysis_id,
+            'test_size':self.test_size,
             'sample_name_short':self.sample_name_short,
             'response_name':self.response_name,
-            'score':self.score,
-            'score_response':self.score_response,
+            'metric_options':self.metric_options,
+            'metric_statistics':self.metric_statistics,
+            'metric_method':self.metric_method,
+            'metric_value':self.metric_value,
             'axis':self.axis,
-            'var_proportion':self.var_proportion,
-            'var_cumulative':self.var_cumulative,
             'pipeline_id':self.pipeline_id,
             'calculated_concentration_units':self.calculated_concentration_units,
             'used_':self.used_,
@@ -91,17 +94,15 @@ class data_stage02_quantification_spls_loadings(Base):
     __tablename__ = 'data_stage02_quantification_spls_loadings'
     id = Column(Integer, Sequence('data_stage02_quantification_spls_loadings_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
+    test_size = Column(Float);
     component_group_name = Column(String(100))
     component_name = Column(String(500))
     axis = Column(Integer)
     
-    impfeat_value = Column(Float);
-    impfeat_method = Column(String(50))
-    impfeat_options = Column(postgresql.JSON);
-    impfeat_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
-
-    loadings = Column(Float);
-    correlations = Column(Float);
+    metric_value = Column(Float);
+    metric_method = Column(String(50))
+    metric_options = Column(postgresql.JSON);
+    metric_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
 
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
@@ -109,21 +110,29 @@ class data_stage02_quantification_spls_loadings(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','component_name','axis',
-                                       'pipeline_id','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id',
+                        'test_size',
+                                       'component_name',
+                                       'axis',
+                                       'metric_method',
+                                       'pipeline_id',
+                                       'calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
         self.analysis_id=row_dict_I['analysis_id'];
+        self.test_size=row_dict_I['test_size'];
+        self.metric_value=row_dict_I['metric_value'];
+        self.metric_method=row_dict_I['metric_method'];
+        self.metric_options=row_dict_I['metric_options'];
+        self.metric_statistics=row_dict_I['metric_statistics'];
         self.pipeline_id=row_dict_I['pipeline_id'];
         self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
         self.used_=row_dict_I['used_'];
         self.comment_=row_dict_I['comment_'];
-        self.correlations=row_dict_I['correlations'];
         self.axis=row_dict_I['axis'];
-        self.loadings=row_dict_I['loadings'];
         self.component_name=row_dict_I['component_name'];
         self.component_group_name=row_dict_I['component_group_name'];
 
@@ -131,9 +140,7 @@ class data_stage02_quantification_spls_loadings(Base):
                  analysis_id_I,
                 component_group_name_I,
                 component_name_I,
-                loadings_I,
                 axis_I,
-                correlations_I,
                 pipeline_id_I,
                 calculated_concentration_units_I,
                 used__I,
@@ -141,9 +148,7 @@ class data_stage02_quantification_spls_loadings(Base):
         self.analysis_id=analysis_id_I
         self.component_group_name=component_group_name_I
         self.component_name=component_name_I
-        self.loadings=loadings_I
         self.axis=axis_I
-        self.correlations=correlations_I
         self.pipeline_id=pipeline_id_I
         self.calculated_concentration_units=calculated_concentration_units_I
         self.used_=used__I
@@ -152,11 +157,14 @@ class data_stage02_quantification_spls_loadings(Base):
     def __repr__dict__(self):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
+            'test_size':self.test_size,
+            'metric_options':self.metric_options,
+            'metric_statistics':self.metric_statistics,
+            'metric_method':self.metric_method,
+            'metric_value':self.metric_value,
             'component_group_name':self.component_group_name,
             'component_name':self.component_name,
-            'loadings':self.loadings,
             'axis':self.axis,
-            'correlations':self.correlations,
             'pipeline_id':self.pipeline_id,
             'calculated_concentration_units':self.calculated_concentration_units,
             'used_':self.used_,
@@ -168,16 +176,14 @@ class data_stage02_quantification_spls_loadingsResponse(Base):
     __tablename__ = 'data_stage02_quantification_spls_loadingsResponse'
     id = Column(Integer, Sequence('data_stage02_quantification_spls_loadingsResponse_id_seq'), primary_key=True)
     analysis_id = Column(String(500))
+    test_size = Column(Float);
     response_name = Column(String(100))
     axis = Column(Integer)
     
-    impfeat_value = Column(Float);
-    impfeat_method = Column(String(50))
-    impfeat_options = Column(postgresql.JSON);
-    impfeat_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
-    
-    loadings_response = Column(Float);
-    correlations_response = Column(Float);
+    metric_value = Column(Float);
+    metric_method = Column(String(50))
+    metric_options = Column(postgresql.JSON);
+    metric_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
     
     pipeline_id = Column(String(50))
     calculated_concentration_units = Column(String(50))
@@ -185,18 +191,27 @@ class data_stage02_quantification_spls_loadingsResponse(Base):
     comment_ = Column(Text);
 
     __table_args__ = (
-                      UniqueConstraint('analysis_id','response_name','axis','pipeline_id','calculated_concentration_units'),
+                      UniqueConstraint('analysis_id',
+                                       'response_name',
+                        'test_size',
+                                       'axis',
+                                       'metric_method',
+                                       'pipeline_id',
+                                       'calculated_concentration_units'),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
         self.pipeline_id=row_dict_I['pipeline_id'];
-        self.correlations_response=row_dict_I['correlations_response'];
+        self.test_size=row_dict_I['test_size'];
+        self.metric_value=row_dict_I['metric_value'];
+        self.metric_method=row_dict_I['metric_method'];
+        self.metric_options=row_dict_I['metric_options'];
+        self.metric_statistics=row_dict_I['metric_statistics'];
         self.axis=row_dict_I['axis'];
         self.analysis_id=row_dict_I['analysis_id'];
         self.response_name=row_dict_I['response_name'];
-        self.loadings_response=row_dict_I['loadings_response'];
         self.comment_=row_dict_I['comment_'];
         self.used_=row_dict_I['used_'];
         self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
@@ -204,18 +219,14 @@ class data_stage02_quantification_spls_loadingsResponse(Base):
     def __set__row__(self, 
                  analysis_id_I,
                 response_name_I,
-                loadings_response_I,
                 axis_I,
-                correlations_response_I,
                 pipeline_id_I,
                 calculated_concentration_units_I,
                 used__I,
                 comment__I,):
         self.analysis_id=analysis_id_I
         self.response_name=response_name_I
-        self.loadings_response=loadings_response_I
         self.axis=axis_I
-        self.correlations_response=correlations_response_I
         self.pipeline_id=pipeline_id_I
         self.calculated_concentration_units=calculated_concentration_units_I
         self.used_=used__I
@@ -224,10 +235,13 @@ class data_stage02_quantification_spls_loadingsResponse(Base):
     def __repr__dict__(self):
         return {'id':self.id,
             'analysis_id':self.analysis_id,
+            'test_size':self.test_size,
             'response_name':self.response_name,
-            'loadings_response':self.loadings_response,
+            'metric_options':self.metric_options,
+            'metric_statistics':self.metric_statistics,
+            'metric_method':self.metric_method,
+            'metric_value':self.metric_value,
             'axis':self.axis,
-            'correlations_response':self.correlations_response,
             'pipeline_id':self.pipeline_id,
             'calculated_concentration_units':self.calculated_concentration_units,
             'used_':self.used_,
@@ -474,15 +488,14 @@ class data_stage02_quantification_spls_validation(Base):
     metric_statistics = Column(postgresql.JSON);
     crossval_method = Column(String(50))
     crossval_options = Column(postgresql.JSON);
-    crossval_parameters = Column(postgresql.JSON);
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
     __table_args__ = (
                       UniqueConstraint('analysis_id','pipeline_id','test_size',
-                                       'metric_method','crossval_method',
-                                       'crossval_parameters',
+                                       'metric_method',
+                                       'crossval_method',
                                        'calculated_concentration_units'),
             )
 
@@ -497,7 +510,6 @@ class data_stage02_quantification_spls_validation(Base):
         self.analysis_id=row_dict_I['analysis_id'];
         self.crossval_options=row_dict_I['crossval_options'];
         self.crossval_method=row_dict_I['crossval_method'];
-        self.crossval_parameters=row_dict_I['crossval_parameters'];
         self.metric_method=row_dict_I['metric_method'];
         self.metric_options=row_dict_I['metric_options'];
         self.metric_score=row_dict_I['metric_score'];
@@ -512,7 +524,6 @@ class data_stage02_quantification_spls_validation(Base):
             metric_method_I,
             crossval_method_I,
             crossval_options_I,
-            crossval_parameters_I,
             calculated_concentration_units_I,
             used__I,
             comment__I,):
@@ -525,7 +536,6 @@ class data_stage02_quantification_spls_validation(Base):
         self.metric_method=metric_method_I
         self.crossval_method=crossval_method_I
         self.crossval_options=crossval_options_I
-        self.crossval_parameters=crossval_parameters_I
         self.calculated_concentration_units=calculated_concentration_units_I
         self.used_=used__I
         self.comment_=comment__I
@@ -541,98 +551,80 @@ class data_stage02_quantification_spls_validation(Base):
                 'metric_method':self.metric_method,
                 'crossval_method':self.crossval_method,
                 'crossval_options':self.crossval_options,
-                'crossval_parameters':self.crossval_parameters,
                 'calculated_concentration_units':self.calculated_concentration_units,
                 'used_':self.used_,
                 'comment_':self.comment_,}
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-
-
-#class data_stage02_quantification_spls_validation(Base):
-#    __tablename__ = 'data_stage02_quantification_spls_validation'
-#    id = Column(Integer, Sequence('data_stage02_quantification_spls_validation_id_seq'), primary_key=True)
-#    analysis_id = Column(String(500))
-#    pipeline_id = Column(String(50))
-#    test_size = Column(Float);
-#    metric_method = Column(String(50));
-#    metric_options = Column(postgresql.JSON);
-#    metric_score = Column(Float);
-#    metric_statistics = Column(postgresql.JSON);
-#    crossval_method = Column(String(50))
-#    crossval_options = Column(postgresql.JSON);
-#    crossval_parameters = Column(postgresql.JSON);
-#    calculated_concentration_units = Column(String(50))
-#    used_ = Column(Boolean);
-#    comment_ = Column(Text);
-
-#    __table_args__ = (
-#                      UniqueConstraint('analysis_id','pipeline_id','test_size',
-#                                       'metric_method','crossval_method',
-#                                       'crossval_parameters',
-#                                       'calculated_concentration_units'),
-#            )
-
-#    def __init__(self,
-#                row_dict_I,
-#                ):
-#        self.pipeline_id=row_dict_I['pipeline_id'];
-#        self.test_size=row_dict_I['test_size'];
-#        self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
-#        self.comment_=row_dict_I['comment_'];
-#        self.used_=row_dict_I['used_'];
-#        self.analysis_id=row_dict_I['analysis_id'];
-#        self.crossval_options=row_dict_I['crossval_options'];
-#        self.crossval_method=row_dict_I['crossval_method'];
-#        self.crossval_parameters=row_dict_I['crossval_parameters'];
-#        self.metric_method=row_dict_I['metric_method'];
-#        self.metric_options=row_dict_I['metric_options'];
-#        self.metric_score=row_dict_I['metric_score'];
-#        self.metric_statistics=row_dict_I['metric_statistics'];
-
-#    def __set__row__(self, analysis_id_I,
-#            pipeline_id_I,
-#            test_size_I,
-#            metric_statistics_I,
-#            metric_score_I,
-#            metric_options_I,
-#            metric_method_I,
-#            crossval_method_I,
-#            crossval_options_I,
-#            crossval_parameters_I,
-#            calculated_concentration_units_I,
-#            used__I,
-#            comment__I,):
-#        self.analysis_id=analysis_id_I
-#        self.pipeline_id=pipeline_id_I
-#        self.test_size=test_size_I
-#        self.metric_statistics=metric_statistics_I
-#        self.metric_score=metric_score_I
-#        self.metric_options=metric_options_I
-#        self.metric_method=metric_method_I
-#        self.crossval_method=crossval_method_I
-#        self.crossval_options=crossval_options_I
-#        self.crossval_parameters=crossval_parameters_I
-#        self.calculated_concentration_units=calculated_concentration_units_I
-#        self.used_=used__I
-#        self.comment_=comment__I
-
-#    def __repr__dict__(self):
-#        return {'id':self.id,
-#                'analysis_id':self.analysis_id,
-#                'pipeline_id':self.pipeline_id,
-#                'test_size':self.test_size,
-#                'metric_statistics':self.metric_statistics,
-#                'metric_score':self.metric_score,
-#                'metric_options':self.metric_options,
-#                'metric_method':self.metric_method,
-#                'crossval_method':self.crossval_method,
-#                'crossval_options':self.crossval_options,
-#                'crossval_parameters':self.crossval_parameters,
-#                'calculated_concentration_units':self.calculated_concentration_units,
-#                'used_':self.used_,
-#                'comment_':self.comment_,}
+class data_stage02_quantification_spls_axis(Base):
+    __tablename__ = 'data_stage02_quantification_spls_axis'
+    id = Column(Integer, Sequence('data_stage02_quantification_spls_axis_id_seq'), primary_key=True)
+    analysis_id = Column(String(500))
+    test_size = Column(Float);
+    axis = Column(Integer);
     
-#    def __repr__json__(self):
-#        return json.dumps(self.__repr__dict__())
+    metric_value = Column(Float);
+    metric_method = Column(String(50))
+    metric_options = Column(postgresql.JSON);
+    metric_statistics = Column(postgresql.JSON); #std, zscore, pvalue, etc.
+   
+    pipeline_id = Column(String(50))
+    calculated_concentration_units = Column(String(50))
+    used_ = Column(Boolean);
+    comment_ = Column(Text);
+
+    __table_args__ = (UniqueConstraint('analysis_id',
+                                       'test_size',
+                                       'axis',
+                                       'metric_method',
+                                       'calculated_concentration_units',
+                                       'pipeline_id'),
+            )
+
+    def __init__(self,
+                row_dict_I,
+                ):
+        self.analysis_id=row_dict_I['analysis_id'];
+        self.test_size=row_dict_I['test_size'];
+        self.metric_value=row_dict_I['metric_value'];
+        self.metric_method=row_dict_I['metric_method'];
+        self.metric_options=row_dict_I['metric_options'];
+        self.metric_statistics=row_dict_I['metric_statistics'];
+        self.axis=row_dict_I['axis'];
+        self.pipeline_id=row_dict_I['pipeline_id'];
+        self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        self.used_=row_dict_I['used_'];
+        self.comment_=row_dict_I['comment_'];
+
+    def __set__row__(self, 
+                 analysis_id_I,
+                axis_I,
+                pipeline_id_I,
+                calculated_concentration_units_I,
+                used__I,
+                comment__I,):
+        self.analysis_id=analysis_id_I
+        self.axis=axis_I
+        self.pipeline_id=pipeline_id_I
+        self.calculated_concentration_units=calculated_concentration_units_I
+        self.used_=used__I
+        self.comment_=comment__I
+
+    def __repr__dict__(self):
+        return {
+            'id':self.id,
+            'analysis_id':self.analysis_id,
+            'test_size':self.test_size,
+            'axis':self.axis,
+            'metric_options':self.metric_options,
+            'metric_statistics':self.metric_statistics,
+            'metric_method':self.metric_method,
+            'metric_value':self.metric_value,
+            'pipeline_id':self.pipeline_id,
+            'calculated_concentration_units':self.calculated_concentration_units,
+            'used_':self.used_,
+            'comment_':self.comment_,}
+    
+    def __repr__json__(self):
+        return json.dumps(self.__repr__dict__());

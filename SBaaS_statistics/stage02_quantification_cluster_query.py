@@ -18,7 +18,7 @@ class stage02_quantification_cluster_query(sbaas_template_query,
         '''Set the supported tables dict for stage02_quantification_cluster
         '''
         tables_supported = {
-            'data_stage02_quantification_cluster_impfeat':data_stage02_quantification_cluster_impfeat,
+            'data_stage02_quantification_cluster_validation':data_stage02_quantification_cluster_validation,
             'data_stage02_quantification_cluster_responseClassification':data_stage02_quantification_cluster_responseClassification,
             'data_stage02_quantification_cluster_pipeline':data_stage02_quantification_cluster_pipeline,
             'data_stage02_quantification_cluster_hyperparameter':data_stage02_quantification_cluster_hyperparameter,

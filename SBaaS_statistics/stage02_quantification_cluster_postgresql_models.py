@@ -175,17 +175,13 @@ class data_stage02_quantification_cluster_validation(Base):
     metric_options = Column(postgresql.JSON);
     metric_score = Column(Float);
     metric_statistics = Column(postgresql.JSON);
-    crossval_method = Column(String(50))
-    crossval_options = Column(postgresql.JSON);
-    crossval_parameters = Column(postgresql.JSON);
     calculated_concentration_units = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
     __table_args__ = (
                       UniqueConstraint('analysis_id','pipeline_id','test_size',
-                                       'metric_method','crossval_method',
-                                       'crossval_parameters',
+                                       'metric_method',
                                        'calculated_concentration_units'),
             )
 
@@ -198,9 +194,6 @@ class data_stage02_quantification_cluster_validation(Base):
         self.comment_=row_dict_I['comment_'];
         self.used_=row_dict_I['used_'];
         self.analysis_id=row_dict_I['analysis_id'];
-        self.crossval_options=row_dict_I['crossval_options'];
-        self.crossval_method=row_dict_I['crossval_method'];
-        self.crossval_parameters=row_dict_I['crossval_parameters'];
         self.metric_method=row_dict_I['metric_method'];
         self.metric_options=row_dict_I['metric_options'];
         self.metric_score=row_dict_I['metric_score'];
@@ -213,9 +206,6 @@ class data_stage02_quantification_cluster_validation(Base):
             metric_score_I,
             metric_options_I,
             metric_method_I,
-            crossval_method_I,
-            crossval_options_I,
-            crossval_parameters_I,
             calculated_concentration_units_I,
             used__I,
             comment__I,):
@@ -226,9 +216,6 @@ class data_stage02_quantification_cluster_validation(Base):
         self.metric_score=metric_score_I
         self.metric_options=metric_options_I
         self.metric_method=metric_method_I
-        self.crossval_method=crossval_method_I
-        self.crossval_options=crossval_options_I
-        self.crossval_parameters=crossval_parameters_I
         self.calculated_concentration_units=calculated_concentration_units_I
         self.used_=used__I
         self.comment_=comment__I
@@ -242,9 +229,6 @@ class data_stage02_quantification_cluster_validation(Base):
                 'metric_score':self.metric_score,
                 'metric_options':self.metric_options,
                 'metric_method':self.metric_method,
-                'crossval_method':self.crossval_method,
-                'crossval_options':self.crossval_options,
-                'crossval_parameters':self.crossval_parameters,
                 'calculated_concentration_units':self.calculated_concentration_units,
                 'used_':self.used_,
                 'comment_':self.comment_,}

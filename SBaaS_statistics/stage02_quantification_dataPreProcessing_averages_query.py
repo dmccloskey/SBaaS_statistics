@@ -1288,7 +1288,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
         except SQLAlchemyError as e:
             print(e);
       
-    # query sample_names from data_stage02_quantification_descriptiveStats
+    # query sample_names from data_stage02_quantification_dataPreProcessing_averages
     def get_sampleNameAbbreviationsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I):
         '''Querry sample_name_abbreviations that are used from the analysis'''
         try:
@@ -1309,7 +1309,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return sample_name_abbreviations_O,time_points_O;
         except SQLAlchemyError as e:
             print(e);
-    # query component_names from data_stage02_quantification_descriptiveStats
+    # query component_names from data_stage02_quantification_dataPreProcessing_averages
     def get_componentNamesAndComponentGroupNames_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,analysis_id_I,calculated_concentration_units_I):
         '''Query component_names and component_group_names that are used by analysis_id and calculated_concentration_units'''
         try:
@@ -1330,7 +1330,7 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
             return component_name_O,component_group_name_O;
         except SQLAlchemyError as e:
             print(e);
-    # query data from data_stage02_quantification_descriptiveStats
+    # query data from data_stage02_quantification_dataPreProcessing_averages
     def get_data_analysisIDAndSampleNameAbbreviationAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(self,
                                 analysis_id_I,
                                 sample_name_abbreviation_I,
@@ -1385,5 +1385,95 @@ class stage02_quantification_dataPreProcessing_averages_query(sbaas_template_que
                     ci_ub=d.ci_ub;
                     calculated_concentration_units=d.calculated_concentration_units;
             return mean,stdev,ci_lb,ci_ub,calculated_concentration_units;
+        except SQLAlchemyError as e:
+            print(e);
+
+    ##refactored
+    def get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages(
+        self,analysis_id_I,
+        calculated_concentration_units_I=[],
+        component_names_I=[],
+        component_group_names_I=[],
+        sample_name_abbreviations_I=[],
+        time_points_I=[],
+        experiment_ids_I=[],
+        test_descriptions_I=[],
+        pvalue_corrected_descriptions_I=[],
+        where_clause_I=None,
+        ):
+        '''Query rows from data_stage02_quantification_dataPreProcessing_averages
+        INPUT:
+        analysis_id_I = string
+        ... = list or comma seperate string
+        where_clause_I = formatted clause to add at the end
+        OUTPUT:
+        rows_O = listDict
+        '''
+        try:
+            cmd = '''SELECT "data_stage02_quantification_dataPreProcessing_averages"."id", 
+                "data_stage02_quantification_dataPreProcessing_averages"."analysis_id", 
+                "data_stage02_quantification_dataPreProcessing_averages"."experiment_id", 
+                "data_stage02_quantification_dataPreProcessing_averages"."sample_name_abbreviation", 
+                "data_stage02_quantification_dataPreProcessing_averages"."time_point", 
+                "data_stage02_quantification_dataPreProcessing_averages"."component_group_name", 
+                "data_stage02_quantification_dataPreProcessing_averages"."component_name", 
+                "data_stage02_quantification_dataPreProcessing_averages"."test_stat", 
+                "data_stage02_quantification_dataPreProcessing_averages"."test_description", 
+                "data_stage02_quantification_dataPreProcessing_averages"."pvalue", 
+                "data_stage02_quantification_dataPreProcessing_averages"."pvalue_corrected", 
+                "data_stage02_quantification_dataPreProcessing_averages"."pvalue_corrected_description", 
+                "data_stage02_quantification_dataPreProcessing_averages"."mean", 
+                "data_stage02_quantification_dataPreProcessing_averages"."var", 
+                "data_stage02_quantification_dataPreProcessing_averages"."cv", 
+                "data_stage02_quantification_dataPreProcessing_averages"."n", 
+                "data_stage02_quantification_dataPreProcessing_averages"."ci_lb", 
+                "data_stage02_quantification_dataPreProcessing_averages"."ci_ub", 
+                "data_stage02_quantification_dataPreProcessing_averages"."ci_level", 
+                "data_stage02_quantification_dataPreProcessing_averages"."min", 
+                "data_stage02_quantification_dataPreProcessing_averages"."max", 
+                "data_stage02_quantification_dataPreProcessing_averages"."median", 
+                "data_stage02_quantification_dataPreProcessing_averages"."iq_1", 
+                "data_stage02_quantification_dataPreProcessing_averages"."iq_3", 
+                "data_stage02_quantification_dataPreProcessing_averages"."calculated_concentration_units", 
+                "data_stage02_quantification_dataPreProcessing_averages"."used_", 
+                "data_stage02_quantification_dataPreProcessing_averages"."comment_" ''';
+            cmd+= 'FROM "data_stage02_quantification_dataPreProcessing_averages" ';
+            cmd+= "WHERE analysis_id LIKE '%s' "%(analysis_id_I)
+            if calculated_concentration_units_I:
+                cmd_q = "AND calculated_concentration_units =ANY ('{%s}'::text[]) " %(self.convert_list2string(calculated_concentration_units_I));
+                cmd+=cmd_q;
+            if component_names_I:
+                cmd_q = "AND component_name =ANY ('{%s}'::text[]) " %(self.convert_list2string(component_names_I));
+                cmd+=cmd_q;
+            if component_group_names_I:
+                cmd_q = "AND component_group_name =ANY ('{%s}'::text[]) " %(self.convert_list2string(component_group_names_I));
+                cmd+=cmd_q;
+            if time_points_I:
+                cmd_q = "AND time_point =ANY ('{%s}'::text[]) " %(self.convert_list2string(time_points_I));
+                cmd+=cmd_q;
+            if experiment_ids_I:
+                cmd_q = "AND experiment_id =ANY ('{%s}'::text[]) " %(self.convert_list2string(experiment_ids_I));
+                cmd+=cmd_q;
+            if test_descriptions_I:
+                cmd_q = "AND test_description =ANY ('{%s}'::text[]) " %(self.convert_list2string(test_descriptions_I));
+                cmd+=cmd_q;
+            if pvalue_corrected_descriptions_I:
+                cmd_q = "AND pvalue_corrected_descriptions =ANY ('{%s}'::text[]) " %(self.convert_list2string(pvalue_corrected_descriptions_I));
+                cmd+=cmd_q;
+            if where_clause_I:
+                cmd += where_clause_I;
+            cmd+= '''ORDER BY "data_stage02_quantification_dataPreProcessing_averages"."analysis_id" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."calculated_concentration_units" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."experiment_id" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."time_point" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."sample_name_abbreviation" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."component_group_name" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."component_name" ASC,
+                "data_stage02_quantification_dataPreProcessing_averages"."test_description" ASC, 
+                "data_stage02_quantification_dataPreProcessing_averages"."pvalue_corrected_description" ASC ''';
+            result = self.session.execute(cmd);
+            data = result.fetchall();
+            data_O = [dict(d) for d in data];
+            return data_O;
         except SQLAlchemyError as e:
             print(e);

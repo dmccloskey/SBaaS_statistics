@@ -179,7 +179,8 @@ outliers01.initialize_supportedTables();
 outliers01.initialize_tables();
 
 analysis_ids_run = [
-    'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
+    'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
+    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -309,92 +310,93 @@ svm_hyperparameters = [
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
-##add in spls pipelines
-#data_O=[
-#    {'pipeline_id':'plsda_R_scaleAndCenter',
-#    'pipeline_order':1,
-#    'used_':True,'comment_':None,
-#    'pipeline_model':"plsda",
-#    'pipeline_parameters':{
-#        'method':"cppls",
-#        'ncomp':7,
-#        'Y_add':"NULL",
-#        'scale':"TRUE",
-#        'validation':"none",
-#        'segments':0, #no CV
-#        'stripped':"FALSE",
-#        'lower':0.5,
-#        'upper':0.5, 
-#        'trunc_pow':"FALSE", 
-#        'weights':"NULL",
-#        }
-#    },
-#    {'pipeline_id':'svdPca_R_scaleAndCenter',
-#    'pipeline_order':1,
-#    'used_':True,'comment_':None,
-#    'pipeline_model':"pca",
-#    'pipeline_method':"R",
-#    'pipeline_parameters':{
-#        'method':"svd",
-#        'ncomp':7,
-#        'imputeMissingValues':"FALSE",
-#        'scale':"uv",
-#        'center':"TRUE",
-#        'cv':"none",
-#        'segments':0, #no CV
-#        'nruncv':1.0, 
-#        'type':"krzanowski", 
-#        }
-#    },
-#    {'pipeline_id':'beysianPca_R_scaleAndCenter',
-#    'pipeline_order':1,
-#    'used_':True,'comment_':None,
-#    'pipeline_model':"pca",
-#    'pipeline_method':"R",
-#    'pipeline_parameters':{
-#        'method':"bpca",
-#        'ncomp':7,
-#        'imputeMissingValues':"FALSE",
-#        'scale':"uv",
-#        'center':"TRUE",
-#        'cv':"none",
-#        'segments':0, #no CV
-#        'nruncv':1.0, 
-#        'type':"krzanowski", 
-#        }
-#    },
-#    {'pipeline_id':'robustPca_R_scaleAndCenter',
-#    'pipeline_order':1,
-#    'used_':True,'comment_':None,
-#    'pipeline_model':"robustPca",
-#    'pipeline_method':"R",
-#    'pipeline_parameters':{
-#        'robust':True,
-#        'cor':"FALSE",
-#        'scores':"TRUE",
-#        'covmat':"NULL",
-#        'na_action':'na.omit',
-#        'center':"TRUE",
-#        'scale':"TRUE",
-#        'ncomp':7,
-#        }
-#    },
-#]
+#add in spls pipelines
+data_O=[
+    {'pipeline_id':'plsda_R_scaleAndCenter',
+    'pipeline_order':1,
+    'used_':True,'comment_':None,
+    'pipeline_model':"plsda",
+    'pipeline_method':"R",
+    'pipeline_parameters':{
+        'method':"cppls",
+        'ncomp':7,
+        'Y_add':"NULL",
+        'scale':"TRUE",
+        'validation':"none",
+        'segments':0, #no CV
+        'stripped':"FALSE",
+        'lower':0.5,
+        'upper':0.5, 
+        'trunc_pow':"FALSE", 
+        'weights':"NULL",
+        }
+    },
+    {'pipeline_id':'svdPca_R_scaleAndCenter',
+    'pipeline_order':1,
+    'used_':True,'comment_':None,
+    'pipeline_model':"pca",
+    'pipeline_method':"R",
+    'pipeline_parameters':{
+        'method':"svd",
+        'ncomp':7,
+        'imputeMissingValues':"FALSE",
+        'scale':"uv",
+        'center':"TRUE",
+        'cv':"none",
+        'segments':0, #no CV
+        'nruncv':1.0, 
+        'type':"krzanowski", 
+        }
+    },
+    {'pipeline_id':'beysianPca_R_scaleAndCenter',
+    'pipeline_order':1,
+    'used_':True,'comment_':None,
+    'pipeline_model':"pca",
+    'pipeline_method':"R",
+    'pipeline_parameters':{
+        'method':"bpca",
+        'ncomp':7,
+        'imputeMissingValues':"FALSE",
+        'scale':"uv",
+        'center':"TRUE",
+        'cv':"none",
+        'segments':0, #no CV
+        'nruncv':1.0, 
+        'type':"krzanowski", 
+        }
+    },
+    {'pipeline_id':'robustPca_R_scaleAndCenter',
+    'pipeline_order':1,
+    'used_':True,'comment_':None,
+    'pipeline_model':"robustPca",
+    'pipeline_method':"R",
+    'pipeline_parameters':{
+        'robust':True,
+        'cor':"FALSE",
+        'scores':"TRUE",
+        'covmat':"NULL",
+        'na_action':'na.omit',
+        'center':"TRUE",
+        'scale':"TRUE",
+        'ncomp':7,
+        }
+    },
+]
 #spls01.add_rows_table('data_stage02_quantification_spls_pipeline',data_O)
 
 #define the different hyperparameter searches
-##PLSDA using pls
-#splsHyperparameters = [
-#    {'pipeline_id':'plsda_R_scaleAndCenter',
-#     'param_dist':{"ncomp":7},
-#     'metric_method':['msep','rmsep','r2','r2x','q2'],
-#     'metric_options':None,
-#     'crossval_method':'CV',
-#     'crossval_options':{'validation':'CV','segments':10},
-#     'hyperparameter_method':'GridSearchCV',
-#     'hyperparameter_options':{},
-#     },
-#    ];
+#PLSDA using pls
+splsHyperparameters = [
+    {'pipeline_id':'plsda_R_scaleAndCenter',
+     'param_dist':{"ncomp":7},
+     'metric_method':['msep','rmsep','r2','r2x','q2'],
+     'metric_options':None,
+     'crossval_method':'CV',
+     'crossval_options':{'validation':'CV','segments':10},
+     'hyperparameter_method':'GridSearchCV',
+     'hyperparameter_options':{},
+     },
+    ];
 #PCA using pcaMethods
 splsHyperparameters = [
     {'pipeline_id':'svdPca_R_scaleAndCenter',
@@ -419,43 +421,23 @@ splsHyperparameters = [
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    #for k,v in pls_model_method.items():
-    #    pls01.execute_plsda(
-    #        analysis_id_I = analysis_id,
-    #        concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        r_calc_I=r_calc,
-    #        pls_model_I = k,
-    #        method = v,
-    #        response_I = None,
-    #        factor_I= "sample_name_abbreviation",
-    #        ncomp = 7,
-    #        Y_add = "NULL",
-    #        scale = "TRUE",
-    #        validation = "CV",
-    #        segments = 10,
-    #        stripped = "FALSE",
-    #        lower = 0.5,
-    #        upper = 0.5, 
-    #        trunc_pow = "FALSE", 
-    #        weights = "NULL",
-    #        p_method = "fdr",
-    #        nperm = 999);
-      
-   # pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-   #         tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
-   #         analysis_id_I = analysis_id,
-   #         warn_I=False);
-   # pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
-   #         sample_name_abbreviations_I=[],
-   #         calculated_concentration_units_I=['log2(FC)'],
-   #         component_names_I=[],
-   #         pvalue_corrected_description_I = "bonferroni",
-   #         redundancy_I=True,
-   #         distance_measure_I='pearson',
-   #         value_I = 'mean',
-   #         r_calc_I=r_calc,
-   #         query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query'
-   #);
+       
+    # check for within component correlation
+    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+            tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
+        sample_name_abbreviations_I=[],
+        calculated_concentration_units_I=['log2(FC)'],
+        component_names_I=[],
+        pvalue_corrected_description_I = "bonferroni",
+        redundancy_I=True,
+        distance_measure_I='pearson',
+        value_I = 'mean',
+        r_calc_I=r_calc,
+        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+        );
     
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(
@@ -557,37 +539,37 @@ for analysis_id in analysis_ids_run:
     #    time_points_I=[],
     #    r_calc_I=r_calc
     #    )
-    #PCA
-    for pipeline_id in [
-        #'svdPca_R_scaleAndCenter',
-        #'robustPca_R_scaleAndCenter',
-        'beysianPca_R_scaleAndCenter']:
-        spls01.execute_spls(
-            analysis_id_I=analysis_id,
-            pipeline_id_I=pipeline_id,
-            test_size_I = 0.,
-            loadings_methods_I=[
-                {'metric_method':'loadings','metric_options':None},
-                #{'metric_method':'correlations','metric_options':None}
-                ],
-            impfeat_methods_I=[],
-            scores_methods_I=[
-                {'metric_method':'scores','metric_options':None},
-                ],
-            loadings_response_methods_I=[],
-            axis_metric_methods_I=[
-                {'metric_method':'var_proportional','metric_options':None},
-                {'metric_method':'var_cumulative','metric_options':None},
-                ],
-            calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            r_calc_I=r_calc
-            )
+    ##PCA
+    #for pipeline_id in [
+    #    'svdPca_R_scaleAndCenter',
+    #    'robustPca_R_scaleAndCenter',
+    #    'beysianPca_R_scaleAndCenter']:
+    #    spls01.execute_spls(
+    #        analysis_id_I=analysis_id,
+    #        pipeline_id_I=pipeline_id,
+    #        test_size_I = 0.,
+    #        loadings_methods_I=[
+    #            {'metric_method':'loadings','metric_options':None},
+    #            #{'metric_method':'correlations','metric_options':None}
+    #            ],
+    #        impfeat_methods_I=[],
+    #        scores_methods_I=[
+    #            {'metric_method':'scores','metric_options':None},
+    #            ],
+    #        loadings_response_methods_I=[],
+    #        axis_metric_methods_I=[
+    #            {'metric_method':'var_proportional','metric_options':None},
+    #            {'metric_method':'var_cumulative','metric_options':None},
+    #            ],
+    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        r_calc_I=r_calc
+    #        )
     
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
@@ -648,36 +630,11 @@ for analysis_id in analysis_ids_run:
 #    },
 #    );
 
-#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationReplicates_js("ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",
-#    query_I = 
-#    {'where':[
-#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-#        'column_name':'sample_name_abbreviation_1',
-#        'value':'OxicEvo04EcoliGlc',
-#        'operator':'LIKE',
-#        'connector':'AND'
-#            },
-#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-#        'column_name':'sample_name_abbreviation_2',
-#        'value':'OxicEvo04EcoliGlc',
-#        'operator':'LIKE',
-#        'connector':'AND'
-#            },
-#        {"table_name":'data_stage02_quantification_pairWiseCorrelation_replicates',
-#        'column_name':'calculated_concentration_units',
-#        'value':'FPKM_log2_normalized',
-#        'operator':'LIKE',
-#        'connector':'AND'
-#            },
-#    ]
-#    },
-#    );
-
-#covariance01.export_dataStage02QuantificationCovarianceSamples_js('ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01')
-#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+#covariance01.export_dataStage02QuantificationCovarianceSamples_js(analysis_id)
+pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationFeatures_js(analysis_id)
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
 
-spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);
+#spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);

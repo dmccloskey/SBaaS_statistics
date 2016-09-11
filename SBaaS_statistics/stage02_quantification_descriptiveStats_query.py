@@ -669,9 +669,13 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 "data_stage02_quantification_descriptiveStats"."used_", 
                 "data_stage02_quantification_descriptiveStats"."comment_" ''';
             cmd+= 'FROM "data_stage02_quantification_descriptiveStats" ';
-            cmd+= "WHERE analysis_id LIKE '%s' "%(analysis_id_I)
+            cmd+= '''WHERE analysis_id LIKE '%s' AND used_ 
+                    '''%(analysis_id_I)
             if calculated_concentration_units_I:
                 cmd_q = "AND calculated_concentration_units =ANY ('{%s}'::text[]) " %(self.convert_list2string(calculated_concentration_units_I));
+                cmd+=cmd_q;
+            if sample_name_abbreviations_I:
+                cmd_q = "AND sample_name_abbreviation =ANY ('{%s}'::text[]) " %(self.convert_list2string(sample_name_abbreviations_I));
                 cmd+=cmd_q;
             if component_names_I:
                 cmd_q = "AND component_name =ANY ('{%s}'::text[]) " %(self.convert_list2string(component_names_I));
@@ -692,7 +696,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
                 cmd_q = "AND pvalue_corrected_descriptions =ANY ('{%s}'::text[]) " %(self.convert_list2string(pvalue_corrected_descriptions_I));
                 cmd+=cmd_q;
             if where_clause_I:
-                cmd += where_clause_I;
+                cmd += "AND %s " %(where_clause_I);
             cmd+= '''ORDER BY "data_stage02_quantification_descriptiveStats"."analysis_id" ASC, 
                 "data_stage02_quantification_descriptiveStats"."calculated_concentration_units" ASC, 
                 "data_stage02_quantification_descriptiveStats"."experiment_id" ASC, 

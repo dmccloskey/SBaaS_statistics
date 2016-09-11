@@ -1,7 +1,7 @@
 # System
 import json
 # SBaaS
-from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
+from .stage02_quantification_dataPreProcessing_points_query import stage02_quantification_dataPreProcessing_points_query
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # SBaaS_resequencing
@@ -17,7 +17,7 @@ from python_statistics.calculate_interface import calculate_interface
 import numpy as np
 from math import sqrt
 
-class stage02_quantification_dataPreProcessing_averages_io(stage02_quantification_dataPreProcessing_averages_query,
+class stage02_quantification_dataPreProcessing_points_io(stage02_quantification_dataPreProcessing_points_query,
                                     sbaas_template_io #abstract io methods
                                     ):
     #Query data from Requencing:
@@ -128,7 +128,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 unique_constraint.add(unique_str);
                 data_db.append(row);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_db);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_points',data_db);
     #Query data from RNASequencing:
     def import_dataStage01RNASequencingGeneExpDiffFpkmTracking(self,
                 analysis_id_I,
@@ -211,7 +211,8 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
             row['iq_3']=None;                 
             data_O.append(row);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_points',data_O);
+
     def import_dataStage01RNASequencingGeneExpDiff_foldChange(self,
                 analysis_id_I,
                 geneID2componentName_I = {},
@@ -361,8 +362,8 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                     row['iq_3']=None;                 
                     data_O.append(row);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
-    #Query data from COBRA:
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_points',data_O);
+    #Query data from RNASequencing:
     def import_dataStage02PhysiologySampledData(self,
                 analysis_id_I,
                 rxn_ids_I = [],
@@ -372,6 +373,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 rxnID2componentGroupName_I = {},
                 snaCOBRA2sna_I = {},
                 analysisID2analysisIDCOBRA_I = {},
+
                 ):
         '''
         TODO:...
@@ -456,4 +458,4 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 row['iq_3']=fpkm['sampling_iq_3']                 
                 data_O.append(row);
         # add data to the DB
-        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_points',data_O);

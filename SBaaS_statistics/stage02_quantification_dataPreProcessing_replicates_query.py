@@ -45,46 +45,6 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
         except Exception as e:
             print(e);
         return data_O;
-    def add_dataStage02QuantificationDataPreProcessingReplicates(self,table_I,data_I):
-        '''add rows of data_stage02_quantification_dataPreProcessing_replicates'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryinsert = sbaas_base_query_insert(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryinsert.add_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-    def update_dataStage02QuantificationDataPreProcessingReplicates(self,table_I,data_I):
-        '''update rows of data_stage02_quantification_dataPreProcessing_replicates'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryupdate = sbaas_base_query_update(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryupdate.update_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-    def initialize_stage02_quantification_dataPreProcessing_replicates(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            queryinitialize = sbaas_base_query_initialize(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                queryinitialize.initialize_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
-    def drop_stage02_quantification_dataPreProcessing_replicates(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            querydrop = sbaas_base_query_drop(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                querydrop.drop_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
     def reset_stage02_quantification_dataPreProcessing_replicates(self,
             tables_I = [],
             analysis_id_I = None,
@@ -1899,3 +1859,89 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 except SQLAlchemyError as e:
                     print(e);
             self.session.commit();
+            
+    ##refactored
+    def get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates(
+        self,analysis_id_I,
+        calculated_concentration_units_I=[],
+        component_names_I=[],
+        component_group_names_I=[],
+        sample_name_shorts_I=[],
+        sample_name_abbreviations_I=[],
+        time_points_I=[],
+        experiment_ids_I=[],
+        imputation_methods_I=[],
+        pvalue_corrected_descriptions_I=[],
+        where_clause_I=None,
+        ):
+        '''Query rows from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string
+        ... = list or comma seperate string
+        where_clause_I = formatted clause to add at the end
+        OUTPUT:
+        rows_O = listDict
+        '''
+        try:
+            cmd = '''SELECT "data_stage02_quantification_dataPreProcessing_replicates"."id", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."analysis_id", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."experiment_id", 
+                "data_stage02_quantification_analysis"."sample_name_abbreviation", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."sample_name_short", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."time_point", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."component_group_name", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."component_name", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."imputation_method", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."calculated_concentration", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."calculated_concentration_units", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."used_", 
+                "data_stage02_quantification_dataPreProcessing_replicates"."comment_" ''';
+            cmd+= '''FROM "data_stage02_quantification_dataPreProcessing_replicates", 
+                "data_stage02_quantification_analysis" ''';
+            cmd+= '''WHERE "data_stage02_quantification_dataPreProcessing_replicates".analysis_id LIKE '%s' 
+                    AND "data_stage02_quantification_dataPreProcessing_replicates".used_ '''%(analysis_id_I)
+            cmd+= '''AND "data_stage02_quantification_dataPreProcessing_replicates".analysis_id LIKE "data_stage02_quantification_analysis".analysis_id  
+                AND "data_stage02_quantification_dataPreProcessing_replicates".experiment_id LIKE "data_stage02_quantification_analysis".experiment_id  
+                AND "data_stage02_quantification_dataPreProcessing_replicates".time_point LIKE "data_stage02_quantification_analysis".time_point  
+                AND "data_stage02_quantification_dataPreProcessing_replicates".sample_name_short LIKE "data_stage02_quantification_analysis".sample_name_short  '''
+            if calculated_concentration_units_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".calculated_concentration_units =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(calculated_concentration_units_I));
+                cmd+=cmd_q;
+            if sample_name_shorts_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".sample_name_short =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(sample_name_shorts_I));
+                cmd+=cmd_q;
+            if sample_name_abbreviations_I:
+                cmd_q = '''AND "data_stage02_quantification_analysis".sample_name_abbreviation =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(sample_name_abbreviations_I));
+                cmd+=cmd_q;
+            if component_names_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".component_name =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(component_names_I));
+                cmd+=cmd_q;
+            if component_group_names_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".component_group_name =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(component_group_names_I));
+                cmd+=cmd_q;
+            if time_points_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".time_point =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(time_points_I));
+                cmd+=cmd_q;
+            if experiment_ids_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".experiment_id =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(experiment_ids_I));
+                cmd+=cmd_q;
+            if imputation_methods_I:
+                cmd_q = '''AND "data_stage02_quantification_dataPreProcessing_replicates".imputation_method =ANY ('{%s}'::text[]) ''' %(self.convert_list2string(imputation_methods_I));
+                cmd+=cmd_q;
+            if where_clause_I:
+                cmd += '''AND %s ''' %(where_clause_I);
+            cmd+= '''ORDER BY "data_stage02_quantification_dataPreProcessing_replicates"."analysis_id" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."calculated_concentration_units" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."experiment_id" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."time_point" ASC, 
+                "data_stage02_quantification_analysis"."sample_name_abbreviation" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."sample_name_short" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."component_group_name" ASC, 
+                "data_stage02_quantification_dataPreProcessing_replicates"."component_name" ASC,
+                "data_stage02_quantification_dataPreProcessing_replicates"."imputation_method" ASC ''';
+            result = self.session.execute(cmd);
+            data = result.fetchall();
+            data_O = [dict(d) for d in data];
+            return data_O;
+        except SQLAlchemyError as e:
+            print(e);

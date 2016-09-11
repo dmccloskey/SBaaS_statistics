@@ -178,8 +178,27 @@ outliers01 = stage02_quantification_outliers_execute(session,engine,pg_settings.
 outliers01.initialize_supportedTables();
 outliers01.initialize_tables();
 
+#make the pairWiseTest table
+from SBaaS_statistics.stage02_quantification_pairWiseTest_execute import stage02_quantification_pairWiseTest_execute
+pwt01 = stage02_quantification_pairWiseTest_execute(session,engine,pg_settings.datadir_settings);
+pwt01.initialize_supportedTables();
+pwt01.initialize_tables();
+
+#make the dataPreProcessing tables
+from SBaaS_statistics.stage02_quantification_dataPreProcessing_pairWiseTest_execute import stage02_quantification_dataPreProcessing_pairWiseTest_execute
+dpppwt01 = stage02_quantification_dataPreProcessing_pairWiseTest_execute(session,engine,pg_settings.datadir_settings);
+dpppwt01.initialize_supportedTables();
+#dpppwt01.drop_tables();
+dpppwt01.initialize_tables();
+
 analysis_ids_run = [
-    'ALEsKOs01_RNASequencing_0_11_evo04Evo01',
+    #'ALEsKOs01_sampledFluxes_0_11_evo04',
+    #'ALEsKOs01_RNASequencing_0_11_evo04',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrr',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
+        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiA',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
         ];
 pls_model_method = {
@@ -419,26 +438,124 @@ splsHyperparameters = [
      },
     ];
 
+algorithm_test = [
+    #{'enrichment_algorithm':'weight01','test_description':'globaltest'},
+    #{'enrichment_algorithm':'classic','test_description':'globaltest'},
+    #{'enrichment_algorithm':'elim','test_description':'globaltest'},
+    {'enrichment_algorithm':'classic','test_description':'fisher'},
+    {'enrichment_algorithm':'elim','test_description':'fisher'},
+    {'enrichment_algorithm':'weight','test_description':'fisher'},
+    {'enrichment_algorithm':'weight01','test_description':'fisher'},
+    {'enrichment_algorithm':'parentchild','test_description':'fisher'},
+    ]
+
+#mapping between gene_id and bnumber
+from SBaaS_LIMS.lims_biologicalMaterial_query import lims_biologicalMaterial_query
+limsBM01 = lims_biologicalMaterial_query(session,engine,pg_settings.datadir_settings);
+component_group_names_mapping = limsBM01.get_orderedLocusName2GeneNameDict_biologicalmaterialID_biologicalMaterialGeneReferences(
+    "MG1655")
+from SBaaS_models.models_BioCyc_query import models_BioCyc_query
+modelsBC01 = models_BioCyc_query(session,engine,pg_settings.datadir_settings);
+modelsBC01.initialize_supportedTables();
+component_group_names_mapping_2 = modelsBC01.get_nameAndAccession1_database_modelsBioCycPolymerSegments(
+    "ECOLI")
+component_group_names_mapping_2 = {d['name']:d['accession_1'] for d in component_group_names_mapping_2}
+component_group_names_mapping.update(component_group_names_mapping_2)
+
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-       
-    # check for within component correlation
-    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-            tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
-            analysis_id_I = analysis_id,
-            warn_I=False);
-    pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
-        sample_name_abbreviations_I=[],
-        calculated_concentration_units_I=['log2(FC)'],
+    #model subsystems
+    enrichment01.reset_dataStage02_quantification_enrichment(
+        tables_I = ['data_stage02_quantification_pairWiseEnrichment'],
+        analysis_id_I = analysis_id,
+        warn_I=False)
+    enrichment01.execute_pairWiseEnrichment(
+        analysis_id,
+        calculated_concentration_units_I=[
+            'log2(FC)'],
         component_names_I=[],
+        component_group_names_I=[],
+        sample_name_abbreviations_1_I=[],
+        sample_name_abbreviations_2_I=[],
+        test_descriptions_I=[],
+        pvalue_corrected_descriptions_I=[],
+        where_clause_I=None,
+        component_names_mapping_I={},
+        component_group_names_mapping_I=component_group_names_mapping,
+        enrichment_method_I='hypergeometric',
+        enrichment_options_I={'pvalue_corrected_threshold':0.05,
+                            #'fold_change_threshold':1.0,
+                            'enrichment_class_database':'iJO1366_genes',
+                            'use_weights':False},
         pvalue_corrected_description_I = "bonferroni",
-        redundancy_I=True,
-        distance_measure_I='pearson',
-        value_I = 'mean',
+        query_object_I = 'stage02_quantification_dataPreProcessing_pairWiseTest_query',
+        query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingPairWiseTest',
         r_calc_I=r_calc,
-        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-        );
+        )
+    ##GO terms
+    #enrichment01.reset_dataStage02_quantification_enrichment(
+    #    tables_I = ['data_stage02_quantification_pairWiseGeneSetEnrichment'],
+    #    analysis_id_I = analysis_id,
+    #    warn_I=False)
+    ##perform a gene_set_enrichment analysis:
+    #for row in algorithm_test:
+    #    print("running algorithm " + row['enrichment_algorithm']);
+    #    print("running statistic " + row['test_description']); 
+    #    enrichment01.execute_pairWiseEnrichment(
+    #        analysis_id,
+    #        calculated_concentration_units_I=[
+    #            'log2(FC)'],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        sample_name_abbreviations_1_I=[],
+    #        sample_name_abbreviations_2_I=[],
+    #        test_descriptions_I=[],
+    #        pvalue_corrected_descriptions_I=[],
+    #        where_clause_I=None,
+    #        component_names_mapping_I={},
+    #            enrichment_method_I='topGO',
+    #            enrichment_options_I={
+    #                'pvalue_corrected_threshold':0.05,
+    #                'fold_change_threshold':1.0, #will not be used...
+    #                'GO_database':'GO.db',
+    #                'enrichment_algorithm':row['enrichment_algorithm'],
+    #                'test_description':row['test_description'],
+    #                'GO_ontology':"BP",
+    #                'GO_annotation':"annFUN.org",
+    #                'GO_annotation_mapping':"org.EcK12.eg.db",
+    #                'GO_annotation_id' :'alias'},
+    #        pvalue_corrected_description_I = "bonferroni",
+    #        query_object_I = 'stage02_quantification_dataPreProcessing_pairWiseTest_query',
+    #        query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingPairWiseTest',
+    #        r_calc_I=r_calc,
+    #        )
+
+    #enrichment01.reset_dataStage02_quantification_enrichment(
+    #    tables_I = ['data_stage02_quantification_pairWiseEnrichment'],
+    #    analysis_id_I = analysis_id,
+    #    warn_I=False)
+    #enrichment01.execute_pairWiseEnrichment(
+    #    analysis_id,
+    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    sample_name_abbreviations_1_I=[],
+    #    sample_name_abbreviations_2_I=[],
+    #    test_descriptions_I=[],
+    #    pvalue_corrected_descriptions_I=[],
+    #    where_clause_I=None,
+    #    component_names_mapping_I=component_names_mapping,
+    #    enrichment_method_I='hypergeometric',
+    #    enrichment_options_I={'pvalue_corrected_threshold':0.05,
+    #                              'enrichment_class_database':'iJO1366_metabolites',
+    #                              'use_weights':False},
+    #    pvalue_corrected_description_I = "bonferroni",
+    #    query_object_I = 'stage02_quantification_pairWiseTest_query',
+    #    query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationPairWiseTest',
+    #    r_calc_I=r_calc,
+    #    )
     
+    ##TODO: update notebooks...
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(
     #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
@@ -631,10 +748,11 @@ for analysis_id in analysis_ids_run:
 #    );
 
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js(analysis_id)
-pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationFeatures_js(analysis_id)
+#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationFeatures_js(analysis_id)
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
 
 #spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);
+#enrichment01.export_dataStage02QuantificationPairWiseGeneSetEnrichment_js('ALEsKOs01_0_evo04_0_11_evo04pgi');

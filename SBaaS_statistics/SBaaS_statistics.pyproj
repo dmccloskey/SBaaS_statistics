@@ -30,6 +30,14 @@
     <Compile Include="stage02_quantification_dataPreProcessing_averages_io.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_averages_postgresql_models.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_averages_query.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_pairWiseTest_execute.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_pairWiseTest_io.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_pairWiseTest_postgresql_models.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_pairWiseTest_query.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_points_execute.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_points_io.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_points_postgresql_models.py" />
+    <Compile Include="stage02_quantification_dataPreProcessing_points_query.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_execute.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_io.py" />
     <Compile Include="stage02_quantification_dataPreProcessing_replicates_postgresql_models.py" />

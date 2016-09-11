@@ -69,7 +69,6 @@ class stage02_quantification_pairWiseTest_io(stage02_quantification_pairWiseTest
             return data_json_O;
         with open(filename_str,'w') as file:
             file.write(ddtutilities.get_allObjects());
-
     
     #Query data from RNASequencing:
     def import_dataStage01RNASequencingGeneExpDiff(self,

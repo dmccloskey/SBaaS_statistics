@@ -454,7 +454,9 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
 
         #reorganize into analysis groups:
         calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
         component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names.sort();
         data_analysis = {'':{'':[]}};
         for row in data_listDict:
             cu = row['calculated_concentration_units']
@@ -597,11 +599,13 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
 
         #reorganize into analysis groups:
         calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
         sample_name_abbreviations = list(set([c['sample_name_abbreviation'] for c in data_listDict]));
+        sample_name_abbreviations.sort();
         data_analysis = {'':{'':[]}};
         for row in data_listDict:
             cu = row['calculated_concentration_units']
-            sna = row['sample_name_abbreviations']
+            sna = row['sample_name_abbreviation']
             if not cu in data_analysis.keys(): data_analysis[cu]={};
             if not sna in data_analysis[cu].keys(): data_analysis[cu][sna]=[];
             data_analysis[cu][sna].append(row);

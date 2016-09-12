@@ -12,13 +12,18 @@ from listDict.listDict import listDict
 class stage02_quantification_outliers_execute(stage02_quantification_outliers_io):
     def execute_calculateOutliersDeviation(
         self,analysis_id_I,
-        experiment_ids_I=[],
-        time_points_I=[],
         calculated_concentration_units_I=[],
         component_names_I=[],
-        sample_name_abbreviations_I=[],
+        component_group_names_I=[],
+        experiment_ids_I = [],
+        time_points_I = [],
+        sample_name_abbreviations_I = [],
+        sample_name_shorts_I = [],
+        where_clause_I = None,
         deviation_I=0.2,
-        method_I='cv'):
+        method_I='cv',
+        query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+        query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',):
         '''calculate outliers based on their deviation
         INPUT:
         OUTPUT:
@@ -30,43 +35,61 @@ class stage02_quantification_outliers_execute(stage02_quantification_outliers_io
         else: r_calc = r_interface();
         calc = calculate_interface();
         calculateoutliers = calculate_outliers();
-        
-        quantification_dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
 
-        data_O = [];
-        # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points/component_names that are unique
-        unique_groups = [];
-        unique_groups = quantification_dataPreProcessing_replicates_query.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePointsAndComponentNames_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
-            analysis_id_I,
-            calculated_concentration_units_I=calculated_concentration_units_I,
-            experiment_ids_I=experiment_ids_I,
-            sample_name_abbreviations_I=sample_name_abbreviations_I,
-            time_points_I=time_points_I,
-            component_names_I=component_names_I,
-            );
-        # will need to refactor in the future...
-        if type(unique_groups)==type(listDict()):
-            unique_groups.convert_dataFrame2ListDict()
-            unique_groups = unique_groups.get_listDict();
+        data_O = [];       
+            
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
+
+        else:
+            print('query instance does not have the required method.');
+        
+        #reorganize into analysis groups:
+        unique_groups = list(set(
+            [(c['analysis_id'],c['experiment_id'],
+              c['time_point'],c['calculated_concentration_units'],
+              c['component_name'],c['sample_name_abbreviation']) 
+             for c in data_listDict]));
+        unique_groups.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            unique_group = (row['analysis_id'],row['experiment_id'],
+              row['time_point'],row['calculated_concentration_units'],
+              row['component_name'],row['sample_name_abbreviation'])
+            if not unique_group in data_analysis.keys(): data_analysis[unique_group]=[];
+            data_analysis[unique_group].append(row);
+        del data_analysis['_del_'];
+
+        #apply the anlaysis to each unique group
         for row in unique_groups:
-            # get data:
-            all_1,data_1 = [],[];
-            all_1,data_1 = quantification_dataPreProcessing_replicates_query.get_RDataList_analysisIDAndExperimentIDAndTimePointAndCalculatedConcentrationUnitsAndComponentNamesAndSampleNameAbbreviation_dataStage02DataPreProcessingReplicates(
-                analysis_id_I,
-                row['experiment_id'],
-                row['time_point'],
-                row['calculated_concentration_units'],
-                row['component_name'],
-                row['sample_name_abbreviation'],
-                );
+            data = data_analysis[row];
+            data_1 = [d['calculated_concentration'] for d in data]
             if len(data_1)<2: continue
-            # will need to refactor in the future...
-            if type(all_1)==type(listDict):
-                all_1.convert_dataFrame2ListDict()
-                all_1 = all_1.get_listDict();
             # calculate outliers
             outliers = [];
-            outliers = calculateoutliers.calculate_outliers_deviation(all_1,"calculated_concentration",deviation_I,method_I,data_labels_I = 'sample_name_short');
+            outliers = calculateoutliers.calculate_outliers_deviation(data,"calculated_concentration",deviation_I,method_I,data_labels_I = 'sample_name_short');
             # record data
             if outliers:
                 data_O.extend(outliers);   
@@ -76,38 +99,72 @@ class stage02_quantification_outliers_execute(stage02_quantification_outliers_io
     def execute_calculateOutliersOneClassSVM(self,
             analysis_id_I,
             calculated_concentration_units_I=[],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            time_points_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            experiment_ids_I = [],
+            time_points_I = [],
+            sample_name_abbreviations_I = [],
+            sample_name_shorts_I = [],
+            where_clause_I = None,
+            query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             ):
         '''
         Check for outliers using a oneClassSVM
         INPUT:
         OUTPUT:
         '''
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
-        calculateoutliers = calculate_interface();
-        data_O = [];
-        # get the calculated_concentration_units/experiment_ids/sample_name_abbreviations/time_points that are unique
-        unique_groups = [];
-        unique_groups = dataPreProcessing_replicates_query.get_calculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndSampleNameShortsAndTimePoints_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
-            analysis_id_I,
-            calculated_concentration_units_I=calculated_concentration_units_I,
-            experiment_ids_I=experiment_ids_I,
-            sample_name_abbreviations_I=sample_name_abbreviations_I,
-            time_points_I=time_points_I,
-            );
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
+
+        data_O = [];       
+            
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
+
+        else:
+            print('query instance does not have the required method.');
+        
+        #reorganize into analysis groups:
+        unique_groups = list(set(
+            [(c['analysis_id'],c['experiment_id'],
+              c['time_point'],c['calculated_concentration_units'],
+              c['component_name'],c['sample_name_abbreviation']) 
+             for c in data_listDict]));
+        unique_groups.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            unique_group = (row['analysis_id'],row['experiment_id'],
+              row['time_point'],row['calculated_concentration_units'],
+              row['component_name'],row['sample_name_abbreviation'])
+            if not unique_group in data_analysis.keys(): data_analysis[unique_group]=[];
+            data_analysis[unique_group].append(row);
+        del data_analysis['_del_'];
+
+        #apply the anlaysis to each unique group
         for row in unique_groups:
-            data_outliers = [];
-            data_outliers = dataPreProcessing_replicates_query.get_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDsAndSampleNameAbbreviationsAndTimePoints_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                row['calculated_concentration_units'],
-                row['experiment_id'],
-                row['sample_name_abbreviation'],
-                row['time_point'],
-                );
             #dim: [nfeatures,nsamples]
-            data_listDict = listDict(data_outliers);
+            data_listDict = listDict(listDict_I=data_analysis[row]);
             data_listDict.set_listDict_dataFrame();
             data_listDict.set_listDict_pivotTable(
                 value_label_I='calculated_concentration',

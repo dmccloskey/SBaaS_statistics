@@ -9,7 +9,6 @@ from matplotlib_utilities.matplot import matplot
 from listDict.listDict import listDict
 
 class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWiseTest_io):
-
     
     def execute_pairwiseTestReplicates(self,
             analysis_id_I,

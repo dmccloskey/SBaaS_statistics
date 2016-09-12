@@ -133,10 +133,21 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
 
             if enrichment_method_I in ['hypergeometric']:
                 #get filtered component names:
+                component_names = [];
                 if component_names_mapping_I:
-                    component_names = [component_names_mapping_I[k] for k in data_filtered.dataFrame['component_name'].get_values()];
+                    for cn in data_filtered.dataFrame['component_name'].get_values():
+                        if cn in component_names_mapping_I.keys():
+                            component_names.append(component_names_mapping_I[cn])
+                        else:
+                            print('no mapping found for ' + cn);
+                    #component_names = [component_names_mapping_I[k] for k in data_filtered.dataFrame['component_name'].get_values() if k in component_names_mapping_I.keys()];
                 elif component_group_names_mapping_I:
-                    component_names = [component_group_names_mapping_I[k] for k in data_filtered.dataFrame['component_group_name'].get_values()];
+                    for cgn in data_filtered.dataFrame['component_group_name'].get_values():
+                        if cgn in component_group_names_mapping_I.keys():
+                            component_names.append(component_group_names_mapping_I[cgn])
+                        else:
+                            print('no mapping found for ' + cgn);
+                    #component_names = [component_group_names_mapping_I[k] for k in data_filtered.dataFrame['component_group_name'].get_values() if k in component_group_names_mapping_I.keys()];
                 else:
                     component_names = data_filtered.dataFrame['component_name'].get_values();
 
@@ -198,7 +209,7 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
             else:
                 print('enrichment method not recognized.');
 
-            if len(data_listDict.get_listDict())>1:
+            if len(data_listDict.dataFrame)>1:
                 # Pass 2: calculate the corrected p-values
                 r_calc.clear_workspace();
                 r_calc.make_vectorFromList(pvalues,'pvalues');

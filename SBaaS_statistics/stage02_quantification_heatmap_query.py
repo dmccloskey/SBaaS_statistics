@@ -17,7 +17,8 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
     def initialize_supportedTables(self):
         '''Set the supported tables dict for 
         '''
-        tables_supported = {'data_stage02_quantification_heatmap':data_stage02_quantification_heatmap,
+        tables_supported = {
+            'data_stage02_quantification_heatmap':data_stage02_quantification_heatmap,
             'data_stage02_quantification_heatmap_descriptiveStats':data_stage02_quantification_heatmap_descriptiveStats,
             'data_stage02_quantification_dendrogram':data_stage02_quantification_dendrogram,
             'data_stage02_quantification_dendrogram_descriptiveStats':data_stage02_quantification_dendrogram_descriptiveStats,
@@ -61,36 +62,29 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
             return data_O;
         except SQLAlchemyError as e:
             print(e);
-    def reset_dataStage02_quantification_heatmap(self,analysis_id_I = None):
+    def reset_dataStage02_quantification_heatmap(self,
+            tables_I = [],
+            analysis_id_I = None,
+            warn_I=True):
         try:
-            if analysis_id_I:
-                reset = self.session.query(data_stage02_quantification_heatmap).filter(data_stage02_quantification_heatmap.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-                self.session.commit();
-        except SQLAlchemyError as e:
-            print(e);
-    def reset_dataStage02_quantification_dendrogram(self,analysis_id_I = None):
-        try:
-            if analysis_id_I:
-                reset = self.session.query(data_stage02_quantification_dendrogram).filter(data_stage02_quantification_dendrogram.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-                self.session.commit();
-        except SQLAlchemyError as e:
-            print(e);
-
-    def initialize_dataStage02_quantification_heatmap(self):
-        try:
-            data_stage02_quantification_heatmap.__table__.create(self.engine,True);
-            data_stage02_quantification_dendrogram.__table__.create(self.engine,True);
-            data_stage02_quantification_heatmap_descriptiveStats.__table__.create(self.engine,True);
-            data_stage02_quantification_dendrogram_descriptiveStats.__table__.create(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def drop_dataStage02_quantification_heatmap(self):
-        try:
-            data_stage02_quantification_heatmap.__table__.drop(self.engine,True);
-            data_stage02_quantification_dendrogram.__table__.drop(self.engine,True);
-            data_stage02_quantification_heatmap_descriptiveStats.__table__.drop(self.engine,True);
-            data_stage02_quantification_dendrogram_descriptiveStats.__table__.drop(self.engine,True);
-        except SQLAlchemyError as e:
+            if not tables_I:
+                tables_I = list(self.get_supportedTables().keys());
+            querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            for table in tables_I:
+                query = {};
+                query['delete_from'] = [{'table_name':table}];
+                query['where'] = [{
+                        'table_name':table,
+                        'column_name':'analysis_id',
+                        'value':analysis_id_I,
+		                'operator':'LIKE',
+                        'connector':'AND'
+                        }
+	                ];
+                table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+                query = querydelete.make_queryFromString(table_model,query);
+                querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
             print(e);
 
     # query data from data_stage02_quantification_heatmap
@@ -129,20 +123,6 @@ class stage02_quantification_heatmap_query(sbaas_template_query):
                     data_stage02_quantification_dendrogram_descriptiveStats.used_).all();
             data_O = [d.__repr__dict__() for d in data];
             return data_O;
-        except SQLAlchemyError as e:
-            print(e);
-    def reset_dataStage02_quantification_heatmap_descriptiveStats(self,analysis_id_I = None):
-        try:
-            if analysis_id_I:
-                reset = self.session.query(data_stage02_quantification_heatmap_descriptiveStats).filter(data_stage02_quantification_heatmap_descriptiveStats.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-                self.session.commit();
-        except SQLAlchemyError as e:
-            print(e);
-    def reset_dataStage02_quantification_dendrogram_descriptiveStats(self,analysis_id_I = None):
-        try:
-            if analysis_id_I:
-                reset = self.session.query(data_stage02_quantification_dendrogram_descriptiveStats).filter(data_stage02_quantification_dendrogram_descriptiveStats.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-                self.session.commit();
         except SQLAlchemyError as e:
             print(e);
     

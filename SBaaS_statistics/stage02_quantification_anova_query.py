@@ -21,22 +21,36 @@ class stage02_quantification_anova_query(sbaas_template_query):
                             'data_stage02_quantification_anova_posthoc':data_stage02_quantification_anova_posthoc,
                         };
         self.set_supportedTables(tables_supported);
-    def initialize_dataStage02_quantification_anova(self):
-        try:
-            data_stage02_quantification_anova.__table__.create(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def drop_dataStage02_quantification_anova(self):
-        try:
-            data_stage02_quantification_anova.__table__.drop(self.engine,True);
-        except SQLAlchemyError as e:
-            print(e);
-    def reset_dataStage02_quantification_anova(self,analysis_id_I = None):
+    def reset_dataStage02_quantification_anova_v1(self,analysis_id_I = None):
         try:
             if analysis_id_I:
                 reset = self.session.query(data_stage02_quantification_anova).filter(data_stage02_quantification_anova.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
                 self.session.commit();
         except SQLAlchemyError as e:
+            print(e);
+    def reset_dataStage02_quantification_anova(self,
+            tables_I = [],
+            analysis_id_I = None,
+            warn_I=True):
+        try:
+            if not tables_I:
+                tables_I = list(self.get_supportedTables().keys());
+            querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            for table in tables_I:
+                query = {};
+                query['delete_from'] = [{'table_name':table}];
+                query['where'] = [{
+                        'table_name':table,
+                        'column_name':'analysis_id',
+                        'value':analysis_id_I,
+		                'operator':'LIKE',
+                        'connector':'AND'
+                        }
+	                ];
+                table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+                query = querydelete.make_queryFromString(table_model,query);
+                querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
             print(e);
     def get_rows_analysisID_dataStage02QuantificationAnova(self, analysis_id_I):
         """get data from analysis ID"""

@@ -184,8 +184,10 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
             query_I = query_I);
         #dynamically add -log10(p-value)
         for d in data_O:
-            if d['pvalue_corrected'] > 0.0:
-                d['log10(pvalue)']=-log10(d['pvalue_corrected']);
+            #if d['pvalue_corrected'] > 0.0:
+            #    d['log10(pvalue)']=-log10(d['pvalue_corrected']);
+            if d['pvalue'] > 0.0:
+                d['log10(pvalue)']=-log10(d['pvalue']);
 
         # make the tile objects  
         #data1 = filter menu and table    
@@ -208,9 +210,11 @@ class stage02_quantification_enrichment_io(stage02_quantification_enrichment_que
             'serieslabel':'sample_name_abbreviation_2',
             'featureslabel':'enrichment_class',
             'rowslabel':'enrichment_class',
-            'columnslabel':'pvalue_corrected',
+            #'columnslabel':'pvalue_corrected',
+            'columnslabel':'pvalue',
             'tooltiplabel':'enrichment_class',
-            'tooltipdata':'pvalue_corrected',
+            #'tooltipdata':'pvalue_corrected',
+            'tooltipdata':'pvalue',
             };     
         
         nsvgtable = ddt_container_filterMenuAndChart2dAndTable();

@@ -194,12 +194,13 @@ dpppwt01.initialize_tables();
 analysis_ids_run = [
     #'ALEsKOs01_sampledFluxes_0_11_evo04',
     #'ALEsKOs01_RNASequencing_0_11_evo04',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrr',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
-        'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiA',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
+    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
+    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
+    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrr',
+    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
+    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiA',
+    #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
+    'ALEsKOs01_0_11_evo04',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -437,124 +438,15 @@ splsHyperparameters = [
      'hyperparameter_options':{},
      },
     ];
-
-algorithm_test = [
-    #{'enrichment_algorithm':'weight01','test_description':'globaltest'},
-    #{'enrichment_algorithm':'classic','test_description':'globaltest'},
-    #{'enrichment_algorithm':'elim','test_description':'globaltest'},
-    {'enrichment_algorithm':'classic','test_description':'fisher'},
-    {'enrichment_algorithm':'elim','test_description':'fisher'},
-    {'enrichment_algorithm':'weight','test_description':'fisher'},
-    {'enrichment_algorithm':'weight01','test_description':'fisher'},
-    {'enrichment_algorithm':'parentchild','test_description':'fisher'},
-    ]
-
-#mapping between gene_id and bnumber
-from SBaaS_LIMS.lims_biologicalMaterial_query import lims_biologicalMaterial_query
-limsBM01 = lims_biologicalMaterial_query(session,engine,pg_settings.datadir_settings);
-component_group_names_mapping = limsBM01.get_orderedLocusName2GeneNameDict_biologicalmaterialID_biologicalMaterialGeneReferences(
-    "MG1655")
-from SBaaS_models.models_BioCyc_query import models_BioCyc_query
-modelsBC01 = models_BioCyc_query(session,engine,pg_settings.datadir_settings);
-modelsBC01.initialize_supportedTables();
-component_group_names_mapping_2 = modelsBC01.get_nameAndAccession1_database_modelsBioCycPolymerSegments(
-    "ECOLI")
-component_group_names_mapping_2 = {d['name']:d['accession_1'] for d in component_group_names_mapping_2}
-component_group_names_mapping.update(component_group_names_mapping_2)
+#define svd models
+svd_method = {
+    'svd',
+    'robustSvd',
+    };
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    #model subsystems
-    enrichment01.reset_dataStage02_quantification_enrichment(
-        tables_I = ['data_stage02_quantification_pairWiseEnrichment'],
-        analysis_id_I = analysis_id,
-        warn_I=False)
-    enrichment01.execute_pairWiseEnrichment(
-        analysis_id,
-        calculated_concentration_units_I=[
-            'log2(FC)'],
-        component_names_I=[],
-        component_group_names_I=[],
-        sample_name_abbreviations_1_I=[],
-        sample_name_abbreviations_2_I=[],
-        test_descriptions_I=[],
-        pvalue_corrected_descriptions_I=[],
-        where_clause_I=None,
-        component_names_mapping_I={},
-        component_group_names_mapping_I=component_group_names_mapping,
-        enrichment_method_I='hypergeometric',
-        enrichment_options_I={'pvalue_corrected_threshold':0.05,
-                            #'fold_change_threshold':1.0,
-                            'enrichment_class_database':'iJO1366_genes',
-                            'use_weights':False},
-        pvalue_corrected_description_I = "bonferroni",
-        query_object_I = 'stage02_quantification_dataPreProcessing_pairWiseTest_query',
-        query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingPairWiseTest',
-        r_calc_I=r_calc,
-        )
-    ##GO terms
-    #enrichment01.reset_dataStage02_quantification_enrichment(
-    #    tables_I = ['data_stage02_quantification_pairWiseGeneSetEnrichment'],
-    #    analysis_id_I = analysis_id,
-    #    warn_I=False)
-    ##perform a gene_set_enrichment analysis:
-    #for row in algorithm_test:
-    #    print("running algorithm " + row['enrichment_algorithm']);
-    #    print("running statistic " + row['test_description']); 
-    #    enrichment01.execute_pairWiseEnrichment(
-    #        analysis_id,
-    #        calculated_concentration_units_I=[
-    #            'log2(FC)'],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        sample_name_abbreviations_1_I=[],
-    #        sample_name_abbreviations_2_I=[],
-    #        test_descriptions_I=[],
-    #        pvalue_corrected_descriptions_I=[],
-    #        where_clause_I=None,
-    #        component_names_mapping_I={},
-    #            enrichment_method_I='topGO',
-    #            enrichment_options_I={
-    #                'pvalue_corrected_threshold':0.05,
-    #                'fold_change_threshold':1.0, #will not be used...
-    #                'GO_database':'GO.db',
-    #                'enrichment_algorithm':row['enrichment_algorithm'],
-    #                'test_description':row['test_description'],
-    #                'GO_ontology':"BP",
-    #                'GO_annotation':"annFUN.org",
-    #                'GO_annotation_mapping':"org.EcK12.eg.db",
-    #                'GO_annotation_id' :'alias'},
-    #        pvalue_corrected_description_I = "bonferroni",
-    #        query_object_I = 'stage02_quantification_dataPreProcessing_pairWiseTest_query',
-    #        query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingPairWiseTest',
-    #        r_calc_I=r_calc,
-    #        )
 
-    #enrichment01.reset_dataStage02_quantification_enrichment(
-    #    tables_I = ['data_stage02_quantification_pairWiseEnrichment'],
-    #    analysis_id_I = analysis_id,
-    #    warn_I=False)
-    #enrichment01.execute_pairWiseEnrichment(
-    #    analysis_id,
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    component_names_I=[],
-    #    component_group_names_I=[],
-    #    sample_name_abbreviations_1_I=[],
-    #    sample_name_abbreviations_2_I=[],
-    #    test_descriptions_I=[],
-    #    pvalue_corrected_descriptions_I=[],
-    #    where_clause_I=None,
-    #    component_names_mapping_I=component_names_mapping,
-    #    enrichment_method_I='hypergeometric',
-    #    enrichment_options_I={'pvalue_corrected_threshold':0.05,
-    #                              'enrichment_class_database':'iJO1366_metabolites',
-    #                              'use_weights':False},
-    #    pvalue_corrected_description_I = "bonferroni",
-    #    query_object_I = 'stage02_quantification_pairWiseTest_query',
-    #    query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationPairWiseTest',
-    #    r_calc_I=r_calc,
-    #    )
-    
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(

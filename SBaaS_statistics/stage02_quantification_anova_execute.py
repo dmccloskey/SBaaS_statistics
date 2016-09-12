@@ -9,50 +9,75 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
             analysis_id_I,
             calculated_concentration_units_I=[],
             component_names_I=[],
+            component_group_names_I=[],
             experiment_ids_I = [],
             time_points_I = [],
             sample_name_abbreviations_I = [],
             sample_name_shorts_I = [],
+            where_clause_I = None,
             ci_level_I = 0.95,
             pvalue_corrected_description_I = "bonferroni",
+            query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             r_calc_I=None):
         '''execute anova using R'''
 
         print('execute_anova...')
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
-        dataPreProcessing_replicates_query.initialize_supportedTables();
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
 
         data_anova_O = [];
-        data_pairwise_O = [];
-        # query the calculated_concentration_units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
+        data_pairwise_O = [];       
+            
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
+
         else:
-            calculated_concentration_units = [];
-            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            print('query instance does not have the required method.');
+        
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names.sort();
+        data_analysis = {'_del_':{'_del_':[]}};
+        for row in data_listDict:
+            cu = row['calculated_concentration_units']
+            cn = row['component_name']
+            if not cu in data_analysis.keys(): data_analysis[cu]={};
+            if not cn in data_analysis[cu].keys(): data_analysis[cu][cn]=[];
+            data_analysis[cu][cn].append(row);
+        del data_analysis['_del_'];
+
+        # query the calculated_concentration_units
         for cu_cnt,cu in enumerate(calculated_concentration_units):
-            # query the component_names/component_group_names:
-            component_names = [];
-            component_names = dataPreProcessing_replicates_query.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                cu,
-                );
-            if component_names_I:
-                component_names = [cn for cn in component_names if cn['component_name'] in component_names_I];
             for cn in component_names:
                 #print('calculating anova for component_names ' + cn);
                 # get data:
-                data = dataPreProcessing_replicates_query.get_RDataFrame_analysisIDAndCalculatedConcentrationUnitsAndComponentNames_dataStage02DataPreProcessingReplicates(
-                    analysis_id_I,
-                    cu,
-                    cn['component_name'],
-                    experiment_ids_I = experiment_ids_I,
-                    time_points_I = time_points_I,
-                    sample_name_abbreviations_I = sample_name_abbreviations_I,
-                    sample_name_shorts_I = sample_name_shorts_I
-                    );
+                data = listDict(listDict_I=data_analysis[cu][cn]);
+                data.convert_listDict2DataFrame();
                 # call R
                 r_calc.clear_workspace();
                 calculated_concentrations = data.dataFrame['calculated_concentration'].get_values();
@@ -73,14 +98,14 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 # add anova data to database
                 data_anova = {};
                 data_anova['sample_name_abbreviation'] = list(set(sample_name_abbreviations));
-                data_anova['component_name'] = cn['component_name'];
+                data_anova['component_name'] = cn;
                 data_anova['test_stat'] = f_stat;
                 data_anova['test_description'] = '1-way ANOVA; F value';
                 data_anova['pvalue'] = pvalue;
                 data_anova['pvalue_corrected'] = None;
                 data_anova['pvalue_corrected_description'] = None;
                 data_anova['analysis_id']=analysis_id_I;
-                data_anova['component_group_name'] = cn['component_group_name'];
+                data_anova['component_group_name'] = data_analysis[cu][cn][0]['component_group_name'];
                 data_anova['calculated_concentration_units'] = cu;
                 data_anova['used_'] = True;
                 data_anova['comment_'] = None;
@@ -109,8 +134,8 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 data_pairwise_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
                 data_pairwise_listDict.add_column2DataFrame('ci_level',ci_level_I);
                 data_pairwise_listDict.add_column2DataFrame('test_description','TukeyHSD');
-                data_pairwise_listDict.add_column2DataFrame('component_name',cn['component_name']);
-                data_pairwise_listDict.add_column2DataFrame('component_group_name',cn['component_group_name']);
+                data_pairwise_listDict.add_column2DataFrame('component_name',cn);
+                data_pairwise_listDict.add_column2DataFrame('component_group_name',data_analysis[cu][cn][0]['component_group_name']);
                 data_pairwise_listDict.add_column2DataFrame('calculated_concentration_units',cu);
                 data_pairwise_listDict.add_column2DataFrame('used_',True);
                 data_pairwise_listDict.add_column2DataFrame('comment_',None);
@@ -127,48 +152,78 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
             analysis_id_I,
             calculated_concentration_units_I=[],
             component_names_I=[],
+            component_group_names_I=[],
             experiment_ids_I = [],
             time_points_I = [],
             sample_name_abbreviations_I = [],
             sample_name_shorts_I = [],
+            where_clause_I = None,
             ci_level_I = 0.95,
             pvalue_corrected_description_I = "bonferroni",
+            query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             r_calc_I=None):
         '''execute twoWayAnova using R'''
 
         print('execute_twoWayAnova...')
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
-        dataPreProcessing_replicates_query.initialize_supportedTables();
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
+
+        data_anova_O = [];
+        data_pairwise_O = [];       
+            
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
+
+        else:
+            print('query instance does not have the required method.');        
+        
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names.sort();
+        data_analysis = {'_del_':{'_del_':[]}};
+        for row in data_listDict:
+            cu = row['calculated_concentration_units']
+            cn = row['component_name']
+            if not cu in data_analysis.keys(): data_analysis[cu]={};
+            if not cn in data_analysis[cu].keys(): data_analysis[cu][cn]=[];
+            data_analysis[cu][cn].append(row);
+        del data_analysis['_del_'];
 
         data_anova_O = [];
         data_pairwise_O = [];
+
         # query the calculated_concentration_units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
-        else:
-            calculated_concentration_units = [];
-            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu_cnt,cu in enumerate(calculated_concentration_units):
-            # query the component_names/component_group_names:
-            component_names = [];
-            component_names = dataPreProcessing_replicates_query.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                cu,
-                );
             for cn in component_names:
                 print('calculating twoWayAnova for component_names ' + cn);
                 # get data:
-                data = dataPreProcessing_replicates_query.get_RDataFrame_analysisIDAndCalculatedConcentrationUnitsAndComponentNames_dataStage02DataPreProcessingReplicates(
-                    analysis_id_I,
-                    cu,
-                    cn['component_name'],
-                    experiment_ids_I = experiment_ids_I,
-                    time_points_I = time_points_I,
-                    sample_name_abbreviations_I = sample_name_abbreviations_I,
-                    sample_name_shorts_I = sample_name_shorts_I
-                    );
+                data = listDict(listDict_I=data_analysis[cu][cn]);
+                data.convert_listDict2DataFrame();
                 # call R
                 r_calc.clear_workspace();
                 calculated_concentrations = data.dataFrame['calculated_concentration'].get_values();
@@ -192,14 +247,14 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 data_anova = {};
                 data_anova['sample_name_abbreviation'] = list(set(sample_name_abbreviations));
                 data_anova['time_point'] = list(set(time_points));
-                data_anova['component_name'] = cn['component_name'];
+                data_anova['component_name'] = cn;
                 data_anova['test_stat'] = f_stat;
-                data_anova['test_description'] = '1-way ANOVA; F value';
+                data_anova['test_description'] = '2-way ANOVA; F value';
                 data_anova['pvalue'] = pvalue;
                 data_anova['pvalue_corrected'] = None;
                 data_anova['pvalue_corrected_description'] = None;
                 data_anova['analysis_id']=analysis_id_I;
-                data_anova['component_group_name'] = cn['component_group_name'];
+                data_anova['component_group_name'] = data_analysis[cu][cn][0]['component_group_name'];
                 data_anova['calculated_concentration_units'] = cu;
                 data_anova['used_'] = True;
                 data_anova['comment_'] = None;
@@ -231,8 +286,8 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
                 data_pairwise_listDict.add_column2DataFrame('analysis_id',analysis_id_I);
                 data_pairwise_listDict.add_column2DataFrame('ci_level',ci_level_I);
                 data_pairwise_listDict.add_column2DataFrame('test_description','TukeyHSD');
-                data_pairwise_listDict.add_column2DataFrame('component_name',cn['component_name']);
-                data_pairwise_listDict.add_column2DataFrame('component_group_name',cn['component_group_name']);
+                data_pairwise_listDict.add_column2DataFrame('component_name',cn);
+                data_pairwise_listDict.add_column2DataFrame('component_group_name',data_analysis[cu][cn][0]['component_group_name']);
                 data_pairwise_listDict.add_column2DataFrame('calculated_concentration_units',cu);
                 data_pairwise_listDict.add_column2DataFrame('used_',True);
                 data_pairwise_listDict.add_column2DataFrame('comment_',None);

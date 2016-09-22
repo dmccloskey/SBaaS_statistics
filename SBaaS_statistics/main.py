@@ -192,7 +192,7 @@ dpppwt01.initialize_supportedTables();
 dpppwt01.initialize_tables();
 
 analysis_ids_run = [
-    #'ALEsKOs01_sampledFluxes_0_11_evo04',
+    'ALEsKOs01_sampledFluxes_0_11_evo04',
     #'ALEsKOs01_RNASequencing_0_11_evo04',
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
@@ -200,7 +200,8 @@ analysis_ids_run = [
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiA',
     #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
-    'ALEsKOs01_0_11_evo04',
+    #'ALEsKOs01_0_11_evo04',
+    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -446,6 +447,47 @@ svd_method = {
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+
+    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+            tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
+            analysis_id_I = analysis_id,
+            warn_I=False);
+    pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
+        sample_name_abbreviations_I=[],
+        calculated_concentration_units_I=[
+            'mmol*gDW-1*hr-1_FC-mean_normalized',
+            'mmol*gDW-1*hr-1_metSum_FC-mean_normalized',
+        ],
+        component_names_I=[],
+        pvalue_corrected_description_I = "bonferroni",
+        redundancy_I=True,
+        distance_measure_I='pearson',
+        value_I = 'mean',
+        r_calc_I=r_calc,
+        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
+        );  
+
+    ## check for within component correlation
+    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
+    #    sample_name_abbreviations_I=[],
+    #    calculated_concentration_units_I=[
+    #        'mmol*gDW-1*hr-1_FC-mean_normalized',
+    #        'mmol*gDW-1*hr-1_metSum_FC-mean_normalized',
+    #    ],
+    #    component_names_I=[],
+    #    pvalue_corrected_description_I = "bonferroni",
+    #    redundancy_I=True,
+    #    distance_measure_I='pearson',
+    #    value_I = 'mean',
+    #    r_calc_I=r_calc,
+    #    query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+    #    query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
+    #    );
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters

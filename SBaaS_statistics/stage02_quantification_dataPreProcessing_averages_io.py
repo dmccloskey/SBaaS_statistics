@@ -374,15 +374,10 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 analysisID2analysisIDCOBRA_I = {},
                 ):
         '''
-        TODO:...
-        get the the genes.fpkm_tracking data from SBaaS_rnasequencing
+
         INPUT:
-        TODO:...
-        geneID2componentName_I = {}, mapping of gene_short_name to component_name
-        gene2componentGroupName_I = {}, mapping of gene_short_name to component_group_name
-        analysisID2analysisIDCOBRA_I = {}
         OUTPUT:
-        TODO:...
+
         '''
         physiology_analysis_query=stage02_physiology_analysis_query(self.session,self.engine,self.settings);
         physiology_analysis_query.initialize_supportedTables();
@@ -444,6 +439,95 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 stdev = np.sqrt(fpkm['sampling_var']);
                 if fpkm['sampling_ave']: cv = stdev/fpkm['sampling_ave']*100;
                 else: cv = 0;
+                row['var']=fpkm['sampling_var'];
+                row['cv']=np.abs(cv);
+                row['n']=fpkm['sampling_n'];
+                row['ci_lb']=fpkm['sampling_lb'];
+                row['ci_ub']=fpkm['sampling_ub'];
+                row['min']=fpkm['sampling_min']
+                row['max']=fpkm['sampling_max']
+                row['median']=fpkm['sampling_median']
+                row['iq_1']=fpkm['sampling_iq_1']
+                row['iq_3']=fpkm['sampling_iq_3']                 
+                data_O.append(row);
+        # add data to the DB
+        self.add_rows_table('data_stage02_quantification_dataPreProcessing_averages',data_O);
+    def import_dataStage02PhysiologySampledMetaboliteData(self,
+                analysis_id_I,
+                met_ids_I = [],
+                sample_name_abbreviations_I = [],
+                simulation_ids_I = [],
+                metID2componentName_I = {},
+                metID2componentGroupName_I = {},
+                snaCOBRA2sna_I = {},
+                analysisID2analysisIDCOBRA_I = {},
+                ):
+        '''
+
+        INPUT:
+        OUTPUT:
+
+        '''
+        physiology_analysis_query=stage02_physiology_analysis_query(self.session,self.engine,self.settings);
+        physiology_analysis_query.initialize_supportedTables();
+        physiology_sampledData_query = stage02_physiology_sampledData_query(self.session,self.engine,self.settings);
+        quantification_analysis_query = stage02_quantification_analysis_query(self.session,self.engine,self.settings);
+        data_O = [];
+        #get the analysis information
+        analysis_rows = quantification_analysis_query.get_rows_analysisID_dataStage02QuantificationAnalysis(analysis_id_I);
+        #reorganize into a dict of sample_name_abbreviation (note: there are no replicates)
+        analysis_dict = {row['sample_name_abbreviation']:row for row in analysis_rows}
+        if analysisID2analysisIDCOBRA_I: analysis_id = analysisID2analysisIDCOBRA_I[analysis_id_I];
+        else: analysis_id = analysis_id_I;
+        #get the simulations
+        simulation_ids = [];
+        simulation_ids = physiology_analysis_query.get_simulationID_analysisID_dataStage02PhysiologyAnalysis(analysis_id);
+        #get the simulation data
+        for simulation in simulation_ids:
+            if simulation_ids_I and not simulation in simulation_ids_I: continue;
+            data_tmp = [];
+            data_tmp = physiology_sampledData_query.get_rows_simulationID_dataStage02PhysiologySampledMetaboliteData(simulation);
+            # map the data
+            for fpkm in data_tmp:
+                row = {};
+                row['analysis_id']=analysis_id_I;
+                if snaCOBRA2sna_I:
+                    sample_name=snaCOBRA2sna_I[fpkm['simulation_id']];
+                    experiment_id=analysis_dict[snaCOBRA2sna_I[fpkm['simulation_id']]]['experiment_id'];
+                    time_point=analysis_dict[snaCOBRA2sna_I[fpkm['simulation_id']]]['time_point'];
+                else:
+                    sample_name=fpkm['simulation_id'];
+                    time_point=analysis_dict[fpkm['simulation_id']]['time_point'];
+                    experiment_id=analysis_dict[fpkm['simulation_id']]['experiment_id'];
+                if met_ids_I and not fpkm['met_id'] in met_ids_I: continue;
+                if sample_name_abbreviations_I and not sample_name in sample_name_abbreviations_I: continue;
+                row['sample_name_abbreviation']=sample_name;
+                row['time_point']=time_point;
+                row['experiment_id']=experiment_id;
+
+                row['used_']=fpkm['used_']
+                row['comment_']=fpkm['comment_'];  
+                if metID2componentName_I:
+                    row['component_name']=metID2componentName_I[fpkm['met_id']];
+                else:
+                    row['component_name']=fpkm['met_id'];
+                if metID2componentGroupName_I:
+                    row['component_group_name']=metID2componentGroupName_I[fpkm['met_id']];
+                else:
+                    row['component_group_name']=fpkm['met_id'];
+                row['calculated_concentration_units']=fpkm['flux_units'];
+
+                #descriptive statistics map
+                row['test_stat'] = None;
+                row['test_description']=None;
+                row['pvalue']=None;
+                row['pvalue_corrected']=None;
+                row['pvalue_corrected_description']=None;
+                row['mean']=fpkm['sampling_ave'];
+                row['ci_level']=fpkm['sampling_ci'];
+                stdev = np.sqrt(fpkm['sampling_var']);
+                if fpkm['sampling_ave']: cv = stdev/fpkm['sampling_ave']*100;
+                else: cv = 0.0;
                 row['var']=fpkm['sampling_var'];
                 row['cv']=np.abs(cv);
                 row['n']=fpkm['sampling_n'];

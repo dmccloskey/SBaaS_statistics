@@ -138,7 +138,10 @@ class stage02_quantification_dataPreProcessing_pairWiseTest_query(sbaas_template
                 "data_stage02_quantification_dataPreProcessing_pairWiseTest"."used_", 
                 "data_stage02_quantification_dataPreProcessing_pairWiseTest"."comment_" ''';
             cmd+= 'FROM "data_stage02_quantification_dataPreProcessing_pairWiseTest" ';
-            cmd+= "WHERE analysis_id LIKE '%s' "%(analysis_id_I)
+            analysis_ids = self.convert_list2string(analysis_id_I);
+            cmd+= '''WHERE "data_stage02_quantification_dataPreProcessing_pairWiseTest".analysis_id =ANY 
+                ('{%s}'::character varying[]) '''%(analysis_ids);
+            cmd+= '''AND "data_stage02_quantification_dataPreProcessing_pairWiseTest".used_ ''';
             if calculated_concentration_units_I:
                 cmd_q = "AND calculated_concentration_units =ANY ('{%s}'::text[]) " %(self.convert_list2string(calculated_concentration_units_I));
                 cmd+=cmd_q;

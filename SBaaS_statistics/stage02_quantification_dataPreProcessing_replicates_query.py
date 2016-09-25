@@ -1876,7 +1876,7 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
         ):
         '''Query rows from data_stage02_quantification_dataPreProcessing_replicates
         INPUT:
-        analysis_id_I = string
+        analysis_id_I = list or comma seperated string
         ... = list or comma seperate string
         where_clause_I = formatted clause to add at the end
         OUTPUT:
@@ -1898,8 +1898,11 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 "data_stage02_quantification_dataPreProcessing_replicates"."comment_" ''';
             cmd+= '''FROM "data_stage02_quantification_dataPreProcessing_replicates", 
                 "data_stage02_quantification_analysis" ''';
-            cmd+= '''WHERE "data_stage02_quantification_dataPreProcessing_replicates".analysis_id LIKE '%s' 
-                    AND "data_stage02_quantification_dataPreProcessing_replicates".used_ '''%(analysis_id_I)
+            #cmd+= '''WHERE "data_stage02_quantification_dataPreProcessing_replicates".analysis_id LIKE '%s' '''%(analysis_id_I);
+            analysis_ids = self.convert_list2string(analysis_id_I);
+            cmd+= '''WHERE "data_stage02_quantification_dataPreProcessing_replicates".analysis_id =ANY 
+                ('{%s}'::character varying[]) '''%(analysis_ids);
+            cmd+= '''AND "data_stage02_quantification_dataPreProcessing_replicates".used_ ''';
             cmd+= '''AND "data_stage02_quantification_dataPreProcessing_replicates".analysis_id LIKE "data_stage02_quantification_analysis".analysis_id  
                 AND "data_stage02_quantification_dataPreProcessing_replicates".experiment_id LIKE "data_stage02_quantification_analysis".experiment_id  
                 AND "data_stage02_quantification_dataPreProcessing_replicates".time_point LIKE "data_stage02_quantification_analysis".time_point  

@@ -82,14 +82,20 @@ class data_stage02_quantification_analysis_pipeline(Base):
     analysis_id = Column(String(500))
     pipeline_id = Column(String(500));
     pipeline_order = Column(Integer);
+    #module
     execute_module = Column(String(500))
-    execute_func = Column(String(500))
-    execute_parameters = Column(postgresql.JSON);
+    execute_dataQuery_parameters = Column(postgresql.JSON);
+    execute_dataTransform_parameters = Column(postgresql.JSON);
+    execute_saveData_parameters = Column(postgresql.JSON);
+    execute_dataQuery_func = Column(String(500))
+    execute_dataTransform_func = Column(String(500))
+    execute_saveData_func = Column(String(500))
+    #module parameters
     input_query_object = Column(String(500))
     input_query_func = Column(String(500))
     input_query_parameters = Column(postgresql.JSON);
-    data_group_func = Column(String(500))
-    data_loop_func = Column(String(500))
+    data_transform_func = Column(String(500))
+    data_transform_parameters = Column(postgresql.JSON);
     output_query_object = Column(String(500))
     output_query_func = Column(String(500))
     output_query_parameters = Column(postgresql.JSON);

@@ -19,13 +19,13 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             test_descriptions_I=[],
             pvalue_corrected_descriptions_I=[],
             where_clause_I=None,
+            query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+            query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',
             pvalue_corrected_description_I = "bonferroni",
             redundancy_I=True,
             distance_measure_I='pearson',
             value_I = 'mean',
-            r_calc_I=None,
-            query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
-            query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats'):
+            r_calc_I=None,):
         '''execute pairwiseCorrelation
         INPUT:
         analysis_id_I = string
@@ -41,14 +41,51 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
 
         print('execute_pairwiseCorrelation...')
 
-        # instantiate dependent objects
-        if r_calc_I: r_calc = r_calc_I;
-        else: r_calc = r_interface();
-        calculatecorrelation = calculate_correlation();
+        #query the data:
+        data_listDict = self.execute_pairwiseCorrelationFeaturesAverages_queryData(self,analysis_id_I,
+            calculated_concentration_units_I=calculated_concentration_units_I,
+            component_names_I=component_names_I,
+            component_group_names_I=component_group_names_I,
+            sample_name_abbreviations_I=sample_name_abbreviations_I,
+            time_points_I=time_points_I,
+            experiment_ids_I=experiment_ids_I,
+            test_descriptions_I=test_descriptions_I,
+            pvalue_corrected_descriptions_I=pvalue_corrected_descriptions_I,
+            where_clause_I=where_clause_I,
+            query_object_descStats_I = query_object_descStats_I,
+            query_func_descStats_I = query_func_descStats_I)
+            
+        # transform the data
+        data_pairwise_O = self.execute_pairwiseCorrelationFeaturesAverages_transformData(
+            analysis_id_I,
+            data_I=data_listDict,
+            pvalue_corrected_description_I = pvalue_corrected_description_I,
+            redundancy_I = redundancy_I,
+            distance_measure_I = distance_measure_I,
+            value_I = value_I,
+            r_calc_I = r_calc_I,
+            );
+        
+        #save/update the data
+        self.execute_pairwiseCorrelationFeaturesAverages_saveData(
+            data_O = data_pairwise_O,
+            table_O = 'data_stage02_quantification_pairWiseCorrelationFeatures'
+            );
 
-        # instantiate the output list
-        data_pairwise_O = [];
-
+    def execute_pairwiseCorrelationFeaturesAverages_queryData(self,
+            analysis_id_I,
+            calculated_concentration_units_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            sample_name_abbreviations_I=[],
+            time_points_I=[],
+            experiment_ids_I=[],
+            test_descriptions_I=[],
+            pvalue_corrected_descriptions_I=[],
+            where_clause_I=None,
+            query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+            query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',):
+        ''' '''
         # intantiate the query object:
         query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
                         'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,};
@@ -74,15 +111,30 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                 );
         else:
             print('query instance does not have the required method.');
+        return data_listDict;
+    def execute_pairwiseCorrelationFeaturesAverages_transformData(self,
+            analysis_id_I,
+            data_I,
+            pvalue_corrected_description_I = "bonferroni",
+            redundancy_I=True,
+            distance_measure_I='pearson',
+            value_I = 'mean',
+            r_calc_I=None,
+            ):
+        ''' '''
+        # instantiate dependent objects
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+        calculatecorrelation = calculate_correlation();
 
         #reorganize into analysis groups:
-        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_I]));
         calculated_concentration_units.sort();
         #component_names = list(set([c['component_name'] for c in data_listDict]));
         #component_names.sort();
         component_names = {k:[] for k in calculated_concentration_units};
         data_analysis = {'_del_':{'_del_':[]}};
-        for row in data_listDict:
+        for row in data_I:
             cu = row['calculated_concentration_units']
             cn = row['component_name']
             if not cu in data_analysis.keys(): data_analysis[cu]={};
@@ -90,6 +142,9 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             if not cn in component_names[cu]: component_names[cu].append(cn);
             data_analysis[cu][cn].append(row);            
         del data_analysis['_del_'];
+
+        # instantiate the output list
+        data_pairwise_O = [];
 
         #apply the analysis to each unique dimension
         for cu_cnt,cu in enumerate(calculated_concentration_units):
@@ -158,7 +213,33 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     data_listDict.convert_dataFrame2ListDict();
                     data_pairwise_O.extend(data_listDict.get_listDict());
 
-        self.add_rows_table('data_stage02_quantification_pairWiseCorrelationFeatures',data_pairwise_O);
+        return data_pairwise_O;
+    def execute_pairwiseCorrelationFeaturesAverages_saveData(self,
+            data_O,
+            table_O='data_stage02_quantification_pairWiseCorrelationFeatures',
+            add_or_update_I = 'add',
+            query_object_O='self',
+            query_func_O='add_rows_table'):
+        ''' '''
+        ## intantiate the query object:
+        #query_objects = {'self':self,
+        #                };
+        #if query_object_O in query_objects.keys():
+        #    query_object = query_objects[query_object_O];
+        #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
+        #    query_instance.initialize_supportedTables();
+            
+        #if hasattr(query_instance, query_func_O):
+        #    query_func = getattr(query_instance, query_func_O);
+        #    data_listDict = query_func(table_O,data_O
+        #        );
+        #else:
+        #    print('query instance does not have the required method.');
+
+        #save the data
+        if add_or_update_I == 'add':
+            self.add_rows_table(table_O,data_O);
+
     def execute_pairwiseCorrelationAverages(self,analysis_id_I,
             calculated_concentration_units_I=[],
             component_names_I=[],

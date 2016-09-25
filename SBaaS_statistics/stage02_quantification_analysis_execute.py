@@ -16,15 +16,28 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
 
         #query the pipeline information
         pipelines = [];
+
+        #reorganize into analysis groups:
+        pipeline_orders = list(set([p['pipeline_order'] for p in pipelines]));
+        pipeline_orders.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            po = row['pipeline_order']
+            if not po in data_analysis.keys(): data_analysis[po]=[];
+            data_analysis[po].append(row);
+        del data_analysis['_del_'];
         
-        for pipeline in pipelines:
+        for pipeline_order in pipeline_orders:
             #1. query the data
             data_listDict = [];
+            for analysis in analysis_ids:
+                data_tmp = [];
+
             #2. group the data
             data_analysis = [];
-            #3. loop through the data
+
+            #3. transform each unique group
             for data in data_analysis:
-                #4. transform each unique group
                 data_O_listDict = [];
 
 

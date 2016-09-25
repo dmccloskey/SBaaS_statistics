@@ -7,6 +7,7 @@ class stage02_quantification_analysis_query(sbaas_template_query):
         '''Set the supported tables dict for stage02_quantification_analysis
         '''
         tables_supported = {'data_stage02_quantification_analysis':data_stage02_quantification_analysis,
+                            'data_stage02_quantification_analysisSubGroups':data_stage02_quantification_analysisSubGroups,
                         };
         self.set_supportedTables(tables_supported);
     # data_stage02_quantification_analysis

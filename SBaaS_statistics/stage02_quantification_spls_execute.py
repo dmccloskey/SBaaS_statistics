@@ -42,8 +42,10 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 component_names_I=[],
                 component_group_names_I=[],
                 time_points_I=[],
+                where_clause_I = None,
+                query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+                query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
                 r_calc_I=None,
-                query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
                 ):
         '''execute spls using sciKit-learn
         INPUT:
@@ -68,9 +70,9 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                         'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
                         'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
                         };
-        if query_object_descStats_I in query_objects.keys():
-            query_object_descStats = query_objects[query_object_descStats_I];
-            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance_descStats = query_object(self.session,self.engine,self.settings);
             query_instance_descStats.initialize_supportedTables();
         
         # instantiate data lists
@@ -81,58 +83,98 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
         data_loadings_O=[];
         data_loadingsResponse_O=[];
 
-        # get concentration units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
+        # get the model pipeline:
+        models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSPLSPipeline(pipeline_id_I);
+        
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
         else:
-            calculated_concentration_units = [];
-            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
-            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
-            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
-            else:
-                print('query instance does not have the required method.');
-        for cu in calculated_concentration_units:
-            #print('calculating spls for calculated_concentration_units ' + cu);
-            if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
-                data_listDict = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
-                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-                data_listDict = self._extract_averagesData(data_tmp);
-            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
-                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-                data_listDict = self._extract_averagesData(data_tmp);
-            else:
-                print('query instance does not have the required method.');
+            print('query instance does not have the required method.');
 
-            # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSPLSPipeline(pipeline_id_I);
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            cu = row['calculated_concentration_units']
+            if not cu in data_analysis.keys(): data_analysis[cu]=[];
+            data_analysis[cu].append(row);
+        del data_analysis['_del_'];
+
+        #apply the analysis to each group
+        for cu in calculated_concentration_units:
+            print('generating a heatmap for concentration_units ' + cu);
+            # get the data
+            data = data_analysis[cu];
+            data_listDict = listDict(listDict_I=data);
+            data_listDict.convert_listDict2DataFrame();
+
+        ##depreicated
+        ## get concentration units
+        #if calculated_concentration_units_I:
+        #    calculated_concentration_units = calculated_concentration_units_I;
+        #else:
+        #    calculated_concentration_units = [];
+        #    if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        #    elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+        #    elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+        #    else:
+        #        print('query instance does not have the required method.');
+        #for cu in calculated_concentration_units:
+        #    #print('calculating spls for calculated_concentration_units ' + cu);
+        #    if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+        #        data_listDict = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #    elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+        #        data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #        data_listDict = self._extract_averagesData(data_tmp);
+        #    elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+        #        data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #        data_listDict = self._extract_averagesData(data_tmp);
+        #    else:
+        #        print('query instance does not have the required method.');
+
 
             # make the data matrix
             #dim: [nsamples,nfeatures]
@@ -702,7 +744,9 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 component_group_names_I=[],
                 time_points_I=[],
                 r_calc_I=None,
-                query_object_descStats_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+                where_clause_I = None,
+                query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+                query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             
                 ):
         '''execute spls using sciKit-learn
@@ -727,66 +771,104 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                         'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,
                         'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
                         };
-        if query_object_descStats_I in query_objects.keys():
-            query_object_descStats = query_objects[query_object_descStats_I];
-            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance_descStats = query_object(self.session,self.engine,self.settings);
             query_instance_descStats.initialize_supportedTables();
         
         # instantiate data lists
         data_O=[];
 
-        # get concentration units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
+        # get the model pipeline:
+        models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSPLSPipeline(pipeline_id_I);
+        
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
         else:
-            calculated_concentration_units = [];
-            if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
-            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
-            elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
-                calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
-            else:
-                print('query instance does not have the required method.');
-        for cu in calculated_concentration_units:
-            #print('calculating spls for calculated_concentration_units ' + cu);
-            if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
-                data_listDict = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
-                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-                data_listDict = self._extract_averagesData(data_tmp);
-            elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
-                data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
-                    analysis_id_I,
-                    cu,
-                    experiment_ids_I=experiment_ids_I,
-                    sample_name_abbreviations_I=sample_name_abbreviations_I,
-                    sample_name_shorts_I=sample_name_shorts_I,
-                    component_names_I=component_names_I,
-                    component_group_names_I=component_group_names_I,
-                    time_points_I=time_points_I,);
-                data_listDict = self._extract_averagesData(data_tmp);
-            else:
-                print('query instance does not have the required method.');
+            print('query instance does not have the required method.');
 
-            # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationSPLSPipeline(pipeline_id_I);
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            cu = row['calculated_concentration_units']
+            if not cu in data_analysis.keys(): data_analysis[cu]=[];
+            data_analysis[cu].append(row);
+        del data_analysis['_del_'];
+
+        #apply the analysis to each group
+        for cu in calculated_concentration_units:
+            print('generating a heatmap for concentration_units ' + cu);
+            # get the data
+            data = data_analysis[cu];
+            data_listDict = listDict(listDict_I=data);
+            data_listDict.convert_listDict2DataFrame();
+
+        ## get concentration units
+        #if calculated_concentration_units_I:
+        #    calculated_concentration_units = calculated_concentration_units_I;
+        #else:
+        #    calculated_concentration_units = [];
+        #    if hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+        #    elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDescriptiveStats(analysis_id_I);
+        #    elif hasattr(query_instance_descStats, 'get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages'):
+        #        calculated_concentration_units = query_instance_descStats.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingAverages(analysis_id_I);
+        #    else:
+        #        print('query instance does not have the required method.');
+        #for cu in calculated_concentration_units:
+        #    #print('calculating spls for calculated_concentration_units ' + cu);
+        #    if hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates'):
+        #        data_listDict = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #    elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages'):
+        #        data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingAverages(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #        data_listDict = self._extract_averagesData(data_tmp);
+        #    elif hasattr(query_instance_descStats, 'get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats'):
+        #        data_tmp = query_instance_descStats.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDescriptiveStats(
+        #            analysis_id_I,
+        #            cu,
+        #            experiment_ids_I=experiment_ids_I,
+        #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+        #            sample_name_shorts_I=sample_name_shorts_I,
+        #            component_names_I=component_names_I,
+        #            component_group_names_I=component_group_names_I,
+        #            time_points_I=time_points_I,);
+        #        data_listDict = self._extract_averagesData(data_tmp);
+        #    else:
+        #        print('query instance does not have the required method.');
 
             # make the data matrix
             #dim: [nsamples,nfeatures]

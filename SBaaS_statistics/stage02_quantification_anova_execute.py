@@ -1,4 +1,4 @@
-from .stage02_quantification_anova_io import stage02_quantification_anova_io
+﻿from .stage02_quantification_anova_io import stage02_quantification_anova_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
 from r_statistics.r_interface import r_interface
@@ -17,6 +17,7 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
             where_clause_I = None,
             ci_level_I = 0.95,
             pvalue_corrected_description_I = "bonferroni",
+            includeAll_calculatedConcentrationUnits_I=False,
             query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
             query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             r_calc_I=None):
@@ -64,7 +65,10 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
         component_names.sort();
         data_analysis = {'_del_':{'_del_':[]}};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             cn = row['component_name']
             if not cu in data_analysis.keys(): data_analysis[cu]={};
             if not cn in data_analysis[cu].keys(): data_analysis[cu][cn]=[];
@@ -160,6 +164,7 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
             where_clause_I = None,
             ci_level_I = 0.95,
             pvalue_corrected_description_I = "bonferroni",
+            includeAll_calculatedConcentrationUnits_I=False,
             query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
             query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
             r_calc_I=None):
@@ -207,7 +212,10 @@ class stage02_quantification_anova_execute(stage02_quantification_anova_io,):
         component_names.sort();
         data_analysis = {'_del_':{'_del_':[]}};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             cn = row['component_name']
             if not cu in data_analysis.keys(): data_analysis[cu]={};
             if not cn in data_analysis[cu].keys(): data_analysis[cu][cn]=[];

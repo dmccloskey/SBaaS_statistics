@@ -1,4 +1,4 @@
-
+﻿
 from .stage02_quantification_covariance_io import stage02_quantification_covariance_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
@@ -20,6 +20,10 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
                 component_names_I=[],
                 component_group_names_I=[],
                 time_points_I=[],
+            where_clause_I = None,
+            query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
+            includeAll_calculatedConcentrationUnits_I=False,
                 ):
         '''execute covariance using sciKit-learn
         INPUT:
@@ -46,31 +50,57 @@ class stage02_quantification_covariance_execute(stage02_quantification_covarianc
 
         # instanciate helper classes
         calculateinterface = calculate_interface()
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
+
         # instanciate data lists
         data_O=[]; #samples/features cov_matrix and precision_matrix
         data_mahalanobis_O=[]; #samples/features mahal_dist
         data_score_O=[]; #samples/features score
-
-        # get concentration units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
+        
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
         else:
-            calculated_concentration_units = [];
-            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            print('query instance does not have the required method.');
+
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
+            if not cu in data_analysis.keys(): data_analysis[cu]=[];
+            data_analysis[cu].append(row);
+        del data_analysis['_del_'];
         for cu in calculated_concentration_units:
             print('calculating covariance for calculated_concentration_units ' + cu);
-            data_listDict = None;
-            # get data:
-            data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                cu,
-                experiment_ids_I=experiment_ids_I,
-                sample_name_abbreviations_I=sample_name_abbreviations_I,
-                sample_name_shorts_I=sample_name_shorts_I,
-                component_names_I=component_names_I,
-                component_group_names_I=component_group_names_I,
-                time_points_I=time_points_I,);
+
+            data_listDict = listDict(listDict_I=data_analysis[cu])
+            data_listDict.convert_listDict2DataFrame();
             # make the data matrix
             if data_matrix_shape_I == 'featuresBySamples':
                 #dim: [nfeatures,nsamples]

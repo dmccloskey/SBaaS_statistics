@@ -1,4 +1,4 @@
-
+﻿
 from .stage02_quantification_spls_io import stage02_quantification_spls_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
@@ -46,6 +46,7 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
                 query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
                 r_calc_I=None,
+            includeAll_calculatedConcentrationUnits_I=False,
                 ):
         '''execute spls using sciKit-learn
         INPUT:
@@ -111,7 +112,10 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
         calculated_concentration_units.sort();
         data_analysis = {'_del_':[]};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             if not cu in data_analysis.keys(): data_analysis[cu]=[];
             data_analysis[cu].append(row);
         del data_analysis['_del_'];
@@ -747,6 +751,7 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
                 where_clause_I = None,
                 query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
                 query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
+            includeAll_calculatedConcentrationUnits_I=False,
             
                 ):
         '''execute spls using sciKit-learn
@@ -807,7 +812,10 @@ class stage02_quantification_spls_execute(stage02_quantification_spls_io):
         calculated_concentration_units.sort();
         data_analysis = {'_del_':[]};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             if not cu in data_analysis.keys(): data_analysis[cu]=[];
             data_analysis[cu].append(row);
         del data_analysis['_del_'];

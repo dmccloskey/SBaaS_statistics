@@ -1,4 +1,4 @@
-
+﻿
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_pairWiseCorrelation_io import stage02_quantification_pairWiseCorrelation_io
@@ -111,10 +111,9 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                 );
         else:
             print('query instance does not have the required method.');
-        return data_listDict;
-    def execute_pairwiseCorrelationFeaturesAverages_transformData(self,
+        self.add_data(data_listDict);
+    def execute_pairwiseCorrelationFeaturesAverages_transformDataCrossUnits(self,
             analysis_id_I,
-            data_I,
             pvalue_corrected_description_I = "bonferroni",
             redundancy_I=True,
             distance_measure_I='pearson',
@@ -126,6 +125,104 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
         if r_calc_I: r_calc = r_calc_I;
         else: r_calc = r_interface();
         calculatecorrelation = calculate_correlation();
+
+        data_I = self.get_data();
+
+        #reorganize into analysis groups:
+        component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names.sort();
+        data_analysis = {'_del_':{'_del_':[]}};
+        for row in data_I:
+            cn = row['component_name']
+            if not cn in data_analysis.keys(): data_analysis[cn]=[];
+            data_analysis[cu][cn].append(row);            
+        del data_analysis['_del_'];
+
+        # instantiate the output list
+        data_pairwise_O = [];
+
+        #apply the analysis to each unique dimension
+        for cn_1_cnt,cn_1 in enumerate(component_names):                    
+            data_O=[];
+            #pass 1: calculate the pairwise correlations
+            if redundancy_I: list_2 = component_names;
+            else: list_2 = component_names[cn_1_cnt+1:];
+            for cnt,cn_2 in enumerate(list_2):
+                if redundancy_I: cn_2_cnt = cnt;
+                else: cn_2_cnt = cn_1_cnt+cnt+1;
+                    
+                data_1,data_2 = [],[];
+                data_1 = data_analysis[cn_1];
+                data_2 = data_analysis[cn_2];                        
+                #extract out the values 
+                data_1 = [d[value_I] for d in data_1];
+                data_2 = [d[value_I] for d in data_2];
+
+                if len(data_1)==len(data_2):
+                    #calculate the correlation coefficient
+                    if distance_measure_I=='pearson':
+                        rho,pval = calculatecorrelation.calculate_correlation_pearsonr(data_1,data_2);
+                    elif distance_measure_I=='spearman':
+                        rho,pval = calculatecorrelation.calculate_correlation_spearmanr(data_1,data_2);
+                    else:
+                        print("distance measure not recognized");
+                        return;
+                else:
+                    print('the number of components in sn_1 and sn_2 are not equal.');
+
+                #check for nan in rho
+                if np.isnan(rho):
+                    rho = 0.0;
+                if np.isnan(pval):
+                    pval = 0.0;
+
+                # add data to database
+                tmp = {'analysis_id':analysis_id_I,
+                    'value_name':value_I,
+                    'component_name_1':cn_1,
+                    'component_name_2':cn_2,
+                    'component_group_name_1':data_analysis[cn_1][0]['component_group_name'],
+                    'component_group_name_2':data_analysis[cn_2][0]['component_group_name'],
+                    'distance_measure':distance_measure_I,
+                    'correlation_coefficient':rho,
+                    'pvalue':pval,
+                    'calculated_concentration_units_1':data_analysis[cn_1][0]['calculated_concentration_units'],
+                    'calculated_concentration_units_2':data_analysis[cn_2][0]['calculated_concentration_units'],
+                    'used_':True,
+                    'comment_':None};
+                data_O.append(tmp)
+                
+            if data_O:
+                # Pass 2: calculate the corrected p-values
+                data_listDict = listDict(data_O);
+                data_listDict.convert_listDict2DataFrame();
+                pvalues = data_listDict.dataFrame['pvalue'].get_values();
+                # call R
+                r_calc.clear_workspace();
+                r_calc.make_vectorFromList(pvalues,'pvalues');
+                pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+                # add in the corrected p-values
+                data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                data_listDict.convert_dataFrame2ListDict();
+                data_pairwise_O.extend(data_listDict.get_listDict());
+
+        self.set_data(data_pairwise_O);
+    def execute_pairwiseCorrelationFeaturesAverages_transformData(self,
+            analysis_id_I,
+            pvalue_corrected_description_I = "bonferroni",
+            redundancy_I=True,
+            distance_measure_I='pearson',
+            value_I = 'mean',
+            r_calc_I=None,
+            ):
+        ''' '''
+        # instantiate dependent objects
+        if r_calc_I: r_calc = r_calc_I;
+        else: r_calc = r_interface();
+        calculatecorrelation = calculate_correlation();
+
+        data_I = self.get_data();
 
         #reorganize into analysis groups:
         calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_I]));
@@ -213,11 +310,9 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     data_listDict.convert_dataFrame2ListDict();
                     data_pairwise_O.extend(data_listDict.get_listDict());
 
-        return data_pairwise_O;
-    def execute_pairwiseCorrelationFeaturesAverages_saveData(self,
-            data_O,
+        self.set_data(data_pairwise_O);
+    def execute_pairwiseCorrelationFeaturesAverages_storeData(self,
             table_O='data_stage02_quantification_pairWiseCorrelationFeatures',
-            add_or_update_I = 'add',
             query_object_O='self',
             query_func_O='add_rows_table'):
         ''' '''
@@ -237,7 +332,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
         #    print('query instance does not have the required method.');
 
         #save the data
-        if add_or_update_I == 'add':
+        if query_func_O == 'add_rows_table':
             self.add_rows_table(table_O,data_O);
 
     def execute_pairwiseCorrelationAverages(self,analysis_id_I,
@@ -689,7 +784,6 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
 
         self.add_rows_table('data_stage02_quantification_pairWiseCorrFeaturesAndConditions',data_pairwise_O);
 
-         
     def execute_pairwiseCorrelationFeaturesReplicates(self,analysis_id_I,
             time_points_I=[],
             experiment_ids_I=[],
@@ -836,6 +930,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     data_pairwise_O.extend(data_listDict.get_listDict());
 
         self.add_rows_table('data_stage02_quantification_pairWiseCorrFeatures_replicates',data_pairwise_O);
+
     ###DEPRECATED
     def execute_pairwiseCorrelationAverages_v01(self,analysis_id_I,
             sample_name_abbreviations_I=[],

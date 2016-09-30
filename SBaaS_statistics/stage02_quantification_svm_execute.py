@@ -1,4 +1,4 @@
-
+﻿
 from .stage02_quantification_svm_io import stage02_quantification_svm_io
 from .stage02_quantification_dataPreProcessing_replicates_query import stage02_quantification_dataPreProcessing_replicates_query
 # resources
@@ -13,6 +13,7 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                 test_size_I = 0.,
                 impfeat_methods_I=[{'impfeat_method':'feature_importance','impfeat_options':None}],
                 response_class_methods_I=[{'response_class_method':'class_probability','response_class_options':None}],
+            includeAll_calculatedConcentrationUnits_I=False,
                 calculated_concentration_units_I=[],
                 experiment_ids_I=[],
                 sample_name_abbreviations_I=[],
@@ -37,6 +38,9 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
         '''
 
         #print('execute_svm...')
+
+        # get the model pipeline:
+        models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
         
         # intantiate the query object:
         query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
@@ -76,7 +80,10 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
         calculated_concentration_units.sort();
         data_analysis = {'_del_':[]};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             if not cu in data_analysis.keys(): data_analysis[cu]=[];
             data_analysis[cu].append(row);
         del data_analysis['_del_'];
@@ -84,9 +91,6 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
         #apply analysis to each unique group
         for cu in calculated_concentration_units:
             #print('calculating svm for calculated_concentration_units ' + cu);
-
-            # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
 
             # make the data matrix
             #dim: [nsamples,nfeatures]
@@ -240,6 +244,7 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                               "min_samples_leaf": [1, 10],
                               "bootstrap": [True, False],
                               "criterion": ["gini", "entropy"]},
+            includeAll_calculatedConcentrationUnits_I=False,
                 test_size_I = 0.,
                 metric_method_I = 'accuracy',
                 metric_options_I = None,
@@ -254,6 +259,9 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
                 component_names_I=[],
                 component_group_names_I=[],
                 time_points_I=[],
+            where_clause_I = None,
+            query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
                 ):
         '''execute svm using sciKit-learn
         INPUT:
@@ -267,38 +275,64 @@ class stage02_quantification_svm_execute(stage02_quantification_svm_io):
 
         #print('execute_svm...')
 
-        # instantiate helper classes
-        calculateinterface = calculate_interface()
-        dataPreProcessing_replicates_query = stage02_quantification_dataPreProcessing_replicates_query(self.session,self.engine,self.settings);
+        # get the model pipeline:
+        models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
         
-        # instantiate data lists
-        data_O=[];
+        # intantiate the query object:
+        query_objects = {'stage02_quantification_dataPreProcessing_replicates_query':stage02_quantification_dataPreProcessing_replicates_query,
+                        };
+        if query_object_I in query_objects.keys():
+            query_object = query_objects[query_object_I];
+            query_instance = query_object(self.session,self.engine,self.settings);
+            query_instance.initialize_supportedTables();
 
-        # get concentration units
-        if calculated_concentration_units_I:
-            calculated_concentration_units = calculated_concentration_units_I;
+        # instantiate data lists
+        data_O=[]; #model score information
+        data_impfeat_O=[]; #features information
+        data_response_class_O=[]; #response information
+        
+        #query the data:
+        data_listDict = [];
+        if hasattr(query_instance, query_func_I):
+            query_func = getattr(query_instance, query_func_I);
+            try:
+                data_listDict = query_func(analysis_id_I,
+                    calculated_concentration_units_I=calculated_concentration_units_I,
+                    component_names_I=component_names_I,
+                    component_group_names_I=component_group_names_I,
+                    sample_name_shorts_I=sample_name_shorts_I,
+                    sample_name_abbreviations_I=sample_name_abbreviations_I,
+                    time_points_I=time_points_I,
+                    experiment_ids_I=experiment_ids_I,
+                    where_clause_I=where_clause_I,
+                    );
+            except AssertionError as e:
+                print(e);
         else:
-            calculated_concentration_units = [];
-            calculated_concentration_units = dataPreProcessing_replicates_query.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
+            print('query instance does not have the required method.');
+
+        #reorganize into analysis groups:
+        calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_listDict]));
+        calculated_concentration_units.sort();
+        data_analysis = {'_del_':[]};
+        for row in data_listDict:
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
+            if not cu in data_analysis.keys(): data_analysis[cu]=[];
+            data_analysis[cu].append(row);
+        del data_analysis['_del_'];
+
+        data_O = [];
+
+        #apply analysis to each unique group
         for cu in calculated_concentration_units:
             #print('calculating svm for calculated_concentration_units ' + cu);
-            data = [];
-            # get data:
-            data_listDict = dataPreProcessing_replicates_query.get_RExpressionData_analysisIDAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
-                analysis_id_I,
-                cu,
-                experiment_ids_I=experiment_ids_I,
-                sample_name_abbreviations_I=sample_name_abbreviations_I,
-                sample_name_shorts_I=sample_name_shorts_I,
-                component_names_I=component_names_I,
-                component_group_names_I=component_group_names_I,
-                time_points_I=time_points_I,);
-
-            # get the model pipeline:
-            models,methods,parameters = self.get_modelsAndMethodsAndParameters_pipelineID_dataStage02QuantificationTreePipeline(pipeline_id_I);
 
             # make the data matrix
             #dim: [nsamples,nfeatures]
+            data_listDict = listDict(listDict_I=data_analysis[cu]);
             value_label = 'calculated_concentration';
             row_labels = ['experiment_id','sample_name_abbreviation','sample_name_short','time_point'];
             column_labels = ['component_name','component_group_name'];

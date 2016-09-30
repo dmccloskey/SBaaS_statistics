@@ -1,4 +1,4 @@
-# SBaaS
+﻿# SBaaS
 from .stage02_quantification_heatmap_io import stage02_quantification_heatmap_io
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
@@ -24,6 +24,7 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
             where_clause_I = None,
             query_object_I = 'stage02_quantification_dataPreProcessing_replicates_query',
             query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates',
+            includeAll_calculatedConcentrationUnits_I=False,
                 ):
         '''Execute hierarchical cluster on row and column data corresponding
         INPUT:
@@ -78,7 +79,10 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
         calculated_concentration_units.sort();
         data_analysis = {'_del_':[]};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             if not cu in data_analysis.keys(): data_analysis[cu]=[];
             data_analysis[cu].append(row);
         del data_analysis['_del_'];
@@ -144,6 +148,7 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
                 order_sample_name_abbreviations_I=False,
                 order_component_names_I=False,
                 value_I = 'mean',
+            includeAll_calculatedConcentrationUnits_I=False,
             component_group_names_I=[],
             time_points_I=[],
             experiment_ids_I=[],
@@ -212,7 +217,10 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
         calculated_concentration_units.sort();
         data_analysis = {'_del_':[]};
         for row in data_listDict:
-            cu = row['calculated_concentration_units']
+            if includeAll_calculatedConcentrationUnits_I:
+                cu = ','.join(calculated_concentration_units);
+            else:
+                cu = row['calculated_concentration_units']
             if not cu in data_analysis.keys(): data_analysis[cu]=[];
             data_analysis[cu].append(row);
         del data_analysis['_del_'];

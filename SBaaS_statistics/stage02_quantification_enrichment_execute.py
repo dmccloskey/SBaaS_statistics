@@ -1,4 +1,4 @@
-# SBaaS
+﻿# SBaaS
 from .stage02_quantification_enrichment_io import stage02_quantification_enrichment_io
 from .stage02_quantification_dataPreProcessing_averages_query import stage02_quantification_dataPreProcessing_averages_query
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
@@ -21,6 +21,8 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
             test_descriptions_I=[],
             pvalue_corrected_descriptions_I=[],
             where_clause_I=None,
+            query_object_I = 'stage02_quantification_pairWiseTest_query',
+            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationPairWiseTest',
             component_names_mapping_I = {},
             component_group_names_mapping_I = {},
             enrichment_method_I='hypergeometric',
@@ -29,9 +31,8 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
                                   'enrichment_class_database':'iJO1366_metabolites',
                                   'use_weights':False},
             pvalue_corrected_description_I = "bonferroni",
-            query_object_I = 'stage02_quantification_pairWiseTest_query',
-            query_func_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationPairWiseTest',
             r_calc_I=None,
+            includeAll_calculatedConcentrationUnits_I=False,
             ):
         '''Execute an enrichment analysis
         IMPLEMENTATION:
@@ -114,13 +115,21 @@ class stage02_quantification_enrichment_execute(stage02_quantification_enrichmen
             r_calc.import_GODB(enrichment_options_I['GO_annotation_mapping'])
 
         #reorganize into analysis groups:
+        calculated_concentration_units = list(set(row['calculated_concentration_units'] for row in data_listDict));
         data_analysis = {'delete':{'delete':[]}};
         for row in data_listDict:
-            unique = (row['analysis_id'],
-                      row['calculated_concentration_units'],
-                      row['sample_name_abbreviation_1'],
-                      row['sample_name_abbreviation_2'],
-                      );
+            if includeAll_calculatedConcentrationUnits_I:
+                unique = (row['analysis_id'],
+                          ','.join(calculated_concentration_units),
+                          row['sample_name_abbreviation_1'],
+                          row['sample_name_abbreviation_2'],
+                          );
+            else:
+                unique = (row['analysis_id'],
+                          row['calculated_concentration_units'],
+                          row['sample_name_abbreviation_1'],
+                          row['sample_name_abbreviation_2'],
+                          );
             if not unique in data_analysis.keys(): data_analysis[unique]=[];
             data_analysis[unique].append(row);
         del data_analysis['delete'];

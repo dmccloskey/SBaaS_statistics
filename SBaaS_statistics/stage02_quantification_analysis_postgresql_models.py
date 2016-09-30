@@ -1,4 +1,9 @@
 ﻿from SBaaS_base.postgresql_orm_base import *
+'''
+USE CASES
+1. pipeline for an individual analysis
+2. pipeline for a group of individual analyses
+'''
 class data_stage02_quantification_analysis(Base):
     __tablename__ = 'data_stage02_quantification_analysis'
     id = Column(Integer, Sequence('data_stage02_quantification_analysis_id_seq'), primary_key=True)
@@ -76,71 +81,6 @@ class data_stage02_quantification_analysis(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-class data_stage02_quantification_analysis_pipeline(Base):
-    __tablename__ = 'data_stage02_quantification_analysis_pipeline'
-    id = Column(Integer, Sequence('data_stage02_quantification_analysis_pipeline_id_seq'), primary_key=True)
-    analysis_id = Column(String(500))
-    pipeline_id = Column(String(500));
-    pipeline_order = Column(Integer);
-    #module
-    execute_module = Column(String(500))
-    execute_dataQuery_parameters = Column(postgresql.JSON);
-    execute_dataTransform_parameters = Column(postgresql.JSON);
-    execute_saveData_parameters = Column(postgresql.JSON);
-    execute_dataQuery_func = Column(String(500))
-    execute_dataTransform_func = Column(String(500))
-    execute_saveData_func = Column(String(500))
-    #module parameters
-    input_query_object = Column(String(500))
-    input_query_func = Column(String(500))
-    input_query_parameters = Column(postgresql.JSON);
-    data_transform_func = Column(String(500))
-    data_transform_parameters = Column(postgresql.JSON);
-    output_query_object = Column(String(500))
-    output_query_func = Column(String(500))
-    output_query_parameters = Column(postgresql.JSON);
-    used_ = Column(Boolean);
-    comment_ = Column(Text);
-
-    __table_args__ = (
-            UniqueConstraint(
-                'analysis_id',
-                'pipeline_id',
-                'pipeline_order',
-                'execute_module',
-                'input_query_object',
-                'input_query_func',
-                'output_query_object',
-                'output_query_func',
-                ),
-            )
-
-    def __init__(self,
-                row_dict_I,
-                ):
-        self.analysis_id=row_dict_I['analysis_id']
-
-        self.used_=row_dict_I['used_']
-        self.comment_=row_dict_I['comment_']
-
-    def __set__row__(self,analysis_id_I,
-
-            used__I,
-            comment__I):
-        self.analysis_id=analysis_id_I
-
-        self.used_=used__I
-        self.comment_=comment__I
-
-    def __repr__dict__(self):
-        return {'id':self.id,
-                'analysis_id':self.analysis_id,
-
-            'used_':self.used_,
-            'comment_':self.comment_}
-    
-    def __repr__json__(self):
-        return json.dumps(self.__repr__dict__())
 class data_stage02_quantification_analysis_group(Base):
     __tablename__ = 'data_stage02_quantification_analysis_group'
     id = Column(Integer, Sequence('data_stage02_quantification_analysis_group_id_seq'), primary_key=True)
@@ -182,3 +122,160 @@ class data_stage02_quantification_analysis_group(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
+class data_stage02_quantification_analysis_connection(Base):
+    __tablename__ = 'data_stage02_quantification_analysis_connection'
+    id = Column(Integer, Sequence('data_stage02_quantification_analysis_connection_id_seq'), primary_key=True)
+    analysis_id = Column(String(500)) #may change between query and transform/store steps to allow for grouping of analyses
+    connection_id = Column(String(500));
+    connection_order = Column(Integer);
+    execute_object = Column(String(500)) #only 1 object per connection
+    execute_parameters = Column(postgresql.JSON);
+    execute_method = Column(String(500))
+    used_ = Column(Boolean);
+    comment_ = Column(Text);
+
+    __table_args__ = (
+            UniqueConstraint(
+                'analysis_id',
+                'connection_id',
+                'execute_object',
+                'execute_method',
+                ),
+            )
+
+    def __init__(self,
+                row_dict_I,
+                ):
+        self.analysis_id=row_dict_I['analysis_id']
+
+        self.used_=row_dict_I['used_']
+        self.comment_=row_dict_I['comment_']
+
+    def __set__row__(self,analysis_id_I,
+
+            used__I,
+            comment__I):
+        self.analysis_id=analysis_id_I
+
+        self.used_=used__I
+        self.comment_=comment__I
+
+    def __repr__dict__(self):
+        return {'id':self.id,
+                'analysis_id':self.analysis_id,
+
+            'used_':self.used_,
+            'comment_':self.comment_}
+    
+    def __repr__json__(self):
+        return json.dumps(self.__repr__dict__())
+class data_stage02_quantification_analysis_pipeline(Base):
+    __tablename__ = 'data_stage02_quantification_pipeline_workflow'
+    id = Column(Integer, Sequence('data_stage02_quantification_analysis_pipeline_id_seq'), primary_key=True)
+    pipeline_id = Column(String(500));
+    pipeline_order = Column(Integer);
+    connection_id = Column(String(500));
+    used_ = Column(Boolean);
+    comment_ = Column(Text);
+
+    __table_args__ = (
+            UniqueConstraint(
+                'connection_id',
+                'pipeline_id',
+                'pipeline_order',
+                ),
+            )
+
+    def __init__(self,
+                row_dict_I,
+                ):
+        self.analysis_id=row_dict_I['analysis_id']
+
+        self.used_=row_dict_I['used_']
+        self.comment_=row_dict_I['comment_']
+
+    def __set__row__(self,analysis_id_I,
+
+            used__I,
+            comment__I):
+        self.analysis_id=analysis_id_I
+
+        self.used_=used__I
+        self.comment_=comment__I
+
+    def __repr__dict__(self):
+        return {'id':self.id,
+                'analysis_id':self.analysis_id,
+
+            'used_':self.used_,
+            'comment_':self.comment_}
+    
+    def __repr__json__(self):
+        return json.dumps(self.__repr__dict__())
+
+
+#class data_stage02_quantification_analysis_pipeline(Base):
+#    __tablename__ = 'data_stage02_quantification_analysis_pipeline'
+#    id = Column(Integer, Sequence('data_stage02_quantification_analysis_pipeline_id_seq'), primary_key=True)
+#    analysis_id = Column(String(500))
+#    pipeline_id = Column(String(500));
+#    pipeline_order = Column(Integer);
+#    #module
+#    execute_object = Column(String(500))
+#    execute_queryData_parameters = Column(postgresql.JSON);
+#    execute_transformData_parameters = Column(postgresql.JSON);
+#    execute_storeData_parameters = Column(postgresql.JSON);
+#    execute_queryData_func = Column(String(500))
+#    execute_transformData_func = Column(String(500))
+#    execute_storeData_func = Column(String(500))
+#    #module parameters
+#    input_query_object = Column(String(500))
+#    input_query_func = Column(String(500))
+#    input_query_parameters = Column(postgresql.JSON);
+#    data_transform_func = Column(String(500))
+#    data_transform_parameters = Column(postgresql.JSON);
+#    output_query_object = Column(String(500))
+#    output_query_func = Column(String(500))
+#    output_query_parameters = Column(postgresql.JSON);
+#    used_ = Column(Boolean);
+#    comment_ = Column(Text);
+
+#    __table_args__ = (
+#            UniqueConstraint(
+#                'analysis_id',
+#                'pipeline_id',
+#                'pipeline_order',
+#                'execute_module',
+#                'input_query_object',
+#                'input_query_func',
+#                'output_query_object',
+#                'output_query_func',
+#                ),
+#            )
+
+#    def __init__(self,
+#                row_dict_I,
+#                ):
+#        self.analysis_id=row_dict_I['analysis_id']
+
+#        self.used_=row_dict_I['used_']
+#        self.comment_=row_dict_I['comment_']
+
+#    def __set__row__(self,analysis_id_I,
+
+#            used__I,
+#            comment__I):
+#        self.analysis_id=analysis_id_I
+
+#        self.used_=used__I
+#        self.comment_=comment__I
+
+#    def __repr__dict__(self):
+#        return {'id':self.id,
+#                'analysis_id':self.analysis_id,
+
+#            'used_':self.used_,
+#            'comment_':self.comment_}
+    
+#    def __repr__json__(self):
+#        return json.dumps(self.__repr__dict__())

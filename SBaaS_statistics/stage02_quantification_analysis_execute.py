@@ -1,47 +1,81 @@
-
+﻿
 from .stage02_quantification_analysis_io import stage02_quantification_analysis_io
 
 class stage02_quantification_analysis_execute(stage02_quantification_analysis_io):
-    def execute_analysisPipeline(self,
-        pipeline_id = None,
-        analysis_group_id_I = None,
+    def execute_analysisConnection(self,
+        connection_id = None,
         r_calc_I = None,
         ):
-        '''Execute an analysis pipeline'''
+        '''Execute an analysis connection
+        
+        DESCRIPTION:
+        connections should conform to the following format:
+        1. query the data
+        2. query the data
+        3. query the data
+        ...
+        N. transform the data
+        N+1. store the data
+
+        '''
 
         data_O = [];
 
-        #query the analysis groups
-        analysis_groups = []
-
-        #query the pipeline information
-        pipelines = [];
-
-        #reorganize into analysis groups:
-        pipeline_orders = list(set([p['pipeline_order'] for p in pipelines]));
-        pipeline_orders.sort();
-        data_analysis = {'_del_':[]};
-        for row in data_listDict:
-            po = row['pipeline_order']
-            if not po in data_analysis.keys(): data_analysis[po]=[];
-            data_analysis[po].append(row);
-        del data_analysis['_del_'];
+        #query the connection information (in connection_order ASC)
+        connections = [];
         
-        for pipeline_order in pipeline_orders:
-            #1. query the data
-            data_listDict = [];
-            for analysis in analysis_ids:
-                data_tmp = [];
+        #NOTE: each execution object is responsible for 1 connection
+        execute_object = self.get_sbaasObject(connections[0]['execute_object'])
+        for connection in connections:
+            #execute_object = self.get_sbaasObject(connection['execute_object'])
+            query_func = self.get_sbaasMethod(execute_object,connection['execute_method'])
+            query_func(
+                analysis_id_I=connection['analysis_id'],
+                r_calc_I=r_calc_I,
+                **analysis['execute_parameters']);
 
-            #2. group the data
-            data_analysis = [];
+    def execute_analysisPipeline(self,
+        pipeline_id = None,
+        r_calc_I = None,
+        ):
+        '''Execute an analysis pipeline
 
-            #3. transform each unique group
-            for data in data_analysis:
-                data_O_listDict = [];
+        '''
 
+        data_O = [];
 
-                data_O.append(data_O_listDict)
+        #query the pipeline information (in pipeline_order ASC)
+        pipelines = [];
+        
+        for pipeline in pipelines:
+            self.execute_analysisConnection(pipeline['connection_id'],r_calc_I=r_calc_I)
 
-        #store the data
+    def get_sbaasObject(self,object_I):
+        '''Return an instanciated object
+        '''
+        object = None;
 
+        #define the supported objects
+        objects = {};
+
+        #instanciate the module
+        if object_I in objects.keys():
+            object = objects[execute_object_I];
+            object = object(self.session,self.engine);
+            object.initialize_supportedTables();
+        else:
+            print('Object not supported');
+
+        return object;
+
+    def get_sbaasMethod(self,object_I,method_I):
+        '''Return an object's method
+        '''
+        
+        method_O = None;
+        if hasattr(object_I, method_I):
+            method_O = getattr(object_I, method_I);
+        else:
+            print('Object does not support the requested method');
+
+        return method_O;

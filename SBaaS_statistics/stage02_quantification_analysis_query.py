@@ -1,4 +1,4 @@
-from .stage02_quantification_analysis_postgresql_models import *
+﻿from .stage02_quantification_analysis_postgresql_models import *
 
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
@@ -7,8 +7,9 @@ class stage02_quantification_analysis_query(sbaas_template_query):
         '''Set the supported tables dict for stage02_quantification_analysis
         '''
         tables_supported = {'data_stage02_quantification_analysis':data_stage02_quantification_analysis,
-                            #'data_stage02_quantification_analysis_pipeline':data_stage02_quantification_analysis_pipeline,
-                            #'data_stage02_quantification_analysis_group':data_stage02_quantification_analysis_group,
+                            'data_stage02_quantification_analysis_pipeline':data_stage02_quantification_analysis_pipeline,
+                            'data_stage02_quantification_analysis_connection':data_stage02_quantification_analysis_connection,
+                            'data_stage02_quantification_analysis_group':data_stage02_quantification_analysis_group,
                         };
         self.set_supportedTables(tables_supported);
     # data_stage02_quantification_analysis
@@ -201,7 +202,6 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             {"table_name":tables[0],
             'column_name':'analysis_id',
             'value':analysis_id_I,
-            #'value':self.convert_string2StringString(analysis_id_I),
             'operator':'LIKE',
             'connector':'AND'
                         },
@@ -233,6 +233,198 @@ class stage02_quantification_analysis_query(sbaas_template_query):
 
         #additional blocks
         for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def _get_rows_analysisID_dataStage02QuantificationAnalysisGroup(self,
+                analysis_id_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_analysis_group
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_analysis_group'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            #'value':self.convert_string2StringString(analysis_id_I),
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_group_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def _get_rows_connectionID_dataStage02QuantificationAnalysisConnection(self,
+                connection_id_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by connection_id from data_stage02_quantification_analysis_connection
+        INPUT:
+        connection_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_analysis_connection'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'connection_id',
+            'value':connection_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'connection_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'connection_order',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'execute_object',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def _get_rows_pipelineID_dataStage02QuantificationAnalysisPipeline(self,
+                pipeline_id_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by pipeline_id from data_stage02_quantification_analysis_pipeline
+        INPUT:
+        pipeline_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        '''
+
+        tables = ['data_stage02_quantification_analysis_pipeline'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'pipeline_id',
+            'value':pipeline_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'pipeline_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'pipeline_order',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'connection_id',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
             for r in v:
                 query[k].append(r);
         
@@ -254,6 +446,8 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
+
+    ##DEPRECATED
     #def add_dataStage02QuantificationAnalysis(self, data_I):
     #    '''add rows of data_stage02_quantification_analysis'''
     #    if data_I:

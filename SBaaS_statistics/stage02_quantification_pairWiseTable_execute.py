@@ -110,7 +110,8 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
     def execute_pairwiseTableAverages_transformDataCrossUnits(self,
             analysis_id_I,
             redundancy_I=True,
-            value_I = 'mean',):
+            value_I = 'mean',
+            includeAll_calculatedConcentrationUnits_I=True):
         '''
         INPUT:
         analysis_id_I
@@ -150,9 +151,17 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                     data_1,data_2 = [],[];
                     data_1 = data_analysis[sna_1];
                     data_2 = data_analysis[sna_2];
-
-                    if len(data_1)!=len(data_2):
-                        print('the number of components in sn_1 and sn_2 are not equal.');
+                    
+                    #check the data
+                    assert(len(data_1)==len(data_2));
+                    cn_1 = list(set(d['component_name'] for d in data_1))
+                    cn_1.sort();
+                    cn_2 = list(set(d['component_name'] for d in data_2))
+                    cn_2.sort();
+                    assert(cn_1==cn_2);
+                    #ensure the data is sorted
+                    data_1 = sorted(data_1,key=lambda x: x['component_name'])
+                    data_2 = sorted(data_2,key=lambda x: x['component_name'])
 
                     # record the data
                     for d_1_cnt,d_1 in enumerate(data_1):
@@ -250,6 +259,35 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
         #save the data
         if query_func_O == 'add_rows_table':
             self.add_rows_table(table_O,data_O);
+    def execute_pairwiseTableAverages_resetData(self,
+            tables_I = [],
+            analysis_id_I = None,
+            warn_I=True,
+            query_object_I='self',
+            query_func_I='reset_dataStage02_quantification_pairWiseTable'):
+        ''' '''
+        ## intantiate the query object:
+        #query_objects = {'self':self,
+        #                };
+        #if query_object_O in query_objects.keys():
+        #    query_object = query_objects[query_object_O];
+        #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
+        #    query_instance.initialize_supportedTables();
+            
+        #if hasattr(query_instance, query_func_O):
+        #    query_func = getattr(query_instance, query_func_O);
+        #    data_listDict = query_func(table_O,data_O
+        #        );
+        #else:
+        #    print('query instance does not have the required method.');
+        
+        #reset the data
+        if query_func_I == 'reset_dataStage02_quantification_pairWiseTable':
+            self.reset_dataStage02_quantification_pairWiseTable(
+                tables_I = tables_I,
+                analysis_id_I = analysis_id_I,
+                warn_I=warn_I,
+                );
 
     def execute_pairwiseTableReplicates(self,analysis_id_I,
             time_points_I=[],
@@ -420,63 +458,24 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
             table_O = 'data_stage02_quantification_pairwiseTableFeatures'
             );
 
-    def execute_pairwiseTableFeaturesAverages_queryData(self,
-            analysis_id_I,
-            calculated_concentration_units_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            sample_name_abbreviations_I=[],
-            time_points_I=[],
-            experiment_ids_I=[],
-            test_descriptions_I=[],
-            pvalue_corrected_descriptions_I=[],
-            where_clause_I=None,
-            query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
-            query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',):
-        ''' '''
-        # intantiate the query object:
-        query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
-                        'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,};
-        if query_object_descStats_I in query_objects.keys():
-            query_object_descStats = query_objects[query_object_descStats_I];
-            query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
-            query_instance_descStats.initialize_supportedTables();
-
-        #query the data:
-        data_listDict = [];
-        if hasattr(query_instance_descStats, query_func_descStats_I):
-            query_func_descStats = getattr(query_instance_descStats, query_func_descStats_I);
-            data_listDict = query_func_descStats(analysis_id_I,
-                calculated_concentration_units_I=calculated_concentration_units_I,
-                component_names_I=component_names_I,
-                component_group_names_I=component_group_names_I,
-                sample_name_abbreviations_I=sample_name_abbreviations_I,
-                time_points_I=time_points_I,
-                experiment_ids_I=experiment_ids_I,
-                test_descriptions_I=test_descriptions_I,
-                pvalue_corrected_descriptions_I=pvalue_corrected_descriptions_I,
-                where_clause_I=where_clause_I,
-                );
-        else:
-            print('query instance does not have the required method.');
-        self.add_data(data_listDict);
     def execute_pairwiseTableFeaturesAverages_transformDataCrossUnits(self,
             analysis_id_I,
             redundancy_I=True,
             value_I = 'mean',
+            includeAll_calculatedConcentrationUnits_I=True
             ):
         ''' '''
 
         data_I = self.get_data();
 
         #reorganize into analysis groups:
-        component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names = list(set([c['component_name'] for c in data_I]));
         component_names.sort();
         data_analysis = {'_del_':{'_del_':[]}};
         for row in data_I:
             cn = row['component_name']
             if not cn in data_analysis.keys(): data_analysis[cn]=[];
-            data_analysis[cu][cn].append(row);            
+            data_analysis[cn].append(row);            
         del data_analysis['_del_'];
 
         # instantiate the output list
@@ -496,21 +495,30 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                 data_1 = data_analysis[cn_1];
                 data_2 = data_analysis[cn_2];
 
-                if len(data_1)!=len(data_2):
-                    print('the number of components in sn_1 and sn_2 are not equal.');
+                #check the data
+                assert(len(data_1)==len(data_2));
+                sns_1 = list(set(d['sample_name_abbreviation'] for d in data_1))
+                sns_1.sort();
+                sns_2 = list(set(d['sample_name_abbreviation'] for d in data_2))
+                sns_2.sort();
+                assert(sns_1==sns_2);
+                data_1_sorted = sorted(data_1,key=lambda x: x['sample_name_abbreviation'])
+                data_2_sorted = sorted(data_2,key=lambda x: x['sample_name_abbreviation'])
 
                 # record the data
-                for d_1_cnt,d_1 in enumerate(data_1):
-                    assert(d_1['component_name']==data_2[d_1_cnt]['component_name']);
+                for d_1_cnt,d_1 in enumerate(data_1_sorted):
+                    assert(d_1['sample_name_abbreviation']==data_2_sorted[d_1_cnt]['sample_name_abbreviation']);
                     tmp = {'analysis_id':analysis_id_I,
+                    'value_name':value_I,
+                    'sample_name_abbreviation':d_1['sample_name_abbreviation'],
                         'value_1':d_1[value_I],
-                        'value_2':data_2[d_1_cnt][value_I],
+                        'value_2':data_2_sorted[d_1_cnt][value_I],
                     'component_name_1':cn_1,
                     'component_name_2':cn_2,
                     'component_group_name_1':d_1['component_group_name'],
-                    'component_group_name_2':data_2[d_1_cnt]['component_group_name'],
+                    'component_group_name_2':data_2_sorted[d_1_cnt]['component_group_name'],
                     'calculated_concentration_units_1':d_1['calculated_concentration_units'],
-                    'calculated_concentration_units_2':data_2[d_1_cnt]['calculated_concentration_units'],
+                    'calculated_concentration_units_2':data_2_sorted[d_1_cnt]['calculated_concentration_units'],
                     'used_':True,
                     'comment_':None};
                     data_pairwise_O.append(tmp)
@@ -528,7 +536,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
         #reorganize into analysis groups:
         calculated_concentration_units = list(set([c['calculated_concentration_units'] for c in data_I]));
         calculated_concentration_units.sort();
-        #component_names = list(set([c['component_name'] for c in data_listDict]));
+        #component_names = list(set([c['component_name'] for c in data_I]));
         #component_names.sort();
         component_names = {k:[] for k in calculated_concentration_units};
         data_analysis = {'_del_':{'_del_':[]}};
@@ -565,8 +573,10 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                         
                     # record the data
                     for d_1_cnt,d_1 in enumerate(data_1):
-                        assert(d_1['component_name']==data_2[d_1_cnt]['component_name']);
+                        assert(d_1['sample_name_abbreviation']==data_2[d_1_cnt]['sample_name_abbreviation']);
                         tmp = {'analysis_id':analysis_id_I,
+                        'value_name':value_I,
+                        'sample_name_abbreviation':d_1['sample_name_abbreviation'],
                             'value_1':d_1[value_I],
                             'value_2':data_2[d_1_cnt][value_I],
                         'component_name_1':cn_1,
@@ -580,26 +590,96 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                         data_pairwise_O.append(tmp)
 
         self.set_data(data_pairwise_O);
-    def execute_pairwiseTableFeaturesAverages_storeData(self,
-            table_O='data_stage02_quantification_pairwiseTableFeatures',
-            query_object_O='self',
-            query_func_O='add_rows_table'):
-        ''' '''
-        ## intantiate the query object:
-        #query_objects = {'self':self,
-        #                };
-        #if query_object_O in query_objects.keys():
-        #    query_object = query_objects[query_object_O];
-        #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
-        #    query_instance.initialize_supportedTables();
-            
-        #if hasattr(query_instance, query_func_O):
-        #    query_func = getattr(query_instance, query_func_O);
-        #    data_listDict = query_func(table_O,data_O
-        #        );
-        #else:
-        #    print('query instance does not have the required method.');
+    ##redundant
+    #def execute_pairwiseTableFeaturesAverages_queryData(self,
+    #        analysis_id_I,
+    #        calculated_concentration_units_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        time_points_I=[],
+    #        experiment_ids_I=[],
+    #        test_descriptions_I=[],
+    #        pvalue_corrected_descriptions_I=[],
+    #        where_clause_I=None,
+    #        query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+    #        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',):
+    #    ''' '''
+    #    # intantiate the query object:
+    #    query_objects = {'stage02_quantification_dataPreProcessing_averages_query':stage02_quantification_dataPreProcessing_averages_query,
+    #                    'stage02_quantification_descriptiveStats_query':stage02_quantification_descriptiveStats_query,};
+    #    if query_object_descStats_I in query_objects.keys():
+    #        query_object_descStats = query_objects[query_object_descStats_I];
+    #        query_instance_descStats = query_object_descStats(self.session,self.engine,self.settings);
+    #        query_instance_descStats.initialize_supportedTables();
 
-        #save the data
-        if query_func_O == 'add_rows_table':
-            self.add_rows_table(table_O,data_O);
+    #    #query the data:
+    #    data_listDict = [];
+    #    if hasattr(query_instance_descStats, query_func_descStats_I):
+    #        query_func_descStats = getattr(query_instance_descStats, query_func_descStats_I);
+    #        data_listDict = query_func_descStats(analysis_id_I,
+    #            calculated_concentration_units_I=calculated_concentration_units_I,
+    #            component_names_I=component_names_I,
+    #            component_group_names_I=component_group_names_I,
+    #            sample_name_abbreviations_I=sample_name_abbreviations_I,
+    #            time_points_I=time_points_I,
+    #            experiment_ids_I=experiment_ids_I,
+    #            test_descriptions_I=test_descriptions_I,
+    #            pvalue_corrected_descriptions_I=pvalue_corrected_descriptions_I,
+    #            where_clause_I=where_clause_I,
+    #            );
+    #    else:
+    #        print('query instance does not have the required method.');
+    #    self.add_data(data_listDict);
+    #def execute_pairwiseTableFeaturesAverages_resetData(self,
+    #        tables_I = [],
+    #        analysis_id_I = None,
+    #        warn_I=True,
+    #        query_object_I='self',
+    #        query_func_I='reset_dataStage02_quantification_pairWiseTable'):
+    #    ''' '''
+    #    ## intantiate the query object:
+    #    #query_objects = {'self':self,
+    #    #                };
+    #    #if query_object_O in query_objects.keys():
+    #    #    query_object = query_objects[query_object_O];
+    #    #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
+    #    #    query_instance.initialize_supportedTables();
+            
+    #    #if hasattr(query_instance, query_func_O):
+    #    #    query_func = getattr(query_instance, query_func_O);
+    #    #    data_listDict = query_func(table_O,data_O
+    #    #        );
+    #    #else:
+    #    #    print('query instance does not have the required method.');
+        
+    #    #reset the data
+    #    if query_func_O == 'reset_dataStage02_quantification_pairWiseTable':
+    #        self.reset_dataStage02_quantification_pairWiseTable(
+    #            tables_I = tables_I,
+    #            analysis_id_I = analysis_id_I,
+    #            warn_I=warn_I,
+    #            );
+    #def execute_pairwiseTableFeaturesAverages_storeData(self,
+    #        table_O='data_stage02_quantification_pairwiseTableFeatures',
+    #        query_object_O='self',
+    #        query_func_O='add_rows_table'):
+    #    ''' '''
+    #    ## intantiate the query object:
+    #    #query_objects = {'self':self,
+    #    #                };
+    #    #if query_object_O in query_objects.keys():
+    #    #    query_object = query_objects[query_object_O];
+    #    #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
+    #    #    query_instance.initialize_supportedTables();
+            
+    #    #if hasattr(query_instance, query_func_O):
+    #    #    query_func = getattr(query_instance, query_func_O);
+    #    #    data_listDict = query_func(table_O,data_O
+    #    #        );
+    #    #else:
+    #    #    print('query instance does not have the required method.');
+
+    #    #save the data
+    #    if query_func_O == 'add_rows_table':
+    #        self.add_rows_table(table_O,data_O);

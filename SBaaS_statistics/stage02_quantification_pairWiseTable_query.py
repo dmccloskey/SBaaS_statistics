@@ -1,4 +1,4 @@
-#SBaaS
+﻿#SBaaS
 from .stage02_quantification_pairWiseTable_postgresql_models import *
 #SBaaS_base
 from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
@@ -18,6 +18,9 @@ class stage02_quantification_pairWiseTable_query(sbaas_template_query):
         '''
         tables_supported = {'data_stage02_quantification_pairWiseTable':data_stage02_quantification_pairWiseTable,
                             'data_stage02_quantification_pairWiseTable_replicates':data_stage02_quantification_pairWiseTable_replicates,
+                            'data_stage02_quantification_pairWiseTableFeatures':data_stage02_quantification_pairWiseTableFeatures,
+                            'data_stage02_quantification_pairWiseTableCrossUnits':data_stage02_quantification_pairWiseTableCrossUnits,
+                            'data_stage02_quantification_pairWiseTableFeaturesCrossUnits':data_stage02_quantification_pairWiseTableFeaturesCrossUnits,
                         };
         self.set_supportedTables(tables_supported);
         

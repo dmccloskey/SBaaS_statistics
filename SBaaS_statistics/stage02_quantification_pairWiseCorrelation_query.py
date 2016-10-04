@@ -1,4 +1,4 @@
-#SBaaS
+﻿#SBaaS
 from .stage02_quantification_pairWiseCorrelation_postgresql_models import *
 
 from SBaaS_base.sbaas_base_query_update import sbaas_base_query_update
@@ -15,11 +15,13 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
         '''Set the supported tables dict for 
         '''
         tables_supported = {
-                            'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
-                            'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
-                            'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures,
-                            'data_stage02_quantification_pairWiseCorrFeaturesAndConditions':data_stage02_quantification_pairWiseCorrFeaturesAndConditions,
-                            'data_stage02_quantification_pairWiseCorrFeatures_replicates':data_stage02_quantification_pairWiseCorrFeatures_replicates,
+            'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
+            'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
+            'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures,
+            'data_stage02_quantification_pairWiseCorrFeaturesAndConditions':data_stage02_quantification_pairWiseCorrFeaturesAndConditions,
+            'data_stage02_quantification_pairWiseCorrFeatures_replicates':data_stage02_quantification_pairWiseCorrFeatures_replicates,
+            'data_stage02_quantification_pairWiseCorrelationCrossUnits':data_stage02_quantification_pairWiseCorrelationCrossUnits,
+            'data_stage02_quantification_pairWiseCorrFeaturesCrossUnits':data_stage02_quantification_pairWiseCorrFeaturesCrossUnits,
                         };
         self.set_supportedTables(tables_supported);
 

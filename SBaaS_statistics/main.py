@@ -1,10 +1,12 @@
-import sys
-sys.path.append('C:/Users/dmccloskey-sbrg/Documents/GitHub/SBaaS_base')
+﻿import sys
+#sys.path.append('C:/Users/dmccloskey-sbrg/Documents/GitHub/SBaaS_base')
+sys.path.append('C:/Users/dmccloskey/Documents/GitHub/SBaaS_base')
 from SBaaS_base.postgresql_settings import postgresql_settings
 from SBaaS_base.postgresql_orm import postgresql_orm
 
 # read in the settings file
-filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
+#filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
+filename = 'C:/Users/dmccloskey/Google Drive/SBaaS_settings/settings_metabolomics_labtop.ini';
 pg_settings = postgresql_settings(filename);
 
 # connect to the database from the settings file
@@ -47,7 +49,7 @@ sys.path.append(pg_settings.datadir_settings['github']+'/ddt_python')
 from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_quantification_analysis_execute
 analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.datadir_settings);
 analysis01.initialize_supportedTables();
-analysis01.initialize_dataStage02_quantification_analysis();
+analysis01.initialize_tables();
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute
@@ -331,6 +333,14 @@ svm_hyperparameters = [
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
+#check that the pipeline exists...
+analysis01.execute_analysisPipeline(
+    pipeline_id_I = 'ALEsKOs01_0_11_crossUnits',
+    #r_calc_I = None,
+    r_calc_I = r_calc,
+    )
+
+##TODO: update notebook...
 #add in spls pipelines
 data_O=[
     {'pipeline_id':'plsda_R_scaleAndCenter',
@@ -447,47 +457,6 @@ svd_method = {
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-
-    pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-            tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
-            analysis_id_I = analysis_id,
-            warn_I=False);
-    pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
-        sample_name_abbreviations_I=[],
-        calculated_concentration_units_I=[
-            'mmol*gDW-1*hr-1_FC-mean_normalized',
-            'mmol*gDW-1*hr-1_metSum_FC-mean_normalized',
-        ],
-        component_names_I=[],
-        pvalue_corrected_description_I = "bonferroni",
-        redundancy_I=True,
-        distance_measure_I='pearson',
-        value_I = 'mean',
-        r_calc_I=r_calc,
-        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
-        );  
-
-    ## check for within component correlation
-    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
-    #        tables_I = ['data_stage02_quantification_pairWiseCorrelationFeatures'], 
-    #        analysis_id_I = analysis_id,
-    #        warn_I=False);
-    #pairWiseCorrelation01.execute_pairwiseCorrelationFeaturesAverages(analysis_id,
-    #    sample_name_abbreviations_I=[],
-    #    calculated_concentration_units_I=[
-    #        'mmol*gDW-1*hr-1_FC-mean_normalized',
-    #        'mmol*gDW-1*hr-1_metSum_FC-mean_normalized',
-    #    ],
-    #    component_names_I=[],
-    #    pvalue_corrected_description_I = "bonferroni",
-    #    redundancy_I=True,
-    #    distance_measure_I='pearson',
-    #    value_I = 'mean',
-    #    r_calc_I=r_calc,
-    #    query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-    #    query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
-    #    );
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters

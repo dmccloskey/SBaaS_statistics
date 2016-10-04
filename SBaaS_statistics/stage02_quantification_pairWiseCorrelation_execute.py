@@ -5,6 +5,7 @@ from .stage02_quantification_pairWiseCorrelation_io import stage02_quantificatio
 from .stage02_quantification_descriptiveStats_query import stage02_quantification_descriptiveStats_query
 # resources
 from python_statistics.calculate_correlation import calculate_correlation
+from r_statistics.r_interface import r_interface
 from listDict.listDict import listDict
 import numpy as np
 
@@ -67,7 +68,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             );
         
         #save/update the data
-        self.execute_pairwiseCorrelationFeaturesAverages_saveData(
+        self.execute_pairwiseCorrelationFeaturesAverages_storeData(
             data_O = data_pairwise_O,
             table_O = 'data_stage02_quantification_pairWiseCorrelationFeatures'
             );
@@ -119,6 +120,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
             distance_measure_I='pearson',
             value_I = 'mean',
             r_calc_I=None,
+            includeAll_calculatedConcentrationUnits_I=True,
             ):
         ''' '''
         # instantiate dependent objects
@@ -129,13 +131,13 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
         data_I = self.get_data();
 
         #reorganize into analysis groups:
-        component_names = list(set([c['component_name'] for c in data_listDict]));
+        component_names = list(set([c['component_name'] for c in data_I]));
         component_names.sort();
         data_analysis = {'_del_':{'_del_':[]}};
         for row in data_I:
             cn = row['component_name']
             if not cn in data_analysis.keys(): data_analysis[cn]=[];
-            data_analysis[cu][cn].append(row);            
+            data_analysis[cn].append(row);            
         del data_analysis['_del_'];
 
         # instantiate the output list
@@ -153,7 +155,19 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     
                 data_1,data_2 = [],[];
                 data_1 = data_analysis[cn_1];
-                data_2 = data_analysis[cn_2];                        
+                data_2 = data_analysis[cn_2];      
+
+                #check the data
+                assert(len(data_1)==len(data_2));
+                sns_1 = list(set(d['sample_name_abbreviation'] for d in data_1))
+                sns_1.sort();
+                sns_2 = list(set(d['sample_name_abbreviation'] for d in data_2))
+                sns_2.sort();
+                assert(sns_1==sns_2);
+                #ensure the data is sorted
+                data_1 = sorted(data_1,key=lambda x: x['sample_name_abbreviation'])
+                data_2 = sorted(data_2,key=lambda x: x['sample_name_abbreviation'])
+                                  
                 #extract out the values 
                 data_1 = [d[value_I] for d in data_1];
                 data_2 = [d[value_I] for d in data_2];
@@ -311,6 +325,35 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                     data_pairwise_O.extend(data_listDict.get_listDict());
 
         self.set_data(data_pairwise_O);
+    def execute_pairwiseCorrelationFeaturesAverages_resetData(self,
+            tables_I = [],
+            analysis_id_I = None,
+            warn_I=True,
+            query_object_I='self',
+            query_func_I='reset_dataStage02_quantification_pairWiseCorrelation'):
+        ''' '''
+        ## intantiate the query object:
+        #query_objects = {'self':self,
+        #                };
+        #if query_object_O in query_objects.keys():
+        #    query_object = query_objects[query_object_O];
+        #    query_instance = query_object_descStats(self.session,self.engine,self.settings);
+        #    query_instance.initialize_supportedTables();
+            
+        #if hasattr(query_instance, query_func_O):
+        #    query_func = getattr(query_instance, query_func_O);
+        #    data_listDict = query_func(table_O,data_O
+        #        );
+        #else:
+        #    print('query instance does not have the required method.');
+        
+        #reset the data
+        if query_func_I == 'reset_dataStage02_quantification_pairWiseCorrelation':
+            self.reset_dataStage02_quantification_pairWiseCorrelation(
+                tables_I = tables_I,
+                analysis_id_I = analysis_id_I,
+                warn_I=warn_I,
+                );
     def execute_pairwiseCorrelationFeaturesAverages_storeData(self,
             table_O='data_stage02_quantification_pairWiseCorrelationFeatures',
             query_object_O='self',
@@ -330,7 +373,8 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
         #        );
         #else:
         #    print('query instance does not have the required method.');
-
+        
+        data_O = self.get_data();
         #save the data
         if query_func_O == 'add_rows_table':
             self.add_rows_table(table_O,data_O);

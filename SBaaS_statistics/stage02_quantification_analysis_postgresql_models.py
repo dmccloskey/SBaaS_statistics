@@ -225,7 +225,6 @@ class data_stage02_quantification_analysis_pipeline(Base):
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-#TODO
 class data_stage02_quantification_analysis_diagnostics(Base):
     __tablename__ = 'data_stage02_quantification_analysis_diagnostics'
     id = Column(Integer, Sequence('data_stage02_quantification_analysis_diagnostics_id_seq'), primary_key=True)
@@ -233,15 +232,18 @@ class data_stage02_quantification_analysis_diagnostics(Base):
     pipeline_id = Column(String(500));
     connection_id = Column(String(500));
     connection_step = Column(Integer);
-    execution_time = Column(DateTime);
+    execution_time = Column(Float);
     execution_time_units = Column(String(50))
     execution_startTime = Column(DateTime)
-    execution_memory = Column(Float)
-    execution_memory_units = Column(String(50))
-    messages_information = Column(Text)
-    messages_warnings = Column(Text)
-    messages_errors = Column(Text)
-    messages_level = Column(String(50)) #information,warning,error,fatal
+    memory_virtual = Column(postgresql.JSON)
+    memory_swap = Column(postgresql.JSON)
+    memory_process = Column(Float)
+    memory_objects = Column(Float)
+    memory_data = Column(Float)
+    memory_units = Column(String(50))
+    disk_io = Column(postgresql.JSON)
+    network_io = Column(postgresql.JSON)
+    message_log = Column(postgresql.JSON) #dictionary with keys: 'message','level'
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
@@ -258,6 +260,22 @@ class data_stage02_quantification_analysis_diagnostics(Base):
     def __init__(self,
                 row_dict_I,
                 ):
+        self.analysis_id=row_dict_I['analysis_id']
+        self.pipeline_id=row_dict_I['pipeline_id']
+        self.connection_id=row_dict_I['connection_id']
+        self.connection_step=row_dict_I['connection_step']
+        self.execution_time=row_dict_I['execution_time']
+        self.execution_time_units=row_dict_I['execution_time_units']
+        self.execution_startTime=row_dict_I['execution_startTime']
+        self.memory_virtual=row_dict_I['memory_virtual']
+        self.memory_swap=row_dict_I['memory_swap']
+        self.memory_process=row_dict_I['memory_process']
+        self.memory_objects=row_dict_I['memory_objects']
+        self.memory_data=row_dict_I['memory_data']
+        self.memory_units=row_dict_I['memory_units']
+        self.disk_io=row_dict_I['disk_io']
+        self.network_io=row_dict_I['network_io']
+        self.message_log=row_dict_I['message_log']
         self.used_=row_dict_I['used_']
         self.comment_=row_dict_I['comment_']
 

@@ -496,7 +496,6 @@ class data_stage02_quantification_pairWiseCorrFeaturesAndConditions(Base):
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
 
-
 class data_stage02_quantification_pairWiseCorrelationCrossUnits(Base):
     __tablename__ = 'data_stage02_quantification_pairWiseCorrelationCrossUnits'
     id = Column(Integer, Sequence('data_stage02_quantification_pairWiseCorrelationCrossUnits_id_seq'), primary_key=True)
@@ -647,7 +646,7 @@ class data_stage02_quantification_pairWiseCorrFeaturesCrossUnits(Base):
         #self.time_point_1=row_dict_I['time_point_1']
         #self.time_point_2=row_dict_I['time_point_2']
         #self.time_point_units=row_dict_I['time_point_units']
-        sself.pvalue=row_dict_I['pvalue'];
+        self.pvalue=row_dict_I['pvalue'];
         self.pvalue_corrected=row_dict_I['pvalue_corrected'];
         self.pvalue_corrected_description=row_dict_I['pvalue_corrected_description'];
         self.distance_measure=row_dict_I['distance_measure'];

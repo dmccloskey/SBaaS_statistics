@@ -1,5 +1,6 @@
 ﻿from .stage02_quantification_analysis_postgresql_models import *
 
+from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
 class stage02_quantification_analysis_query(sbaas_template_query):
@@ -10,6 +11,7 @@ class stage02_quantification_analysis_query(sbaas_template_query):
                             'data_stage02_quantification_analysis_pipeline':data_stage02_quantification_analysis_pipeline,
                             'data_stage02_quantification_analysis_connection':data_stage02_quantification_analysis_connection,
                             'data_stage02_quantification_analysis_group':data_stage02_quantification_analysis_group,
+                            'data_stage02_quantification_analysis_diagnostics':data_stage02_quantification_analysis_diagnostics,
                         };
         self.set_supportedTables(tables_supported);
     # data_stage02_quantification_analysis
@@ -112,53 +114,11 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             print(e);
 
     #SPLIT 2:
-    def add_dataStage02QuantificationAnalysis(self,table_I,data_I):
-        '''add rows of data_stage02_quantification_analysis'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryinsert = sbaas_base_query_insert(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryinsert.add_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-    def update_dataStage02QuantificationAnalysis(self,table_I,data_I):
-        '''update rows of data_stage02_quantification_analysis'''
-        if data_I:
-            try:
-                model_I = self.convert_tableString2SqlalchemyModel(table_I);
-                queryupdate = sbaas_base_query_update(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-                queryupdate.update_rows_sqlalchemyModel(model_I,data_I);
-            except Exception as e:
-                print(e);
-    def initialize_dataStage02_quantification_analysis(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            queryinitialize = sbaas_base_query_initialize(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                queryinitialize.initialize_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
-    def drop_dataStage02_quantification_analysis(self,
-            tables_I = [],):
-        try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
-            querydrop = sbaas_base_query_drop(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
-            for table in tables_I:
-                model_I = self.convert_tableString2SqlalchemyModel(table);
-                querydrop.drop_table_sqlalchemyModel(model_I);
-        except Exception as e:
-            print(e);
     def reset_dataStage02_quantification_analysis(self,
-            tables_I = [],
+            tables_I = ['data_stage02_quantification_analysis'],
             analysis_id_I = None,
             warn_I=True):
         try:
-            if not tables_I:
-                tables_I = list(self.get_supportedTables().keys());
             querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
             for table in tables_I:
                 query = {};
@@ -168,6 +128,28 @@ class stage02_quantification_analysis_query(sbaas_template_query):
                         'column_name':'analysis_id',
                         'value':analysis_id_I,
                         #'value':self.convert_string2StringString(analysis_id_I),
+		                'operator':'LIKE',
+                        'connector':'AND'
+                        }
+	                ];
+                table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+                query = querydelete.make_queryFromString(table_model,query);
+                querydelete.reset_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
+            print(e);
+    def reset_dataStage02_quantification_analysis_diagnostics(self,
+            tables_I = ['data_stage02_quantification_analysis_diagnostics'],
+            pipeline_id_I = None,
+            warn_I=True):
+        try:
+            querydelete = sbaas_base_query_delete(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            for table in tables_I:
+                query = {};
+                query['delete_from'] = [{'table_name':table}];
+                query['where'] = [{
+                        'table_name':table,
+                        'column_name':'pipeline_id',
+                        'value':pipeline_id_I,
 		                'operator':'LIKE',
                         'connector':'AND'
                         }

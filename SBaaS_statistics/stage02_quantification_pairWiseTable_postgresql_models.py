@@ -15,7 +15,9 @@ class data_stage02_quantification_pairWiseTable(Base):
     value_name = Column(String(500))
     value_1 = Column(Float)
     value_2 = Column(Float)
-    calculated_concentration_units = Column(String(50))
+    #calculated_concentration_units = Column(String(50))
+    calculated_concentration_units_1 = Column(String(50))
+    calculated_concentration_units_2 = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
@@ -24,7 +26,9 @@ class data_stage02_quantification_pairWiseTable(Base):
                                         #time_point_units,
                                         'component_name',
                                         'value_name',
-                                       'calculated_concentration_units'),
+                                       #'calculated_concentration_units',
+                                       'calculated_concentration_units_1',
+                                       'calculated_concentration_units_2',),
             )
 
     def __init__(self,
@@ -35,7 +39,9 @@ class data_stage02_quantification_pairWiseTable(Base):
         self.sample_name_abbreviation_2=row_dict_I['sample_name_abbreviation_2'];
         self.component_name=row_dict_I['component_name'];
         self.component_group_name=row_dict_I['component_group_name'];
-        self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        #self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        self.calculated_concentration_units_1=row_dict_I['calculated_concentration_units_1'];
+        self.calculated_concentration_units_2=row_dict_I['calculated_concentration_units_2'];
         self.comment_=row_dict_I['comment_'];
         self.analysis_id=row_dict_I['analysis_id'];
         #self.time_point_1=row_dict_I['time_point_1']
@@ -55,7 +61,9 @@ class data_stage02_quantification_pairWiseTable(Base):
             value_name_I,
             value_1_I,
             value_2_I,
-                 calculated_concentration_units_I, used_I, comment_I):
+                 #calculated_concentration_units_I, 
+                 calculated_concentration_units_1_I, 
+                 calculated_concentration_units_2_I, used_I, comment_I):
         self.analysis_id = analysis_id_I;
         #self.experiment_id = experiment_id_I;
         self.sample_name_abbreviation_1 = sample_name_abbreviation_1_I;
@@ -68,7 +76,9 @@ class data_stage02_quantification_pairWiseTable(Base):
         self.value_name=value_name_I
         self.value_1=value_1_I
         self.value_2=value_2_I
-        self.calculated_concentration_units = calculated_concentration_units_I;
+        #self.calculated_concentration_units = calculated_concentration_units_I;
+        self.calculated_concentration_units_1 = calculated_concentration_units_1_I;
+        self.calculated_concentration_units_2 = calculated_concentration_units_2_I;
         self.used_ = used_I;
         self.comment_ = comment_I;
 
@@ -86,7 +96,9 @@ class data_stage02_quantification_pairWiseTable(Base):
             'value_name':self.value_name,
             'value_1':self.value_1,
             'value_2':self.value_2,
-            'calculated_concentration_units':self.calculated_concentration_units,
+            #'calculated_concentration_units':self.calculated_concentration_units,
+            'calculated_concentration_units_1':self.calculated_concentration_units_1,
+            'calculated_concentration_units_2':self.calculated_concentration_units_2,
             'used_':self.used_,
             'comment_':self.comment_}
     
@@ -107,9 +119,9 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
     #time_point_units = Column(String(50))
     component_group_name = Column(String(100))
     component_name = Column(String(500))
-    calculated_concentration_1 = Column(Float)
-    calculated_concentration_2 = Column(Float)
-    calculated_concentration_units = Column(String(50))
+    #calculated_concentration_units = Column(String(50))
+    calculated_concentration_units_1 = Column(String(50))
+    calculated_concentration_units_2 = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
@@ -117,7 +129,9 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
                                        #time_point_1, time_point_2,
                                         #time_point_units,
                                         'component_name',
-                                       'calculated_concentration_units'),
+                                       #'calculated_concentration_units',
+                                       'calculated_concentration_units_1',
+                                       'calculated_concentration_units_2',),
             )
 
     def __init__(self,
@@ -130,7 +144,9 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
         self.sample_name_short_2=row_dict_I['sample_name_short_2'];
         self.component_name=row_dict_I['component_name'];
         self.component_group_name=row_dict_I['component_group_name'];
-        self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        #self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        self.calculated_concentration_units_1=row_dict_I['calculated_concentration_units_1'];
+        self.calculated_concentration_units_2=row_dict_I['calculated_concentration_units_2'];
         self.comment_=row_dict_I['comment_'];
         self.analysis_id=row_dict_I['analysis_id'];
         #self.time_point_1=row_dict_I['time_point_1']
@@ -147,9 +163,9 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
             component_group_name_I, component_name_I,
                  #time_point_1_I, time_point_2_I,
             #time_point_units_I,
-            calculated_concentration_1_I,
-            calculated_concentration_2_I,
-                 calculated_concentration_units_I, used_I, comment_I):
+                 #calculated_concentration_units_I, 
+                 calculated_concentration_units_1_I, 
+                 calculated_concentration_units_2_I, used_I, comment_I):
         self.analysis_id = analysis_id_I;
         #self.experiment_id = experiment_id_I;
         self.sample_name_abbreviation_1 = sample_name_abbreviation_1_I;
@@ -161,9 +177,9 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
         #self.time_point_1 = time_point_1_I;
         #self.time_point_2 = time_point_2_I;
         #self.time_point_units=time_point_units_I
-        self.calculated_concentration_1 = calculated_concentration_1_I;
-        self.calculated_concentration_2 = calculated_concentration_2_I;
-        self.calculated_concentration_units = calculated_concentration_units_I;
+        #self.calculated_concentration_units = calculated_concentration_units_I;
+        self.calculated_concentration_units_1 = calculated_concentration_units_1_I;
+        self.calculated_concentration_units_2 = calculated_concentration_units_2_I;
         self.used_ = used_I;
         self.comment_ = comment_I;
 
@@ -180,14 +196,14 @@ class data_stage02_quantification_pairWiseTable_replicates(Base):
             #'time_point_1':self.time_point_1,
             #'time_point_2':self.time_point_2,
             #'time_point_units':self.time_point_units,
-                "calculated_concentration_1":self.calculated_concentration_1,
-                "calculated_concentration_2":self.calculated_concentration_2,
+            #'calculated_concentration_units':self.calculated_concentration_units,
+            'calculated_concentration_units_1':self.calculated_concentration_units_1,
+            'calculated_concentration_units_2':self.calculated_concentration_units_2,
             'used_':self.used_,
             'comment_':self.comment_}
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
-
 class data_stage02_quantification_pairWiseTableFeatures(Base):
     __tablename__ = 'data_stage02_quantification_pairWiseTableFeatures'
     id = Column(Integer, Sequence('data_stage02_quantification_pairWiseTableFeatures_id_seq'), primary_key=True)
@@ -201,7 +217,9 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
     value_name = Column(String(100))
     value_1 = Column(Float)
     value_2 = Column(Float)
-    calculated_concentration_units = Column(String(50))
+    #calculated_concentration_units = Column(String(50))
+    calculated_concentration_units_1 = Column(String(50))
+    calculated_concentration_units_2 = Column(String(50))
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
@@ -209,7 +227,9 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
                                        #time_point_1, time_point_2,
                                         #time_point_units,
                                         'value_name',
-                                       'calculated_concentration_units',),
+                                       #'calculated_concentration_units',
+                                       'calculated_concentration_units_1',
+                                       'calculated_concentration_units_2',),
             )
 
     def __init__(self,
@@ -221,7 +241,9 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
         self.component_group_name_1=row_dict_I['component_group_name_1'];
         self.component_group_name_2=row_dict_I['component_group_name_2'];
         self.value_2=row_dict_I['value_2'];
-        self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        #self.calculated_concentration_units=row_dict_I['calculated_concentration_units'];
+        self.calculated_concentration_units_1=row_dict_I['calculated_concentration_units_1'];
+        self.calculated_concentration_units_2=row_dict_I['calculated_concentration_units_2'];
         self.comment_=row_dict_I['comment_'];
         self.analysis_id=row_dict_I['analysis_id'];
         #self.time_point_1=row_dict_I['time_point_1']
@@ -242,7 +264,9 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
             value_name_I,
                 value_1_I,
                  value_2_I,
-                 calculated_concentration_units_I, used_I, comment_I):
+                 #calculated_concentration_units_I, 
+                 calculated_concentration_units_1_I, 
+                 calculated_concentration_units_2_I, used_I, comment_I):
         self.analysis_id = analysis_id_I;
         #self.experiment_id = experiment_id_I;
         self.sample_name_abbreviation = sample_name_abbreviation_I;
@@ -256,7 +280,9 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
         self.value_name=value_name_I
         self.value_1=value_1_I
         self.value_2=value_2_I;
-        self.calculated_concentration_units = calculated_concentration_units_I;
+        #self.calculated_concentration_units = calculated_concentration_units_I;
+        self.calculated_concentration_units_1 = calculated_concentration_units_1_I;
+        self.calculated_concentration_units_2 = calculated_concentration_units_2_I;
         self.used_ = used_I;
         self.comment_ = comment_I;
 
@@ -275,12 +301,15 @@ class data_stage02_quantification_pairWiseTableFeatures(Base):
             'value_name':self.value_name,
             'value_1':self.value_1,
             'value_2':self.value_2,
-            'calculated_concentration_units':self.calculated_concentration_units,
+            #'calculated_concentration_units':self.calculated_concentration_units,
+            'calculated_concentration_units_1':self.calculated_concentration_units_1,
+            'calculated_concentration_units_2':self.calculated_concentration_units_2,
             'used_':self.used_,
             'comment_':self.comment_}
     
     def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
+
 class data_stage02_quantification_pairWiseTableCrossUnits(Base):
     __tablename__ = 'data_stage02_quantification_pairWiseTableCrossUnits'
     id = Column(Integer, Sequence('data_stage02_quantification_pairWiseTableCrossUnits_id_seq'), primary_key=True)

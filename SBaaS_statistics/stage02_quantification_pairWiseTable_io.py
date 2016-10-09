@@ -39,7 +39,8 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_abbreviation_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data1_nestkeys = ['component_name','sample_name_abbreviation_1'];
         data1_keymap = {
@@ -58,13 +59,14 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_abbreviation_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data2_nestkeys = ['component_name'];
         data2_keymap = {
             'xdata':'value_1',
             'ydata':'value_2',
-            'serieslabel':'calculated_concentration_units',
+            'serieslabel':'calculated_concentration_units_1',
             'featureslabel':'component_name',
             #'tooltiplabel':'component_name',
             };
@@ -164,7 +166,8 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_short_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data1_nestkeys = ['component_name','sample_name_short_1'];
         data1_keymap = {
@@ -182,13 +185,14 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_short_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data2_nestkeys = ['component_name'];
         data2_keymap = {
             'xdata':'calculated_concentration_1',
             'ydata':'calculated_concentration_2',
-            'serieslabel':'calculated_concentration_units',
+            'serieslabel':'calculated_concentration_units_1',
             'featureslabel':'component_name',
             #'tooltiplabel':'component_name',
             };
@@ -326,7 +330,8 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_short_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data1_nestkeys = ['component_name','sample_name_short_1'];
         data1_keymap = {
@@ -344,7 +349,8 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
                       'sample_name_short_2',
                       'component_name',
                       'component_group_name',
-                      'calculated_concentration_units'
+                      'calculated_concentration_units_1',
+                      'calculated_concentration_units_2'
                     ];
         data2_nestkeys = ['component_name'];
         data2_keymap = {
@@ -355,7 +361,7 @@ class stage02_quantification_pairWiseTable_io(stage02_quantification_pairWiseTab
             'xdatalabel':'sns_cn_1',
             'ydatalabel':'sns_cn_2',
             #'serieslabel':'singular_value_index',
-            'serieslabel':'calculated_concentration_units',
+            'serieslabel':'calculated_concentration_units_1',
             'featureslabel':'component_name',
             #'tooltiplabel':'component_name',
             };

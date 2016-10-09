@@ -54,7 +54,8 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
             'col_index',
             'row_leaves',
             'col_leaves',
-            'calculated_concentration_units',
+            'calculated_concentration_units_1',
+            'calculated_concentration_units_2',
             'distance_measure'
             ]
         data1_nestkeys = [
@@ -117,18 +118,20 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
         data_O_listDict.convert_listDict2DataFrame();
         #add in rows for self vs self comparison (unique: calculated_concentration_units, sample_name_short_1, sample_name_short_2
         if add_self_vs_self_I:
-            calculated_concentration_units = data_O_listDict.get_uniqueValues('calculated_concentration_units');
+            calculated_concentration_units_1 = data_O_listDict.get_uniqueValues('calculated_concentration_units_1');
+            calculated_concentration_units_2 = data_O_listDict.get_uniqueValues('calculated_concentration_units_2');
             sample_name_shorts = data_O_listDict.get_uniqueValues('sample_name_short_1');
-            for ccu in calculated_concentration_units:
-                for sns in sample_name_shorts:
-                    sns_row = data_O_listDict.dataFrame[(data_O_listDict.dataFrame['sample_name_short_1']==sns) & (data_O_listDict.dataFrame['calculated_concentration_units']==ccu)]
-                    head = dict(sns_row.iloc[0]);
-                    head['sample_name_short_2'] = head['sample_name_short_1']
-                    head['sample_name_abbreviation_2'] = head['sample_name_abbreviation_1']
-                    head['correlation_coefficient'] = 1.0
-                    head['pvalue'] = 0.0
-                    head['pvalue_corrected'] = 0.0
-                    data_O_listDict.append_listDict2dataFrame([head]);
+            for ccu1 in calculated_concentration_units_1:
+                for ccu2 in calculated_concentration_units_2:
+                    for sns in sample_name_shorts:
+                        sns_row = data_O_listDict.dataFrame[(data_O_listDict.dataFrame['sample_name_short_1']==sns) & (data_O_listDict.dataFrame['calculated_concentration_units_1']==ccu1) & (data_O_listDict.dataFrame['calculated_concentration_units_2']==ccu2)]
+                        head = dict(sns_row.iloc[0]);
+                        head['sample_name_short_2'] = head['sample_name_short_1']
+                        head['sample_name_abbreviation_2'] = head['sample_name_abbreviation_1']
+                        head['correlation_coefficient'] = 1.0
+                        head['pvalue'] = 0.0
+                        head['pvalue_corrected'] = 0.0
+                        data_O_listDict.append_listDict2dataFrame([head]);
         # add in dummy clustering and ordering indices for heatmap
         data_O_listDict.make_dummyIndexColumn('row_index','sample_name_short_1');
         data_O_listDict.make_dummyIndexColumn('col_index','sample_name_short_2');
@@ -146,7 +149,8 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
             'col_index',
             'row_leaves',
             'col_leaves',
-            'calculated_concentration_units',
+            'calculated_concentration_units_1',
+            'calculated_concentration_units_2',
             'distance_measure'
             ]
         data1_nestkeys = [
@@ -272,7 +276,8 @@ class stage02_quantification_pairWiseCorrelation_io(stage02_quantification_pairW
             'col_index',
             'row_leaves',
             'col_leaves',
-            'calculated_concentration_units',
+            'calculated_concentration_units_1',
+            'calculated_concentration_units_2',
             'distance_measure'
             ]
         data1_nestkeys = [

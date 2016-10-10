@@ -63,30 +63,37 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         #NOTE: each execution object is responsible for 1 connection
         execute_object = self.get_sbaasObject(connections[0]['execute_object'])
         for connection_cnt,connection in enumerate(connections):
-            connection_diagnostics = {};
-            execution_startTime = time.time();
-
-            #get the function
-            #execute_object = self.get_sbaasObject(connection['execute_object'])
-            query_func = self.get_sbaasMethod(execute_object,connection['execute_method'])
-
-            #get and format the parameters
-            method_signature = signature(query_func);
-            method_parameters = [mp for mp in method_signature.parameters];
-            addIn_parameters = {'analysis_id_I':connection['analysis_id'],
-                                'r_calc_I':r_calc_I,
-                                };
-            parameters = self.parse_executeParameters(
-                connection['execute_parameters'],
-                addIn_parameters_I=addIn_parameters,
-                method_parameters_I=method_parameters
-                )
+            message_O = [];
             try:
-                query_func(**parameters);
-            except TypeError as e:
-                print(e);
+                connection_diagnostics = {};
+                execution_startTime = time.time();
+
+                #get the function
+                #execute_object = self.get_sbaasObject(connection['execute_object'])
+                query_func = self.get_sbaasMethod(execute_object,connection['execute_method'])
+
+                #get and format the parameters
+                method_signature = signature(query_func);
+                method_parameters = [mp for mp in method_signature.parameters];
+                addIn_parameters = {'analysis_id_I':connection['analysis_id'],
+                                    'r_calc_I':r_calc_I,
+                                    };
+                parameters = self.parse_executeParameters(
+                    connection['execute_parameters'],
+                    addIn_parameters_I=addIn_parameters,
+                    method_parameters_I=method_parameters
+                    )
+                try:
+                    query_func(**parameters);
+                except TypeError as e:
+                    print(e);
+                    message_O.append({'message':str(e),'level':'Exception'});
+                except Exception as e:
+                    print(e);
+                    message_O.append({'message':str(e),'level':'Exception'});
             except Exception as e:
                 print(e);
+                message_O.append({'message':str(e),'level':'Exception'});
 
             #log diagnostics
             connection_diagnostics['analysis_id'] = connection['analysis_id'];
@@ -105,7 +112,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             connection_diagnostics['memory_units'] = 'bytes';
             connection_diagnostics['disk_io'] = dict(psutil.disk_io_counters()._asdict())
             connection_diagnostics['network_io'] = dict(psutil.net_io_counters()._asdict())
-            connection_diagnostics['message_log'] = None;
+            connection_diagnostics['message_log'] = message_O;
             connection_diagnostics['used_'] = True;
             connection_diagnostics['comment_'] = None;
             diagnostics_O.append(connection_diagnostics);

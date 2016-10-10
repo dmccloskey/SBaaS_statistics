@@ -333,12 +333,22 @@ svm_hyperparameters = [
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
-#check that the pipeline exists...
-analysis01.execute_analysisPipeline(
-    pipeline_id_I = 'ALEsKOs01_0_11_crossUnits',
-    #r_calc_I = None,
-    r_calc_I = r_calc,
-    )
+pipelines = [
+#     'ALEsKOs01_0_11_crossUnits',
+    'ALEsKOs01_0_11_evo04_crossUnits',
+    'ALEsKOs01_0_11_evo04gnd_crossUnits',
+    'ALEsKOs01_0_11_evo04pgi_crossUnits',
+    'ALEsKOs01_0_11_evo04ptsHIcrr_crossUnits',
+    'ALEsKOs01_0_11_evo04sdhCB_crossUnits',
+    'ALEsKOs01_0_11_evo04tpiA_crossUnits',
+]
+#build the connections for the pipeline
+for pipeline in pipelines:
+    print("running pipeline " + pipeline)
+    analysis01.execute_analysisPipeline(
+        pipeline_id_I = pipeline,
+        r_calc_I = r_calc,
+        )
 
 ##TODO: update notebook...
 #add in spls pipelines

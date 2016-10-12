@@ -138,6 +138,7 @@ class data_stage02_quantification_analysis_connection(Base):
             UniqueConstraint(
                 'analysis_id',
                 'connection_id',
+                'connection_order',
                 'execute_object',
                 'execute_method',
                 ),

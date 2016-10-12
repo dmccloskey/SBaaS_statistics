@@ -63,6 +63,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         #NOTE: each execution object is responsible for 1 connection
         execute_object = self.get_sbaasObject(connections[0]['execute_object'])
         for connection_cnt,connection in enumerate(connections):
+            print('executing connection ' + str(connection_cnt))
             message_O = [];
             try:
                 connection_diagnostics = {};
@@ -132,6 +133,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             pipeline_id_I = pipeline_id_I
             );         
         for pipeline in pipelines:
+            print('executing connection_id ' + pipeline['connection_id'])
             diagnostics = self.execute_analysisConnection(
                 pipeline['connection_id'],
                 r_calc_I=r_calc_I,
@@ -235,7 +237,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         #    parameters_O['analysis_id_I']=analysis_id_I;
 
         #trim the arguments to best match the method parameters: 
-        if method_parameters_I:
+        if not method_parameters_I is None:
             parameters_O = {k:parameters_O[k] for k in method_parameters_I if k in parameters_O.keys()};
         return parameters_O;
 

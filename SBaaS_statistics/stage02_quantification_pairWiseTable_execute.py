@@ -252,13 +252,19 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
     def execute_pairwiseTableAverages_storeData(self,
         table_O = 'data_stage02_quantification_pairWiseTable',
         query_object_O='self',
-        query_func_O='add_rows_table'):
+        query_func_O='add_rows_table',
+        verbose_I = False,
+        raise_I = False,
+        safeInsert_I=False,):
         ''' '''
 
         data_O=self.get_data();
         #save the data
         if query_func_O == 'add_rows_table':
-            self.add_rows_table(table_O,data_O);
+            self.add_rows_table(table_O,data_O,
+                verbose_I = verbose_I,
+                raise_I = raise_I,
+                safeInsert_I=safeInsert_I,);
     def execute_pairwiseTableAverages_resetData(self,
             tables_I = [],
             analysis_id_I = None,

@@ -5,7 +5,7 @@ from .stage02_quantification_dataPreProcessing_averages_query import stage02_qua
 from .stage02_quantification_analysis_query import stage02_quantification_analysis_query
 from SBaaS_base.sbaas_template_io import sbaas_template_io
 # SBaaS_resequencing
-from SBaaS_resequencing.stage01_resequencing_gd_query import stage01_resequencing_gd_query
+from SBaaS_resequencing.stage01_resequencing_mutations_query import stage01_resequencing_mutations_query
 from sequencing_analysis.genome_diff import genome_diff
 #SBaaS_rnasequencing
 from SBaaS_rnasequencing.stage01_rnasequencing_geneExpDiff_query import stage01_rnasequencing_geneExpDiff_query
@@ -44,7 +44,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
         OUTPUT:
  
         '''
-        resequencing_gd_query = stage01_resequencing_gd_query(self.session,self.engine,self.settings);
+        resequencing_gd_query = stage01_resequencing_mutations_query(self.session,self.engine,self.settings);
         genomediff = genome_diff();
         calc = calculate_interface();
         # get the analysis information

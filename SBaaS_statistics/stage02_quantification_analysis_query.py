@@ -416,6 +416,73 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
+    def _get_rows_analysisID_dataStage02QuantificationAnalysisPartitions(self,
+                analysis_id_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_analysis_partitions
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        EXAMPLE:
+        analysis2Partitions = {};
+        analysis2Partitions = _get_rows_analysisID_dataStage02QuantificationAnalysisPartitions(
+            analysis_id_I='',
+            query_I={},
+            output_O='dictColumn',
+            dictColumn_I='analysis_id',
+        )
+        '''
+
+        tables = ['data_stage02_quantification_analysis_partitions'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'value':analysis_id_I,
+            'operator':'LIKE',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'analysis_id',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'partition_id',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
 
     #SPLIT 1:   
     def get_rows_analysisID_dataStage02QuantificationAnalysis(self,analysis_id_I):

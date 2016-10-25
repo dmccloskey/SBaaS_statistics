@@ -302,7 +302,49 @@ class data_stage02_quantification_analysis_diagnostics(Base):
             'comment_':self.comment_}
     
     def __repr__json__(self):
+        return json.dumps(self.__repr__dict__())    
+class data_stage02_quantification_analysis_partitions(Base):
+    __tablename__ = 'data_stage02_quantification_analysis_partitions'
+    id = Column(Integer, Sequence('data_stage02_quantification_analysis_partitions_id_seq'), primary_key=True)
+    analysis_id = Column(String(500))
+    partition_id = Column(String(50))
+    used_ = Column(Boolean);
+    comment_ = Column(Text);
+
+    __table_args__ = (
+            UniqueConstraint(
+                'partition_id',
+                'analysis_id',
+                ),
+            )
+
+    def __init__(self,
+                row_dict_I,
+                ):
+        self.analysis_id=row_dict_I['analysis_id']
+        self.partition_id=row_dict_I['partition_id']
+        self.used_=row_dict_I['used_']
+        self.comment_=row_dict_I['comment_']
+
+    def __set__row__(self,analysis_id_I,
+                 partition_id_I,
+            used__I,
+            comment__I):
+        self.analysis_id=analysis_id_I
+        self.partition_id=partition_id_I
+        self.used_=used__I
+        self.comment_=comment__I
+
+    def __repr__dict__(self):
+        return {'id':self.id,
+             'analysis_id':self.analysis_id,
+            'partition_id':self.partition_id,
+            'used_':self.used_,
+            'comment_':self.comment_}
+    
+    def __repr__json__(self):
         return json.dumps(self.__repr__dict__())
+
 #TODO: class data_stage02_quantification_analysis_scheduler
 
 #class data_stage02_quantification_analysis_pipeline(Base):

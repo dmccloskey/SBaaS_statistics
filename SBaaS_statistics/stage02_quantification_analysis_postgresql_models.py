@@ -306,38 +306,44 @@ class data_stage02_quantification_analysis_diagnostics(Base):
 class data_stage02_quantification_analysis_partitions(Base):
     __tablename__ = 'data_stage02_quantification_analysis_partitions'
     id = Column(Integer, Sequence('data_stage02_quantification_analysis_partitions_id_seq'), primary_key=True)
-    analysis_id = Column(String(500))
-    partition_id = Column(String(50))
+    partition_column = Column(String(500)) #e.g., 'analysis_id'
+    partition_value = Column(String(500)) #e.g., 'ALEsKOs01'
+    partition_id = Column(Integer)
     used_ = Column(Boolean);
     comment_ = Column(Text);
 
     __table_args__ = (
             UniqueConstraint(
                 'partition_id',
-                'analysis_id',
+                'partition_column',
+                'partition_value',
                 ),
             )
 
     def __init__(self,
                 row_dict_I,
                 ):
-        self.analysis_id=row_dict_I['analysis_id']
+        self.partition_column=row_dict_I['partition_column']
+        self.partition_value=row_dict_I['partition_value']
         self.partition_id=row_dict_I['partition_id']
         self.used_=row_dict_I['used_']
         self.comment_=row_dict_I['comment_']
 
-    def __set__row__(self,analysis_id_I,
+    def __set__row__(self,partition_column_I,
+                     partition_value_I,
                  partition_id_I,
             used__I,
             comment__I):
-        self.analysis_id=analysis_id_I
+        self.partition_column=partition_column_I
+        self.partition_value=partition_value_I
         self.partition_id=partition_id_I
         self.used_=used__I
         self.comment_=comment__I
 
     def __repr__dict__(self):
         return {'id':self.id,
-             'analysis_id':self.analysis_id,
+             'partition_column':self.partition_column,
+             'partition_value':self.partition_value,
             'partition_id':self.partition_id,
             'used_':self.used_,
             'comment_':self.comment_}

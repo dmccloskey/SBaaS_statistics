@@ -1,12 +1,12 @@
 ﻿import sys
-sys.path.append('C:/Users/dmccloskey-sbrg/Documents/GitHub/SBaaS_base')
-#sys.path.append('C:/Users/dmccloskey/Documents/GitHub/SBaaS_base')
+#sys.path.append('C:/Users/dmccloskey-sbrg/Documents/GitHub/SBaaS_base')
+sys.path.append('C:/Users/dmccloskey/Documents/GitHub/SBaaS_base')
 from SBaaS_base.postgresql_settings import postgresql_settings
 from SBaaS_base.postgresql_orm import postgresql_orm
 
 # read in the settings file
-filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
-#filename = 'C:/Users/dmccloskey/Google Drive/SBaaS_settings/settings_metabolomics_labtop.ini';
+#filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
+filename = 'C:/Users/dmccloskey/Google Drive/SBaaS_settings/settings_metabolomics_labtop.ini';
 pg_settings = postgresql_settings(filename);
 
 # connect to the database from the settings file
@@ -44,6 +44,23 @@ sys.path.append(pg_settings.datadir_settings['github']+'/python_statistics')
 sys.path.append(pg_settings.datadir_settings['github']+'/r_statistics')
 sys.path.append(pg_settings.datadir_settings['github']+'/listDict')
 sys.path.append(pg_settings.datadir_settings['github']+'/ddt_python')
+
+from SBaaS_base.postgresql_methods import postgresql_methods
+pg_methods = postgresql_methods();
+triggerFunction = pg_methods.create_tablePartitionTriggerFunction(
+        session,
+        user_I=pg_settings.get_database_variables(pg_settings.datadir_settings,variables_I=['user'])['user'],
+        schema_I='public',
+        table_name_I='data_stage02_quantification_pairWiseCorrelationFeatures',
+        partition_schema_I='public',
+        partition_table_name_I='data_stage02_quantification_analysis_partitions',
+        list_range_I = 'LIST',
+        column_name_I = 'analysis_id',
+        constraint_column_I='analysis_id',
+        constraint_comparator_I='=',
+        constraint_id_I='01',
+        verbose_I=False,
+        )
 
 #make the analysis table
 from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_quantification_analysis_execute
@@ -333,22 +350,22 @@ svm_hyperparameters = [
 from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
-pipelines = [
-     #'ALEsKOs01_0_11_crossUnits',
-    #'ALEsKOs01_0_11_evo04_crossUnits',
-    'ALEsKOs01_0_evo04_0_11_evo04gnd_crossUnits',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgi_crossUnits',
-    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrr_crossUnits',
-    #'ALEsKOs01_0_evo04_0_11_evo04sdhCB_crossUnits',
-    #'ALEsKOs01_0_evo04_0_11_evo04tpiA_crossUnits',
-]
-#build the connections for the pipeline
-for pipeline in pipelines:
-    print("running pipeline " + pipeline)
-    analysis01.execute_analysisPipeline(
-        pipeline_id_I = pipeline,
-        r_calc_I = r_calc,
-        )
+#pipelines = [
+#     #'ALEsKOs01_0_11_crossUnits',
+#    #'ALEsKOs01_0_11_evo04_crossUnits',
+#    'ALEsKOs01_0_evo04_0_11_evo04gnd_crossUnits',
+#    #'ALEsKOs01_0_evo04_0_11_evo04pgi_crossUnits',
+#    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrr_crossUnits',
+#    #'ALEsKOs01_0_evo04_0_11_evo04sdhCB_crossUnits',
+#    #'ALEsKOs01_0_evo04_0_11_evo04tpiA_crossUnits',
+#]
+##build the connections for the pipeline
+#for pipeline in pipelines:
+#    print("running pipeline " + pipeline)
+#    analysis01.execute_analysisPipeline(
+#        pipeline_id_I = pipeline,
+#        r_calc_I = r_calc,
+#        )
 
 ##TODO: update notebook...
 #add in spls pipelines

@@ -12,6 +12,7 @@ class stage02_quantification_analysis_query(sbaas_template_query):
                             'data_stage02_quantification_analysis_connection':data_stage02_quantification_analysis_connection,
                             'data_stage02_quantification_analysis_group':data_stage02_quantification_analysis_group,
                             'data_stage02_quantification_analysis_diagnostics':data_stage02_quantification_analysis_diagnostics,
+                            'data_stage02_quantification_analysis_partitions':data_stage02_quantification_analysis_partitions,
                         };
         self.set_supportedTables(tables_supported);
     # data_stage02_quantification_analysis

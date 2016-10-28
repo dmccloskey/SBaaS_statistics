@@ -45,15 +45,23 @@ sys.path.append(pg_settings.datadir_settings['github']+'/r_statistics')
 sys.path.append(pg_settings.datadir_settings['github']+'/listDict')
 sys.path.append(pg_settings.datadir_settings['github']+'/ddt_python')
 
+#make the analysis table
+from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_quantification_analysis_execute
+analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.datadir_settings);
+analysis01.initialize_supportedTables();
+analysis01.initialize_tables();
+
 from SBaaS_base.postgresql_methods import postgresql_methods
 pg_methods = postgresql_methods();
 triggerFunction = pg_methods.create_tablePartitionTriggerFunction(
         session,
-        user_I=pg_settings.get_database_variables(pg_settings.datadir_settings,variables_I=['user'])['user'],
+        user_I=pg_settings.database_settings['user'],
+        #user_I='user',
         schema_I='public',
         table_name_I='data_stage02_quantification_pairWiseCorrelationFeatures',
         partition_schema_I='public',
-        partition_table_name_I='data_stage02_quantification_analysis_partitions',
+        partition_lookup_schema_I='public',
+        partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
         list_range_I = 'LIST',
         column_name_I = 'analysis_id',
         constraint_column_I='analysis_id',
@@ -61,12 +69,6 @@ triggerFunction = pg_methods.create_tablePartitionTriggerFunction(
         constraint_id_I='01',
         verbose_I=False,
         )
-
-#make the analysis table
-from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_quantification_analysis_execute
-analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.datadir_settings);
-analysis01.initialize_supportedTables();
-analysis01.initialize_tables();
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute

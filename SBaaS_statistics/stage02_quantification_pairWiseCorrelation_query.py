@@ -22,6 +22,7 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
             'data_stage02_quantification_pairWiseCorrFeatures_replicates':data_stage02_quantification_pairWiseCorrFeatures_replicates,
             'data_stage02_quantification_pairWiseCorrelationCrossUnits':data_stage02_quantification_pairWiseCorrelationCrossUnits,
             'data_stage02_quantification_pairWiseCorrFeaturesCrossUnits':data_stage02_quantification_pairWiseCorrFeaturesCrossUnits,
+            'statistics_pairWiseCorrFeat':statistics_pairWiseCorrFeat,
                         };
         self.set_supportedTables(tables_supported);
 

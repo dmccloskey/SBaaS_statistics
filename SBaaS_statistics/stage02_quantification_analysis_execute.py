@@ -26,6 +26,10 @@ try:
     from .stage02_quantification_tree_execute import stage02_quantification_tree_execute
 except ImportError as e:
     print(e);
+#SBaaS base
+from SBaaS_base.postgresql_methods import postgresql_methods
+from SBaaS_base.sbaas_base_query_select import sbaas_base_query_select
+
 #System
 import json
 import time as time
@@ -241,4 +245,126 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             parameters_O = {k:parameters_O[k] for k in method_parameters_I if k in parameters_O.keys()};
         return parameters_O;
 
+    def execute_createAnalysisTablePartitionSequenceGenerator(
+        self,
+        schema_I='public',
+        table_name_I='data_stage02_quantification_analysis_partitions',
+        ):
+        ''' '''
+        pg_methods = postgresql_methods();
+        #create the sequence generator for the partition table
+        pg_methods.drop_tablePartitionSequenceGenerator(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            verbose_I=True
+            );
+        pg_methods.create_tablePartitionSequenceGenerator(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            verbose_I=True
+            )
+    def execute_createAnalysisTablePartitionTriggerFunction(
+        self,
+        schema_I='public',
+        table_name_I='data_stage02_quantification_pairWiseCorrelationFeatures',
+        partition_schema_I='public',
+        partition_lookup_schema_I='public',
+        partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
+        ):
+        ''' '''
+        pg_methods = postgresql_methods();
+        #create the partition table functions and triggers
+        pg_methods.drop_tablePartitionTrigger(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            verbose_I=True
+            );
+        pg_methods.drop_tablePartitionTriggerFunction(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            verbose_I=True
+            );
+        pg_methods.create_tablePartitionTriggerFunction(
+            self.session,
+            user_I=self.settings.database_settings['user'],
+            #user_I='user',
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            partition_schema_I=partition_schema_I,
+            partition_lookup_schema_I=partition_lookup_schema_I,
+            partition_lookup_table_name_I=partition_lookup_table_name_I,
+            list_range_I = 'LIST',
+            column_name_I = 'analysis_id',
+            constraint_column_I='analysis_id',
+            constraint_comparator_I='=',
+            verbose_I=False,
+            )
+        pg_methods.create_tablePartitionTrigger(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            verbose_I=True
+            )
+    def execute_populateMasterAndPartitionTablesFromSourceTable(self,
+        table_I='',
+        schema_I='',
+        sourceTable_schema_I = '',
+        sourceTable_I = '',
+        verbose_I=True,
+        query_I='',
+        ):
+        '''create a master table and child partitions
+        
+        '''
+        queryselect = sbaas_base_query_select(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+        
+        #get a list of all of the columns (except the id) from the source table
+        model = self.convert_tableString2SqlalchemyModel(table_I);
+        column_names = queryselect.get_columns_sqlalchemyModel(
+            model_I=model,
+            exclude_I=['id']);
 
+        #dump the data to file
+        filename = self.settings['workspace_data'] + '/%s_%s.binary'%(sourceTable_schema_I,sourceTable_I)
+        self.copy_table(
+            self.session,
+            schema_I=sourceTable_schema_I,
+            table_name_I=sourceTable_I,
+            column_names_I = column_names,
+            query_I = query_I,
+            to_or_from_I='TO',
+            filename_I=filename,
+            program_cmd_I='',
+            stdin_or_stdout_I='',
+            with_I=['FORMAT'],
+            with_options_delimiter_I=['binary'],
+            verbose_I = verbose_I,
+            execute_I = True,
+            commit_I=True,
+            return_response_I=False,
+            return_cmd_I=False,
+            );
+
+        #copy the data back in
+        self.copy_table(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_I,
+            column_names_I = column_names,
+            query_I = '',
+            to_or_from_I='FROM',
+            filename_I=filename,
+            program_cmd_I='',
+            stdin_or_stdout_I='',
+            with_I=['FORMAT'],
+            with_options_delimiter_I=['binary'],
+            verbose_I = verbose_I,
+            execute_I = True,
+            commit_I=True,
+            return_response_I=False,
+            return_cmd_I=False,
+            );

@@ -45,30 +45,41 @@ sys.path.append(pg_settings.datadir_settings['github']+'/r_statistics')
 sys.path.append(pg_settings.datadir_settings['github']+'/listDict')
 sys.path.append(pg_settings.datadir_settings['github']+'/ddt_python')
 
+#make the pairWiseCorrelation tables
+from SBaaS_statistics.stage02_quantification_pairWiseCorrelation_execute import stage02_quantification_pairWiseCorrelation_execute
+pairWiseCorrelation01 = stage02_quantification_pairWiseCorrelation_execute(session,engine,pg_settings.datadir_settings);
+#pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
+pairWiseCorrelation01.initialize_supportedTables();
+pairWiseCorrelation01.initialize_tables();
+
 #make the analysis table
 from SBaaS_statistics.stage02_quantification_analysis_execute import stage02_quantification_analysis_execute
 analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.datadir_settings);
 analysis01.initialize_supportedTables();
 analysis01.initialize_tables();
 
-from SBaaS_base.postgresql_methods import postgresql_methods
-pg_methods = postgresql_methods();
-triggerFunction = pg_methods.create_tablePartitionTriggerFunction(
-        session,
-        user_I=pg_settings.database_settings['user'],
-        #user_I='user',
-        schema_I='public',
-        table_name_I='data_stage02_quantification_pairWiseCorrelationFeatures',
-        partition_schema_I='public',
-        partition_lookup_schema_I='public',
-        partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
-        list_range_I = 'LIST',
-        column_name_I = 'analysis_id',
-        constraint_column_I='analysis_id',
-        constraint_comparator_I='=',
-        constraint_id_I='01',
-        verbose_I=False,
-        )
+#create the new master table
+#create the new sequence
+analysis01.execute_createAnalysisTablePartitionSequenceGenerator(
+    schema_I='public',
+    table_name_I='data_stage02_quantification_analysis_partitions',
+    );
+#create the trigger function and trigger
+analysis01.execute_createAnalysisTablePartitionTriggerFunction(
+    schema_I='public',
+    table_name_I='statistics_pairWiseCorrFeat',
+    partition_schema_I='public',
+    partition_lookup_schema_I='public',
+    partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
+    );
+analysis01.execute_populateMasterAndPartitionTablesFromSourceTable(
+    table_I='statistics_pairWiseCorrFeat',
+    schema_I='public',
+    sourceTable_schema_I = 'public',
+    sourceTable_I = 'data_stage02_quantification_pairWiseCorrelationFeatures',
+    verbose_I=True,
+    query_I='''SELECT * FROM "public"."data_stage02_quantification_pairWiseCorrelationFeatures" WHERE analysis_id = 'ALEsKOs01_0_11_evo04' '''
+    )
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute
@@ -107,13 +118,6 @@ pairWiseTable01 = stage02_quantification_pairWiseTable_execute(session,engine,pg
 #pairWiseTable01.drop_dataStage02_quantification_pairWiseTable();
 pairWiseTable01.initialize_supportedTables();
 pairWiseTable01.initialize_tables();
-
-#make the pairWiseCorrelation tables
-from SBaaS_statistics.stage02_quantification_pairWiseCorrelation_execute import stage02_quantification_pairWiseCorrelation_execute
-pairWiseCorrelation01 = stage02_quantification_pairWiseCorrelation_execute(session,engine,pg_settings.datadir_settings);
-#pairWiseCorrelation01.drop_dataStage02_quantification_pairWiseCorrelation();
-pairWiseCorrelation01.initialize_supportedTables();
-pairWiseCorrelation01.initialize_tables();
 
 #make the dataPreProcessing tables
 from SBaaS_statistics.stage02_quantification_dataPreProcessing_replicates_execute import stage02_quantification_dataPreProcessing_replicates_execute

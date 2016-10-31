@@ -1,5 +1,6 @@
 ﻿from .stage02_quantification_analysis_postgresql_models import *
-
+#SBaaS base
+from SBaaS_base.postgresql_methods import postgresql_methods
 from SBaaS_base.sbaas_base_query_delete import sbaas_base_query_delete
 from SBaaS_base.sbaas_template_query import sbaas_template_query
 
@@ -484,6 +485,114 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             output_O=output_O,
             dictColumn_I=dictColumn_I);
         return data_O;
+    def _get_rows_analysisIDs_dataStage02QuantificationAnalysisPartitions(self,
+                analysis_ids_I,
+                query_I={},
+                output_O='listDict',
+                dictColumn_I=None):
+        '''Query rows by analysis_id from data_stage02_quantification_analysis_partitions
+        INPUT:
+        analysis_id_I = string
+        output_O = string
+        dictColumn_I = string
+        OPTIONAL INPUT:
+        query_I = additional query blocks
+        OUTPUT:
+        data_O = output specified by output_O and dictColumn_I
+        EXAMPLE:
+        analysis2Partitions = {};
+        analysis2Partitions = _get_rows_analysisID_dataStage02QuantificationAnalysisPartitions(
+            analysis_id_I='',
+            query_I={},
+            output_O='dictColumn',
+            dictColumn_I='analysis_id',
+        )
+        '''
+
+        tables = ['data_stage02_quantification_analysis_partitions'];
+        # get the listDict data
+        data_O = [];
+        query = {};
+        analysis_ids_str = "('{%s}'::text[])"%self.convert_list2string(analysis_ids_I);
+        query['select'] = [{"table_name":tables[0]}];
+        query['where'] = [
+            {"table_name":tables[0],
+            'column_name':'partition_column',
+            'value':'analysis_id',
+            'operator':'=',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'partition_value',
+            'value':analysis_ids_str,
+            'operator':'=ANY',
+            'connector':'AND'
+                        },
+            {"table_name":tables[0],
+            'column_name':'used_',
+            'value':'true',
+            'operator':'IS',
+            'connector':'AND'
+                },
+	    ];
+        query['order_by'] = [
+            {"table_name":tables[0],
+            'column_name':'partition_column',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'partition_value',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'partition_id',
+            'order':'ASC',
+            },
+        ];
+
+        #additional blocks
+        for k,v in query_I.items():
+            if k not in query.items():
+                query[k]=[];
+            for r in v:
+                query[k].append(r);
+        
+        data_O = self.get_rows_tables(
+            tables_I=tables,
+            query_I=query,
+            output_O=output_O,
+            dictColumn_I=dictColumn_I);
+        return data_O;
+    def drop_dataStage02QuantificationAnalysisTablePartitions(
+        self,
+        schema_I='public',
+        table_name_I='',
+        analysis_ids_I=[],
+        verbose_I=True,
+        ):
+        '''drop table partitions by analysis_id
+        INPUT:
+        schema_I = string
+        tablen_name_I = string
+        analysis_ids_I = [] of strings
+
+        '''
+
+        #get the partition ids for the analysis_ids
+        rows = self._get_rows_analysisIDs_dataStage02QuantificationAnalysisPartitions(
+            analysis_ids_I,query_I={},
+            output_O='listDict',dictColumn_I=None
+            )
+        partition_ids = [r['partition_id'] for r in rows];
+        #drop the tables
+        pg_methods = postgresql_methods();
+        pg_methods.drop_tablePartitions(
+            self.session,
+            schema_I=schema_I,
+            table_name_I=table_name_I,
+            partition_ids_I=partition_ids,
+            verbose_I=verbose_I,
+            )
 
     #SPLIT 1:   
     def get_rows_analysisID_dataStage02QuantificationAnalysis(self,analysis_id_I):
@@ -496,71 +605,5 @@ class stage02_quantification_analysis_query(sbaas_template_query):
             return rows_O;
         except SQLAlchemyError as e:
             print(e);
-
-    ##DEPRECATED
-    #def add_dataStage02QuantificationAnalysis(self, data_I):
-    #    '''add rows of data_stage02_quantification_analysis'''
-    #    if data_I:
-    #        for d in data_I:
-    #            try:
-    #                data_add = data_stage02_quantification_analysis(
-    #                    d['analysis_id'],
-    #                    d['experiment_id'],
-    #                    d['sample_name_short'],
-    #                    d['sample_name_abbreviation'],
-    #                    d['time_point'],
-    #                    #d['time_point_units'],
-    #                    d['analysis_type'],
-    #                    d['used_'],
-    #                    d['comment_']);
-    #                self.session.add(data_add);
-    #            except SQLAlchemyError as e:
-    #                print(e);
-    #        self.session.commit();
-    #def update_dataStage02QuantificationAnalysis(self,data_I):
-    #    '''update rows of data_stage02_quantification_analysis'''
-    #    if data_I:
-    #        for d in data_I:
-    #            try:
-    #                data_update = self.session.query(data_stage02_quantification_analysis).filter(
-    #                        data_stage02_quantification_analysis.id==d['id']).update(
-    #                        {
-    #                        'analysis_id':d['analysis_id'],
-    #                        'experiment_id':d['experiment_id'],
-    #                        'sample_name_short':d['sample_name_short'],
-    #                        'sample_name_abbreviation':d['sample_name_abbreviation'],
-    #                        'time_point':d['time_point'],
-    #                        #'time_point_units':d['time_point_units'],
-    #                        'analysis_type':d['analysis_type'],
-    #                        'used_':d['used_'],
-    #                        'comment_':d['comment_']},
-    #                        synchronize_session=False);
-    #                if data_update == 0:
-    #                    print('row not found.')
-    #                    print(d)
-    #            except IntegrityError as e:
-    #                print(e);
-    #            except SQLAlchemyError as e:
-    #                print(e);
-    #        self.session.commit();
-    #def initialize_dataStage02_quantification_analysis(self):
-    #    try:
-    #        data_stage02_quantification_analysis.__table__.create(self.engine,True);
-    #    except SQLAlchemyError as e:
-    #        print(e);
-    #def drop_dataStage02_quantification_analysis(self):
-    #    try:
-    #        data_stage02_quantification_analysis.__table__.drop(self.engine,True);
-    #    except SQLAlchemyError as e:
-    #        print(e);
-    #def reset_dataStage02_quantification_analysis(self,analysis_id_I = None):
-    #    try:
-    #        if analysis_id_I:
-    #            reset = self.session.query(data_stage02_quantification_analysis).filter(data_stage02_quantification_analysis.analysis_id.like(analysis_id_I)).delete(synchronize_session=False);
-    #        else:
-    #            reset = self.session.query(data_stage02_quantification_analysis).delete(synchronize_session=False);
-    #        self.session.commit();
-    #    except SQLAlchemyError as e:
-    #        print(e);
    
 

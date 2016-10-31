@@ -249,6 +249,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         self,
         schema_I='public',
         table_name_I='data_stage02_quantification_analysis_partitions',
+        verbose_I=True
         ):
         ''' '''
         pg_methods = postgresql_methods();
@@ -257,21 +258,23 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             self.session,
             schema_I=schema_I,
             table_name_I=table_name_I,
-            verbose_I=True
+            verbose_I=verbose_I
             );
         pg_methods.create_tablePartitionSequenceGenerator(
             self.session,
             schema_I=schema_I,
             table_name_I=table_name_I,
-            verbose_I=True
+            verbose_I=verbose_I
             )
     def execute_createAnalysisTablePartitionTriggerFunction(
         self,
+        user_I,
         schema_I='public',
         table_name_I='data_stage02_quantification_pairWiseCorrelationFeatures',
         partition_schema_I='public',
         partition_lookup_schema_I='public',
         partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
+        verbose_I=True
         ):
         ''' '''
         pg_methods = postgresql_methods();
@@ -280,17 +283,17 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             self.session,
             schema_I=schema_I,
             table_name_I=table_name_I,
-            verbose_I=True
+            verbose_I=verbose_I
             );
         pg_methods.drop_tablePartitionTriggerFunction(
             self.session,
             schema_I=schema_I,
             table_name_I=table_name_I,
-            verbose_I=True
+            verbose_I=verbose_I
             );
         pg_methods.create_tablePartitionTriggerFunction(
             self.session,
-            user_I=self.settings.database_settings['user'],
+            user_I=user_I,
             #user_I='user',
             schema_I=schema_I,
             table_name_I=table_name_I,
@@ -301,47 +304,75 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             column_name_I = 'analysis_id',
             constraint_column_I='analysis_id',
             constraint_comparator_I='=',
-            verbose_I=False,
+            verbose_I=verbose_I,
             )
         pg_methods.create_tablePartitionTrigger(
             self.session,
             schema_I=schema_I,
             table_name_I=table_name_I,
-            verbose_I=True
+            verbose_I=verbose_I
             )
     def execute_populateMasterAndPartitionTablesFromSourceTable(self,
         table_I='',
         schema_I='',
         sourceTable_schema_I = '',
         sourceTable_I = '',
+        sourceTable_object_I='',
         verbose_I=True,
-        query_I='',
+        analysis_ids_I=[],
+        dirname_I='C:/Users/Public'
         ):
-        '''create a master table and child partitions
+        '''
+        create a master table and child partitions
+        INPUT:        
+        table_I='',
+        schema_I='',
+        sourceTable_schema_I = '',
+        sourceTable_I = '',
+        sourceTable_object_I='',
+        verbose_I=True,
+        analysis_ids_I=[],
+        dirname_I='C:/Users/Public', location should be accessible by postgresql
         
         '''
         queryselect = sbaas_base_query_select(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
         
+        pg_methods = postgresql_methods();
+
         #get a list of all of the columns (except the id) from the source table
-        model = self.convert_tableString2SqlalchemyModel(table_I);
+        model_object = self.get_sbaasObject(sourceTable_object_I)
+        model = model_object.convert_tableString2SqlalchemyModel(table_I);
         column_names = queryselect.get_columns_sqlalchemyModel(
             model_I=model,
             exclude_I=['id']);
 
         #dump the data to file
         filename = self.settings['workspace_data'] + '/%s_%s.binary'%(sourceTable_schema_I,sourceTable_I)
-        self.copy_table(
+        filename = '%s/%s_%s.binary'%(dirname_I,sourceTable_schema_I,sourceTable_I)
+        query='';
+        col_names = [];
+        if analysis_ids_I:
+            cnames = '';
+            for c in column_names:
+                cnames+='"%s",'%(c)
+            cnames = cnames[:-1];
+            analysis_ids = ','.join(analysis_ids_I);
+            query = '''SELECT %s FROM "%s"."%s" WHERE "analysis_id" =ANY ('{%s}'::text[]) '''%(
+                cnames,sourceTable_schema_I,sourceTable_I,analysis_ids);
+        else:
+            col_names=column_names;
+        pg_methods.copy_table(
             self.session,
             schema_I=sourceTable_schema_I,
             table_name_I=sourceTable_I,
-            column_names_I = column_names,
-            query_I = query_I,
+            column_names_I = col_names,
+            query_I = query,
             to_or_from_I='TO',
             filename_I=filename,
             program_cmd_I='',
             stdin_or_stdout_I='',
             with_I=['FORMAT'],
-            with_options_delimiter_I=['binary'],
+            with_options_I=['binary'],
             verbose_I = verbose_I,
             execute_I = True,
             commit_I=True,
@@ -350,21 +381,29 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
             );
 
         #copy the data back in
-        self.copy_table(
+        if column_names:
+            #col_names=['id'] + column_names;
+            col_names=column_names;
+        pg_methods.copy_table(
             self.session,
             schema_I=schema_I,
             table_name_I=table_I,
-            column_names_I = column_names,
+            column_names_I = col_names,
             query_I = '',
             to_or_from_I='FROM',
             filename_I=filename,
             program_cmd_I='',
             stdin_or_stdout_I='',
             with_I=['FORMAT'],
-            with_options_delimiter_I=['binary'],
+            with_options_I=['binary'],
             verbose_I = verbose_I,
             execute_I = True,
             commit_I=True,
             return_response_I=False,
             return_cmd_I=False,
             );
+        #remove the backup file
+        import os
+        os.remove(filename)
+
+

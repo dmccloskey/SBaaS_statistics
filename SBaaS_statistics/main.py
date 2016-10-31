@@ -58,28 +58,64 @@ analysis01 = stage02_quantification_analysis_execute(session,engine,pg_settings.
 analysis01.initialize_supportedTables();
 analysis01.initialize_tables();
 
-#create the new master table
-#create the new sequence
-analysis01.execute_createAnalysisTablePartitionSequenceGenerator(
-    schema_I='public',
-    table_name_I='data_stage02_quantification_analysis_partitions',
-    );
+##create the new master table
+#convert integer to serial on column "id"
+#from SBaaS_base.postgresql_methods import postgresql_methods
+#pg_methods = postgresql_methods();
+#pg_methods.convert_intColumn2SerialColumn(
+#    session,
+#    schema_I='public',
+#    table_name_I='statistics_pairWiseCorrFeat',
+#    column_name_I='id',
+#    verbose_I=True,
+#    )
+
+##create the new sequence
+#analysis01.execute_createAnalysisTablePartitionSequenceGenerator(
+#    schema_I='public',
+#    table_name_I='data_stage02_quantification_analysis_partitions',
+#    );
 #create the trigger function and trigger
+
 analysis01.execute_createAnalysisTablePartitionTriggerFunction(
+    user_I=pg_settings.database_settings['user'],
     schema_I='public',
     table_name_I='statistics_pairWiseCorrFeat',
     partition_schema_I='public',
     partition_lookup_schema_I='public',
     partition_lookup_table_name_I='data_stage02_quantification_analysis_partitions',
+    verbose_I=False
     );
+import time as time
+st = time.time();
 analysis01.execute_populateMasterAndPartitionTablesFromSourceTable(
     table_I='statistics_pairWiseCorrFeat',
     schema_I='public',
     sourceTable_schema_I = 'public',
     sourceTable_I = 'data_stage02_quantification_pairWiseCorrelationFeatures',
-    verbose_I=True,
-    query_I='''SELECT * FROM "public"."data_stage02_quantification_pairWiseCorrelationFeatures" WHERE analysis_id = 'ALEsKOs01_0_11_evo04' '''
+    sourceTable_object_I='stage02_quantification_pairWiseCorrelation_execute',
+    verbose_I=False,
+    analysis_ids_I=['ALEsKOs01_0_11_evo04',
+    'ALEsKOs01_0_evo04_0_11_evo04gnd',
+    #'ALEsKOs01_0_evo04_0_11_evo04pgi',
+    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrr',
+    #'ALEsKOs01_0_evo04_0_11_evo04sdhCB',
+    #'ALEsKOs01_0_evo04_0_11_evo04tpiA',
+    ],
+    dirname_I='C:/Users/Public'
     )
+elapsed_time = time.time() - st;
+print("Elapsed time: %.2fs" % elapsed_time)
+#analysis01.drop_dataStage02QuantificationAnalysisTablePartitions(
+#    table_name_I='statistics_pairWiseCorrFeat',
+#    schema_I='public',
+#    analysis_ids_I=['ALEsKOs01_0_11_evo04',
+#    'ALEsKOs01_0_evo04_0_11_evo04gnd',
+#    'ALEsKOs01_0_evo04_0_11_evo04pgi',
+#    'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrr',
+#    'ALEsKOs01_0_evo04_0_11_evo04sdhCB',
+#    'ALEsKOs01_0_evo04_0_11_evo04tpiA'],
+#    verbose_I=False)
 
 #make the descriptiveStats methods table
 from SBaaS_statistics.stage02_quantification_descriptiveStats_execute import stage02_quantification_descriptiveStats_execute

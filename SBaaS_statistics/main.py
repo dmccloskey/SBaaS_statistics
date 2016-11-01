@@ -88,22 +88,25 @@ analysis01.execute_createAnalysisTablePartitionTriggerFunction(
     );
 import time as time
 st = time.time();
-analysis01.execute_populateMasterAndPartitionTablesFromSourceTable(
-    table_I='statistics_pairWiseCorrFeat',
-    schema_I='public',
-    sourceTable_schema_I = 'public',
-    sourceTable_I = 'data_stage02_quantification_pairWiseCorrelationFeatures',
-    sourceTable_object_I='stage02_quantification_pairWiseCorrelation_execute',
-    verbose_I=False,
-    analysis_ids_I=['ALEsKOs01_0_11_evo04',
+analysis_ids = [
+    'ALEsKOs01_0_11_evo04',
     'ALEsKOs01_0_evo04_0_11_evo04gnd',
     #'ALEsKOs01_0_evo04_0_11_evo04pgi',
     #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrr',
     #'ALEsKOs01_0_evo04_0_11_evo04sdhCB',
     #'ALEsKOs01_0_evo04_0_11_evo04tpiA',
-    ],
-    dirname_I='C:/Users/Public'
-    )
+    ]
+for analysis_id in analysis_ids:
+    analysis01.execute_populateMasterAndPartitionTablesFromSourceTable(
+        table_I='statistics_pairWiseCorrFeat',
+        schema_I='public',
+        sourceTable_schema_I = 'public',
+        sourceTable_I = 'data_stage02_quantification_pairWiseCorrelationFeatures',
+        sourceTable_object_I='stage02_quantification_pairWiseCorrelation_execute',
+        verbose_I=False,
+        analysis_ids_I=[analysis_id],
+        dirname_I='C:/Users/Public'
+        )
 elapsed_time = time.time() - st;
 print("Elapsed time: %.2fs" % elapsed_time)
 #analysis01.drop_dataStage02QuantificationAnalysisTablePartitions(

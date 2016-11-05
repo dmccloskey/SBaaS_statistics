@@ -203,7 +203,25 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         else:
             print('Object does not support the requested method');
 
-        return method_O;
+        return method_O;    
+
+    def _parse_parameters(self,parameters_I):
+        '''Parse a string parameter set'''
+        parameters_O = {};
+        if type(parameters_I)==type({}):
+            parameters_O = parameters_I; #TODO: refactor...
+        elif type(parameters_I)==type(''):
+            try:
+                parameters_O = eval(parameters_I); #TODO: refactor...
+            except SyntaxError as e:
+                print(e)
+            except Exception as e:
+                print(e)
+        else:
+            print('execute_parameters type not recognized.');
+        if type(parameters_O)==type(''):
+            parameters_O = self._parse_parameters(parameters_O);
+        return parameters_O;
 
     def parse_executeParameters(self,parameters_I,addIn_parameters_I=[],method_parameters_I=[]):
         '''Parse the execution method parameters
@@ -218,17 +236,7 @@ class stage02_quantification_analysis_execute(stage02_quantification_analysis_io
         parameters_O = {};
 
         #parse the parameters
-        if type(parameters_I)==type({}):
-            parameters_O = parameters_I; #TODO: refactor...
-        elif type(parameters_I)==type(''):
-            try:
-                parameters_O = eval(parameters_I); #TODO: refactor...
-            except SyntaxError as e:
-                print(e)
-            except Exception as e:
-                print(e)
-        else:
-            print('execute_parameters type not recognized.');
+        parameters_O = self._parse_parameters(parameters_I);
 
         #add in additional parameters
         for k,v in addIn_parameters_I.items():

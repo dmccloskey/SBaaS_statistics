@@ -17,11 +17,11 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
         tables_supported = {
             'data_stage02_quantification_pairWiseCorrelation':data_stage02_quantification_pairWiseCorrelation,
             'data_stage02_quantification_pairWiseCorrelation_replicates':data_stage02_quantification_pairWiseCorrelation_replicates,
-            'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures,
+            #'data_stage02_quantification_pairWiseCorrelationFeatures':data_stage02_quantification_pairWiseCorrelationFeatures,
             'data_stage02_quantification_pairWiseCorrFeaturesAndConditions':data_stage02_quantification_pairWiseCorrFeaturesAndConditions,
             'data_stage02_quantification_pairWiseCorrFeatures_replicates':data_stage02_quantification_pairWiseCorrFeatures_replicates,
-            'data_stage02_quantification_pairWiseCorrelationCrossUnits':data_stage02_quantification_pairWiseCorrelationCrossUnits,
-            'data_stage02_quantification_pairWiseCorrFeaturesCrossUnits':data_stage02_quantification_pairWiseCorrFeaturesCrossUnits,
+            #'data_stage02_quantification_pairWiseCorrelationCrossUnits':data_stage02_quantification_pairWiseCorrelationCrossUnits,
+            #'data_stage02_quantification_pairWiseCorrFeaturesCrossUnits':data_stage02_quantification_pairWiseCorrFeaturesCrossUnits,
             'statistics_pairWiseCorrFeat':statistics_pairWiseCorrFeat,
                         };
         self.set_supportedTables(tables_supported);

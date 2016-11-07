@@ -13,7 +13,7 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
     #Shared methods:
     
     def execute_pairwiseCorrelation_storeData(self,
-            table_O='data_stage02_quantification_pairWiseCorrelationFeatures',
+            table_O='statistics_pairWiseCorrFeat',
             query_object_O='self',
             query_func_O='add_rows_table',
             verbose_I = False,

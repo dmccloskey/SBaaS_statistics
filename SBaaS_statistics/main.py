@@ -334,30 +334,7 @@ from r_statistics.r_interface import r_interface
 r_calc = r_interface();
 
 pipelines = [
-    #'ALEsKOs01_0_11_evo04Evo01',
-    #'ALEsKOs01_0_11_evo04Evo02',
-    'ALEsKOs01_0_evo04_0_11_evo04gndEvo01',
-    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo02',
-    #'ALEsKOs01_0_evo04_0_11_evo04gndEvo03',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo02',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo03',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo04',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo05',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo06',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo07',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo08',
-    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrrEvo01',
-    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrrEvo02',
-    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrrEvo03',
-    #'ALEsKOs01_0_evo04_0_11_evo04ptsHIcrrEvo04',
-    #'ALEsKOs01_0_evo04_0_11_evo04sdhCBEvo01',
-    #'ALEsKOs01_0_evo04_0_11_evo04sdhCBEvo02',
-    #'ALEsKOs01_0_evo04_0_11_evo04sdhCBEvo03',
-    #'ALEsKOs01_0_evo04_0_11_evo04tpiAEvo01',
-    #'ALEsKOs01_0_evo04_0_11_evo04tpiAEvo02',
-    #'ALEsKOs01_0_evo04_0_11_evo04tpiAEvo03',
-    #'ALEsKOs01_0_evo04_0_11_evo04tpiAEvo04',
+    'ALEsKOs01_0_11_crossUnits'
 ]
 #build the connections for the pipeline
 for pipeline in pipelines:

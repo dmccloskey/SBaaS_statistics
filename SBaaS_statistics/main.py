@@ -6,7 +6,7 @@ from SBaaS_base.postgresql_orm import postgresql_orm
 
 # read in the settings file
 filename = 'C:/Users/dmccloskey-sbrg/Google Drive/SBaaS_settings/settings_metabolomics.ini';
-#filename = 'C:/Users/dmccloskey/Google Drive/SBaaS_settings/settings_metabolomics_labtop.ini';
+#filename = 'C:/Users/dmccloskey/Google Drive/SBaaS_settings/settings_metabolomics_remote.ini';
 pg_settings = postgresql_settings(filename);
 
 # connect to the database from the settings file
@@ -193,6 +193,124 @@ dpppwt01.initialize_supportedTables();
 #dpppwt01.drop_tables();
 dpppwt01.initialize_tables();
 
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
+
+##Custom analysis tests:
+#################################################################
+sys.path.append(pg_settings.datadir_settings['workspace']+'/sbaas_shared')
+from ALEsKOs01_shared.ALEsKOs01_commonRoutines import *
+
+analysis_ids_Metabolomics_str = 'ALEsKOs01_Metabolomics_0_evo04_0_11_evo04gndEvo01,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04gndEvo02,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04gndEvo03,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04sdhCBEvo01,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04sdhCBEvo02,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04sdhCBEvo03,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04tpiAEvo01,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04tpiAEvo02,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04tpiAEvo03,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04tpiAEvo04,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04ptsHIcrrEvo01,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04ptsHIcrrEvo02,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04ptsHIcrrEvo03,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04ptsHIcrrEvo04,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo01,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo02,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo03,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo04,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo05,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo06,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo07,\
+ALEsKOs01_Metabolomics_0_evo04_0_11_evo04pgiEvo08'
+analysis_ids_RNASequencing_str = 'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gndEvo01,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gndEvo02,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gndEvo03,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCBEvo01,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCBEvo02,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCBEvo03,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiAEvo01,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiAEvo02,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiAEvo03,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiAEvo04,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrrEvo01,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrrEvo02,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrrEvo03,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrrEvo04,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo01,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo02,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo03,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo04,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo05,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo06,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo07,\
+ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgiEvo08'
+analysis_ids_sampledFluxes_str = 'ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04gndEvo01,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04gndEvo02,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04gndEvo03,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04sdhCBEvo01,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04sdhCBEvo02,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04sdhCBEvo03,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04tpiAEvo01,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04tpiAEvo02,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04tpiAEvo03,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04tpiAEvo04,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04ptsHIcrrEvo01,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04ptsHIcrrEvo02,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04ptsHIcrrEvo03,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04ptsHIcrrEvo04,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo01,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo02,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo03,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo04,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo05,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo06,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo07,\
+ALEsKOs01_sampledFluxes_0_evo04_0_11_evo04pgiEvo08'
+
+sigMets,sigExpression,sigFluxes = execute_getSignificantComponents(
+    session,
+    analysis_ids_Metabolomics_str,
+    analysis_ids_RNASequencing_str,
+    analysis_ids_sampledFluxes_str
+    )
+sigComponents = {};
+sigComponents.update(sigMets);
+sigComponents.update(sigExpression);
+sigComponents.update(sigFluxes);
+
+filename_I = pg_settings.datadir_settings['workspace_data']+\
+    '/ALEsKOs01_impFeats/ALEsKOs01_0_11_correlationPatterns.csv'
+    
+iobase = base_importData();
+iobase.read_csv(filename_I);
+analysis_table_I = iobase.data;  
+
+data1 = execute_sigPairWiseAgreementCorrelationPatterns(
+    session,
+    analysis_table_I,
+    pvalue_I = None,
+    correlation_coefficient_I = 0.88,
+    sigComponents_I=sigComponents,
+    optional_constraint_I=None,
+    )
+
+##Pipeline tests:
+#################################################################
+#pipelines = [
+#    'ALEsKOs01_0_11_crossUnits'
+#]
+##build the connections for the pipeline
+#for pipeline in pipelines:
+#    print("running pipeline " + pipeline)
+#    analysis01.execute_analysisPipeline(
+#        pipeline_id_I = pipeline,
+#        r_calc_I = r_calc,
+#        )
+
+##Analysis tests:
+#################################################################
 analysis_ids_run = [
     'ALEsKOs01_sampledFluxes_0_11_evo04',
     #'ALEsKOs01_RNASequencing_0_11_evo04',
@@ -328,21 +446,6 @@ svm_hyperparameters = [
     # 'hyperparameter_method':'RandomizedSearchCV','hyperparameter_options':{'n_iter':10, 'fit_params':None, 'n_jobs':1, 'iid':True, 'refit':True, 'verbose':0,  'random_state':None, 'error_score':'raise'},
     # },
     ];
-
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();
-
-pipelines = [
-    'ALEsKOs01_0_11_crossUnits'
-]
-#build the connections for the pipeline
-for pipeline in pipelines:
-    print("running pipeline " + pipeline)
-    analysis01.execute_analysisPipeline(
-        pipeline_id_I = pipeline,
-        r_calc_I = r_calc,
-        )
 
 ##TODO: update notebook...
 #add in spls pipelines
@@ -594,6 +697,9 @@ for analysis_id in analysis_ids_run:
     #        time_points_I=[],
     #        r_calc_I=r_calc
     #        )
+
+##Analysis export tests:
+#################################################################
     
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTableReplicates_js(
 #    "ALEsKOs01_RNASequencing_0_evo04_11_evo04Evo01",

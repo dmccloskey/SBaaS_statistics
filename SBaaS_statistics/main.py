@@ -193,9 +193,9 @@ dpppwt01.initialize_supportedTables();
 #dpppwt01.drop_tables();
 dpppwt01.initialize_tables();
 
-# Load R once
-from r_statistics.r_interface import r_interface
-r_calc = r_interface();
+## Load R once
+#from r_statistics.r_interface import r_interface
+#r_calc = r_interface();
 
 ##Custom analysis tests:
 #################################################################
@@ -287,7 +287,9 @@ iobase = base_importData();
 iobase.read_csv(filename_I);
 analysis_table_I = iobase.data;  
 
-data1 = execute_sigPairWiseAgreementCorrelationPatterns(
+fitnessVsCorrelationPatterns,\
+    fitnessVsCorrelationPatterns_aid_stats,\
+    fitnessVsCorrelationPatterns_rnp_stats = execute_fitnessVsCorrelationPatterns(
     session,
     analysis_table_I,
     pvalue_I = None,
@@ -295,6 +297,24 @@ data1 = execute_sigPairWiseAgreementCorrelationPatterns(
     sigComponents_I=sigComponents,
     optional_constraint_I=None,
     )
+
+filename_O = pg_settings.datadir_settings['workspace_data']+\
+    '/_output/ALEsKOs01_0_11_fitnessVsCorrelationPatterns.csv'
+    
+iobase = base_exportData(fitnessVsCorrelationPatterns);
+iobase.write_dict2csv(filename_O);
+
+filename_O = pg_settings.datadir_settings['workspace_data']+\
+    '/_output/ALEsKOs01_0_11_fitnessVsCorrelationPatterns_aid_stats.csv'
+    
+iobase = base_exportData(fitnessVsCorrelationPatterns_aid_stats);
+iobase.write_dict2csv(filename_O);
+
+filename_O = pg_settings.datadir_settings['workspace_data']+\
+    '/_output/ALEsKOs01_0_11_fitnessVsCorrelationPatterns_rnp_stats.csv'
+    
+iobase = base_exportData(fitnessVsCorrelationPatterns_rnp_stats);
+iobase.write_dict2csv(filename_O);
 
 ##Pipeline tests:
 #################################################################

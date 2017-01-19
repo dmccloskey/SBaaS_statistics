@@ -15,10 +15,10 @@ from python_statistics.calculate_pca import calculate_pca
 
 class stage02_quantification_pls_io(stage02_quantification_pls_query,
                                     sbaas_template_io):
-    def export_dataStage02QuantificationPLSScoresAndLoadings_js(self,analysis_id_I,axis_I=3,data_dir_I='tmp'):
+    def export_dataStage02QuantificationPLSScoresAndLoadings_js(self,analysis_id_I,axis_I=4,data_dir_I='tmp'):
         '''Export pls scores and loadings plots for axis 1 vs. 2, 1 vs 3, and 2 vs 3'''
         calculatepca = calculate_pca();
-        PCs = [[1,2],[1,3],[2,3]];
+        PCs = [[1,2],[1,3],[2,3],[1,4],[2,4],[3,4]];
         # get data:
         data_scores,data_loadings = [],[];
         data_scores,data_loadings = self.get_RExpressionData_analysisID_dataStage02QuantificationPLSScoresLoadings(analysis_id_I,axis_I);

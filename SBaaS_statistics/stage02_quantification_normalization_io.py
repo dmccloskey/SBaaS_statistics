@@ -1,4 +1,4 @@
-# System
+﻿# System
 import json
 # SBaaS
 from .stage02_quantification_normalization_query import stage02_quantification_normalization_query
@@ -106,7 +106,6 @@ class stage02_quantification_normalization_io(stage02_quantification_normalizati
         
         ddttable = ddt_container_table()
         ddttable.make_container_table(data_points_O,data1_keys,data1_nestkeys,data1_keymap,tabletype='responsivecrosstable_01');
-
 
         # dump the data to a json file
         if data_dir_I=='tmp':

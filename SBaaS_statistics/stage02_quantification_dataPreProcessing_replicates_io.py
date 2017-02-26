@@ -14,6 +14,8 @@ from SBaaS_rnasequencing.stage01_rnasequencing_genesCountTable_query import stag
 from SBaaS_quantification.stage01_quantification_replicates_query import stage01_quantification_replicates_query
 from SBaaS_quantification.stage01_quantification_replicatesMI_query import stage01_quantification_replicatesMI_query
 from SBaaS_quantification.stage01_quantification_physiologicalRatios_query import stage01_quantification_physiologicalRatios_query
+#DDT
+from ddt_python.ddt_container_table import ddt_container_table
 
 class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantification_dataPreProcessing_replicates_query,
                                     sbaas_template_io #abstract io methods

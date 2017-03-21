@@ -153,8 +153,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
  
         '''
         resequencing_omniExpressExome_query = stage01_resequencing_omniExpressExome_query(self.session,self.engine,self.settings);
-		oee_dep = stage01_resequencing_omniExpressExome_dependencies()
-
+        oee_dep = stage01_resequencing_omniExpressExome_dependencies()
         calc = calculate_interface();
         # get the analysis information
         analysis_rows = [];
@@ -179,19 +178,19 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                 #sample name mapping
                 row['sample_name_abbreviation']=analysis_row['sample_name_abbreviation'];
                 #component mapping       
-		        mutation_id = oee_dep.make_mutationID(
-                    mutation_frequency['Chr'],
-                    mutation_frequency['MapInfo']
-                    );
-                mutation_genes = genomediff._make_mutationGenesStr()
+                mutation_id = mutation_frequency['SNP_Name']
                 if mutationID2componentName_I:
                     row['component_name']=mutationID2componentName_I[mutation_id];
                 else:
                     row['component_name']=mutation_id;
+                mutation_gene = oee_dep.make_mutationID(
+                    mutation_frequency['Chr'],
+                    mutation_frequency['MapInfo']
+                    );
                 if mutationGenes2componentGroupName_I:
-                    row['component_group_name']=mutationGenes2componentGroupName_I[mutation_frequency['SNP_Name']];
+                    row['component_group_name']=mutationGenes2componentGroupName_I[mutation_gene];
                 else:
-                    row['component_group_name']=mutation_frequency['SNP_Name'];
+                    row['component_group_name']=mutation_gene;
                 row['calculated_concentration_units']='Frequency';
                 #descriptive statistics map
                 data_mean,data_median = 1.0,1.0

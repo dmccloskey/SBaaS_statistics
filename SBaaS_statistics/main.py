@@ -110,6 +110,8 @@ dppave01.initialize_supportedTables();
 #dppave01.drop_tables();
 dppave01.initialize_tables();
 
+dppave01.import_dataStage01ResequencingOmniExpressExomeFiltered('BloodProject01')
+
 #make the covariance tables
 from SBaaS_statistics.stage02_quantification_covariance_execute import stage02_quantification_covariance_execute
 covariance01 = stage02_quantification_covariance_execute(session,engine,pg_settings.datadir_settings);

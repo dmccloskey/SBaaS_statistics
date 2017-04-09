@@ -193,9 +193,9 @@ dpppwt01.initialize_supportedTables();
 #dpppwt01.drop_tables();
 dpppwt01.initialize_tables();
 
-## Load R once
-#from r_statistics.r_interface import r_interface
-#r_calc = r_interface();
+# Load R once
+from r_statistics.r_interface import r_interface
+r_calc = r_interface();
 
 ##Custom analysis tests:
 #################################################################
@@ -332,7 +332,7 @@ dpppwt01.initialize_tables();
 ##Analysis tests:
 #################################################################
 analysis_ids_run = [
-    'ALEsKOs01_sampledFluxes_0_11_evo04',
+    #'ALEsKOs01_sampledFluxes_0_11_evo04',
     #'ALEsKOs01_RNASequencing_0_11_evo04',
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
     #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
@@ -342,6 +342,8 @@ analysis_ids_run = [
     #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
     #'ALEsKOs01_0_11_evo04',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
+    "BloodProject01_PLT_pre-post",
+    #"BloodProject01_PLT_time-course",
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -585,6 +587,31 @@ svd_method = {
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
+
+
+    features_histogram = ['mean','cv','var','median','calculated_concentration'];
+    feature_units = ['uM','height_ratio'];
+    n_bins_histogram = [];
+    descstats01.reset_dataStage02_quantification_descriptiveStats(
+        analysis_id,
+        calculated_concentration_units_I = feature_units
+        );
+    descstats01.execute_descriptiveStats(
+        analysis_id,
+        calculated_concentration_units_I = feature_units,
+        r_calc_I = r_calc);
+    # make a histogram of the data before and after normalization
+    hist01.reset_dataStage02_quantification_histogram(
+        analysis_id_I = analysis_id,
+        feature_units_I = feature_units
+    );
+    hist01.execute_binFeatures(
+        analysis_id_I = analysis_id,
+        features_I = features_histogram,
+        feature_units_I = feature_units,
+        n_bins_I = n_bins_histogram,
+        );   
+
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(
@@ -791,4 +818,4 @@ for analysis_id in analysis_ids_run:
 
 #spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);
 #enrichment01.export_dataStage02QuantificationPairWiseGeneSetEnrichment_js('ALEsKOs01_0_evo04_0_11_evo04pgi');
-dpprep01.export_dataStage02QuantificationDataPreProcessingReplicatesCrossTable_js('BloodProject01_PLT');
+#dpprep01.export_dataStage02QuantificationDataPreProcessingReplicatesCrossTable_js('BloodProject01_PLT');

@@ -723,7 +723,29 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                         elif imputation_method_I == 'median_sample':
                             pass;
                         elif imputation_method_I == 'median_feature':
-                            pass;
+                            value_new = None;
+                            value_new_data = self.get_rows_analysisID_dataStage02QuantificationDataPreProcessingReplicates(
+                                analysis_id_I,
+                                query_I={
+                                    'where':[
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'calculated_concentration_units',
+                                    'value':cu,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    {"table_name":'data_stage02_quantification_dataPreProcessing_replicates',
+                                    'column_name':'component_name',
+                                    'value':mcn,
+                                    'operator':'LIKE',
+                                    'connector':'AND'
+                                    },
+                                    ],
+                                }
+                                );
+                            value_new = np.median([d['calculated_concentration'] for d in value_new_data])
+                            if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
+                            row_tmp['calculated_concentration'] = value_new;
                         elif imputation_method_I == 'median_data':
                             pass;
                         elif imputation_method_I == 'min_sample':

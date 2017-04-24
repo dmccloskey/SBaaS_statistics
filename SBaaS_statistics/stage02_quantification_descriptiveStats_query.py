@@ -544,7 +544,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             data = self.session.query(data_stage02_quantification_descriptiveStats.mean).filter(
                     data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats.used_.is_(True),
+                    data_stage02_quantification_descriptiveStats.mean.isnot(None)).order_by(
                     data_stage02_quantification_descriptiveStats.mean).all();
             rows_O = [];
             if data: 
@@ -561,7 +562,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             data = self.session.query(data_stage02_quantification_descriptiveStats.cv).filter(
                     data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats.used_.is_(True),
+                    data_stage02_quantification_descriptiveStats.cv.isnot(None)).order_by(
                     data_stage02_quantification_descriptiveStats.cv).all();
             rows_O = [];
             if data: 
@@ -578,7 +580,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             data = self.session.query(data_stage02_quantification_descriptiveStats.median).filter(
                     data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats.used_.is_(True),
+                    data_stage02_quantification_descriptiveStats.median.isnot(None)).order_by(
                     data_stage02_quantification_descriptiveStats.median).all();
             rows_O = [];
             if data: 
@@ -595,7 +598,8 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             data = self.session.query(data_stage02_quantification_descriptiveStats.var).filter(
                     data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.used_.is_(True)).order_by(
+                    data_stage02_quantification_descriptiveStats.used_.is_(True),
+                    data_stage02_quantification_descriptiveStats.var.isnot(None)).order_by(
                     data_stage02_quantification_descriptiveStats.var).all();
             rows_O = [];
             if data: 

@@ -1605,7 +1605,8 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration).filter(
                     data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(analysis_id_I),
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(concentration_units_I),
-                    data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True)).order_by(
+                    data_stage02_quantification_dataPreProcessing_replicates.used_.is_(True),
+                    data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration.isnot(None)).order_by(
                     data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration.asc()).all();
             data_O = [];
             for d in data: 

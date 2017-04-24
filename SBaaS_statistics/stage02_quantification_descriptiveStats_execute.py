@@ -78,7 +78,7 @@ class stage02_quantification_descriptiveStats_execute(stage02_quantification_des
         #apply the anlaysis to each unique group
         for row in unique_groups:
             data = data_analysis[row];
-            data_1 = [d['calculated_concentration'] for d in data]
+            data_1 = [d['calculated_concentration'] for d in data if not d['calculated_concentration'] is None]
             if len(data_1)<2: continue
             # call R
             data_TTest = {};

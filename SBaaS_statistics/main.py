@@ -342,7 +342,7 @@ analysis_ids_run = [
     #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
     #'ALEsKOs01_0_11_evo04',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
-    "BloodProject01_PLT_pre-post",
+'BloodProject01_PLT_pre-post_02',
     #"BloodProject01_PLT_time-course",
         ];
 pls_model_method = {

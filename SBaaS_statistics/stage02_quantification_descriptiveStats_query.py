@@ -356,6 +356,7 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             analysis_id_I,
             calculated_concentration_units_I,
             cv_threshold_I,
+            cv_comparator_I='>',
             used__I=True):
         '''Query rows by analysis_id and calculated_concentration_units that are used
            and that are greater that cv_threshold_I
@@ -368,13 +369,29 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
            rows_O = listDict with columns for sample_name_short from analysis_id
            '''
         try:
-            data = self.session.query(
-                    data_stage02_quantification_descriptiveStats).filter(
-                    data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
-                    data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
-                    data_stage02_quantification_descriptiveStats.cv>cv_threshold_I,
-                    data_stage02_quantification_descriptiveStats.used_.is_(used__I)).all();
-            rows_O = [d.__repr__dict__() for d in data];
+            query_cmd = '''SELECT * '''
+            query_cmd += '''FROM "data_stage02_quantification_descriptiveStats" '''
+            query_cmd += '''WHERE analysis_id LIKE '%s' ''' %(analysis_id_I)
+            query_cmd += '''AND calculated_concentration_units LIKE '%s' ''' %(calculated_concentration_units_I)
+            query_cmd += '''AND cv %s %s ''' %(cv_comparator_I,cv_threshold_I)
+            if used__I:
+                query_cmd += '''AND used_ '''
+            query_cmd += '''ORDER BY analysis_id ASC, experiment_id ASC, 
+                sample_name_abbreviation ASC, component_name ASC, 
+                calculated_concentration_units ASC '''
+            query_cmd += '''; '''
+            #data = self.session.query(
+            #        data_stage02_quantification_descriptiveStats).filter(
+            #        data_stage02_quantification_descriptiveStats.analysis_id.like(analysis_id_I),
+            #        data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
+            #        data_stage02_quantification_descriptiveStats.cv>cv_threshold_I,
+            #        data_stage02_quantification_descriptiveStats.used_.is_(used__I)).all();
+            #rows_O = [d.__repr__dict__() for d in data];
+
+            
+
+            query_select = sbaas_base_query_select(self.session,self.engine,self.settings)
+            data_O = [dict(d) for d in query_select.execute_select(query_cmd)];
             return rows_O;
         except SQLAlchemyError as e:
             print(e);

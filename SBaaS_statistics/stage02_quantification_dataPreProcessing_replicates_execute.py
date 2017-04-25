@@ -145,6 +145,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                 calculated_concentration_units_cv_I=['umol*gDW-1'],
                 calculated_concentration_units_delete_I=['umol*gDW-1_glog_normalized'],
                 cv_threshold_I=80,
+                cv_comparator_I='>',
                 component_names_I=[],
                 set_used_false_I = False,
                 warn_I=False,
@@ -173,6 +174,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                 analysis_id_I,
                 calculated_concentration_units_I = cu,
                 cv_threshold_I = cv_threshold_I,
+                cv_comparator_I=cv_comparator_I,
                 used__I=True);
             #filter in component_names if provided
             if component_names_I:

@@ -343,6 +343,7 @@ analysis_ids_run = [
     #'ALEsKOs01_0_11_evo04',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
 'BloodProject01_PLT_pre-post_02',
+'BloodProject01_PLT_pre-post_03',
     #"BloodProject01_PLT_time-course",
         ];
 pls_model_method = {
@@ -587,30 +588,44 @@ svd_method = {
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-
-
-    features_histogram = ['mean','cv','var','median','calculated_concentration'];
-    feature_units = ['uM','height_ratio'];
-    n_bins_histogram = [];
-    descstats01.reset_dataStage02_quantification_descriptiveStats(
-        analysis_id,
-        calculated_concentration_units_I = feature_units
-        );
-    descstats01.execute_descriptiveStats(
-        analysis_id,
-        calculated_concentration_units_I = feature_units,
-        r_calc_I = r_calc);
-    # make a histogram of the data before and after normalization
-    hist01.reset_dataStage02_quantification_histogram(
-        analysis_id_I = analysis_id,
-        feature_units_I = feature_units
-    );
-    hist01.execute_binFeatures(
-        analysis_id_I = analysis_id,
-        features_I = features_histogram,
-        feature_units_I = feature_units,
-        n_bins_I = n_bins_histogram,
-        );   
+    mv_value_operator = [
+    {'value':None,'operator':'NA'},
+    #{'value':0.0,'operator':'<='},
+    ]
+    # remove metabolites with a cv>80
+    dpprep01.execute_deleteOutliers(
+            analysis_id_I=analysis_id,
+            calculated_concentration_units_cv_I=['uM'],
+            calculated_concentration_units_delete_I=['uM_glog_normalized'],
+            cv_threshold_I=80,
+            cv_comparator_I='>',
+            component_names_I = [],
+            set_used_false_I = True,
+            warn_I=False,
+                );
+    # remove metabolites with a cv<1e-12
+    dpprep01.execute_deleteOutliers(
+            analysis_id_I=analysis_id,
+            calculated_concentration_units_cv_I=['uM'],
+            calculated_concentration_units_delete_I=['uM_glog_normalized'],
+            cv_threshold_I=1e-12,
+            cv_comparator_I='<',
+            component_names_I = [],
+            set_used_false_I = False,
+            warn_I=False,
+                );
+    #count the number of missing values
+    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
+           tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
+                       ],
+           analysis_id_I = analysis_id,
+           warn_I=False);
+    for row in mv_value_operator:
+       dpprep01.execute_countMissingValues(
+           analysis_id,
+           value_I = row['value'],
+           operator_I = row['operator'],
+       ); 
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters

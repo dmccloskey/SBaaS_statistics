@@ -386,13 +386,11 @@ class stage02_quantification_descriptiveStats_query(sbaas_template_query):
             #        data_stage02_quantification_descriptiveStats.calculated_concentration_units.like(calculated_concentration_units_I),
             #        data_stage02_quantification_descriptiveStats.cv>cv_threshold_I,
             #        data_stage02_quantification_descriptiveStats.used_.is_(used__I)).all();
-            #rows_O = [d.__repr__dict__() for d in data];
-
-            
+            #rows_O = [d.__repr__dict__() for d in data];            
 
             query_select = sbaas_base_query_select(self.session,self.engine,self.settings)
             data_O = [dict(d) for d in query_select.execute_select(query_cmd)];
-            return rows_O;
+            return data_O;
         except SQLAlchemyError as e:
             print(e);
     def get_rows_analysisIDAndCalculatedConcentrationUnitsAndSampleNameAbbreviation_dataStage02QuantificationDescriptiveStats(self, analysis_id_I,calculated_concentration_units_I,sample_name_abbreviation_I):

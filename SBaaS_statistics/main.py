@@ -342,8 +342,8 @@ analysis_ids_run = [
     #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
     #'ALEsKOs01_0_11_evo04',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
-'BloodProject01_PLT_pre-post_02',
-'BloodProject01_PLT_pre-post_03',
+
+    "BloodProject01_RBC_time-course"
     #"BloodProject01_PLT_time-course",
         ];
 pls_model_method = {
@@ -588,45 +588,18 @@ svd_method = {
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-    mv_value_operator = [
-    {'value':None,'operator':'NA'},
-    #{'value':0.0,'operator':'<='},
-    ]
-    # remove metabolites with a cv>80
-    dpprep01.execute_deleteOutliers(
-            analysis_id_I=analysis_id,
-            calculated_concentration_units_cv_I=['uM'],
-            calculated_concentration_units_delete_I=['uM_glog_normalized'],
-            cv_threshold_I=80,
-            cv_comparator_I='>',
-            component_names_I = [],
-            set_used_false_I = True,
-            warn_I=False,
-                );
-    # remove metabolites with a cv<1e-12
-    dpprep01.execute_deleteOutliers(
-            analysis_id_I=analysis_id,
-            calculated_concentration_units_cv_I=['uM'],
-            calculated_concentration_units_delete_I=['uM_glog_normalized'],
-            cv_threshold_I=1e-12,
-            cv_comparator_I='<',
-            component_names_I = [],
-            set_used_false_I = False,
-            warn_I=False,
-                );
-    #count the number of missing values
-    dpprep01.reset_stage02_quantification_dataPreProcessing_replicates(
-           tables_I = ['data_stage02_quantification_dataPreProcessing_replicates_mv',
-                       ],
-           analysis_id_I = analysis_id,
-           warn_I=False);
-    for row in mv_value_operator:
-       dpprep01.execute_countMissingValues(
-           analysis_id,
-           value_I = row['value'],
-           operator_I = row['operator'],
-       ); 
-
+    #fill in any remaining missing values with the LLOQ/2
+    dpprep01.execute_imputeMissingValues(
+        analysis_id,
+        calculated_concentration_units_I = ['uM'],
+        imputation_method_I = 'lloq',
+        imputation_options_I = {
+            'biological_material':None,
+            'conversion_name':None,
+            'scale':0.5,
+            'noise_cv':30.0,
+        },
+       );
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(

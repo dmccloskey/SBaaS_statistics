@@ -597,6 +597,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
         '''
         data_O = [];
         data_imputations = [];
+        calc = calculate_interface();
         # get the calculated_concentration_units
         if calculated_concentration_units_I:
             calculated_concentration_units = calculated_concentration_units_I;
@@ -623,7 +624,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                 time_points_I);
             #fill values for each missing component
             missing_components_found = False;
-            for unique_group in unique_groups:
+            for unique_group_cnt,unique_group in enumerate(unique_groups):
                 #get all components for the row
                 unique_components = [];
                 unique_components = self.getGroup_componentNameAndComponentGroupName_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndSampleNameShortAndTimePoint_dataStage02QuantificationDataPreProcessingReplicates(
@@ -632,7 +633,7 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                 missing_components = list(set(all_components_dict.keys()) - set(unique_components_dict.keys()))
                 if missing_components:
                     missing_components_found = True;
-                    for mcn in missing_components:
+                    for mcn_cnt,mcn in enumerate(missing_components):
                         row_tmp = {};
                         if imputation_method_I == 'value':
                             row_tmp['calculated_concentration'] = imputation_options_I['value'];
@@ -644,6 +645,21 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                                         biological_material_I=imputation_options_I['biological_material'],
                                         conversion_name_I=imputation_options_I['conversion_name']
                                         );
+                            if 'noise_cv' in imputation_options_I.keys(): 
+                                if 'cv' in imputation_options_I.keys():
+                                    cv = imputation_options_I['noise_cv']
+                                else: 
+                                    cv = 30.0 #default coefficient of variation
+                                stdev = calc.convert_cv2StDev(value_new,cv)
+                                seed = (unique_group_cnt+1)*(mcn_cnt+1) #calculate a new random seed at each iteration
+                                sampled_values = calc.sample_pointsFromDistribution(n_points_I=1000,
+                                    distribution_I='normal',
+                                    dist_params_I={'loc':value_new,'scale':stdev},
+                                    seed_I=seed,
+                                    #distribution_I='lognormal',
+                                    #dist_params_I={'mean':value_new,'sigma':stdev},
+                                    raise_I = False)
+                                value_new = sampled_values[0]
                             if 'scale' in imputation_options_I.keys(): value_new = imputation_options_I['scale']*value_new;
                             row_tmp['calculated_concentration'] = value_new;
                         elif imputation_method_I == 'mean_feature':

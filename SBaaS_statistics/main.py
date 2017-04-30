@@ -343,7 +343,7 @@ analysis_ids_run = [
     #'ALEsKOs01_0_11_evo04',
     #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
 
-    "BloodProject01_RBC_time-course"
+    "BloodProject01_P_pre-post_02"
     #"BloodProject01_PLT_time-course",
         ];
 pls_model_method = {
@@ -588,18 +588,6 @@ svd_method = {
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
 
-    #fill in any remaining missing values with the LLOQ/2
-    dpprep01.execute_imputeMissingValues(
-        analysis_id,
-        calculated_concentration_units_I = ['uM'],
-        imputation_method_I = 'lloq',
-        imputation_options_I = {
-            'biological_material':None,
-            'conversion_name':None,
-            'scale':0.5,
-            'noise_cv':30.0,
-        },
-       );
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
     #spls01.reset_dataStage02_quantification_spls(
@@ -805,5 +793,6 @@ for analysis_id in analysis_ids_run:
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
 
 #spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);
+pls01.export_dataStage02QuantificationPLSSPlot_js(analysis_id);
 #enrichment01.export_dataStage02QuantificationPairWiseGeneSetEnrichment_js('ALEsKOs01_0_evo04_0_11_evo04pgi');
 #dpprep01.export_dataStage02QuantificationDataPreProcessingReplicatesCrossTable_js('BloodProject01_PLT');

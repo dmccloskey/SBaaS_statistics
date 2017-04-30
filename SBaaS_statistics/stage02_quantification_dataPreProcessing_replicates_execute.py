@@ -129,9 +129,13 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
             calculated_concentration_units = self.get_calculatedConcentrationUnits_analysisID_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I);
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             if set_used_false_I:
-                continue;
-                #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates
-                #set used_ = False;
+                self.setUsed2False_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(
+                    analysis_id_I = analysis_id_I,
+                    calculated_concentration_units_I = cu,
+                    value_I = value_I,
+                    operator_I = operator_I,
+                    warn_I=warn_I,
+                    );
             else:
                 self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(
                     analysis_id_I = analysis_id_I,
@@ -197,9 +201,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             for delete_row in delete_rows:
                 if set_used_false_I:
-                    continue;
-                    #TODO: update_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates
-                    #set used_ = False;
+                    delete_row.update({'calculated_concentration_units':cu})
+                    self.setUsed2False_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                        [delete_row]);
                 else:
                     #remove experiment_id/sample_name_short/time_point/component_name from the analysis
                     self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndExperimentIDAndTimePointAndSampleNameShortAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(
@@ -956,7 +960,10 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                     delete_row_O.append(tmp);
         #delete the rows
         if set_used_false_I:
-            self.setUsed2False_analysisIDAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(delete_rows_O);
+            for delete_row in delete_row_O:
+                delete_row.update({'analysis_id':analysis_id_I})
+                self.setUsed2False_analysisIDAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(
+                    [delete_row]);
         else:
             for delete_row in delete_row_O:
                 self.delete_rows_analysisIDAndCalculatedConcentrationUnitsAndComponentName_dataStage02QuantificationDataPreProcessingReplicates(

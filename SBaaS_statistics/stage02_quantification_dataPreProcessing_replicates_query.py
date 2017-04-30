@@ -1860,6 +1860,54 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 except SQLAlchemyError as e:
                     print(e);
             self.session.commit();
+    def setUsed2False_analysisIDAndCalculatedConcentrationUnitsAndCalculatedConcentrationValueAndOperator_dataStage02QuantificationDataPreProcessingReplicates(self,
+            analysis_id_I,
+            calculated_concentration_units_I,
+            value_I,operator_I,
+            warn_I=True):
+        '''delete rows from data_stage02_quantification_dataPreProcessing_replicates
+        INPUT:
+        analysis_id_I = string,
+        value_I = float,
+        operator_I = string, e.g. "="
+        OUTPUT:
+        '''
+        try:
+            table = 'data_stage02_quantification_dataPreProcessing_replicates';
+            queryupdate = sbaas_base_query_update(session_I=self.session,engine_I=self.engine,settings_I=self.settings,data_I=self.data);
+            query = {};
+            query['update'] = [{'table_name':table}];
+            query['set'] = [{
+                    'table_name':table,
+                    'column_name':'used_',
+                    'value':False,
+		            'operator':'=',
+                    }];
+            query['where'] = [{
+                    'table_name':table,
+                    'column_name':'analysis_id',
+                    'value':analysis_id_I,
+		            'operator':'LIKE',
+                    'connector':'AND'
+                    },{
+                    'table_name':table,
+                    'column_name':'calculated_concentration',
+                    'value':value_I,
+		            'operator':operator_I,
+                    'connector':'AND'
+                    },
+                    {"table_name":table,
+                    'column_name':'calculated_concentration_units',
+                    'value':calculated_concentration_units_I,
+                    'operator':'LIKE',
+                    'connector':'AND'
+                    },
+	            ];
+            table_model = self.convert_tableStringList2SqlalchemyModelDict([table]);
+            query = queryupdate.make_queryFromString(table_model,query);
+            queryupdate.update_table_sqlalchemyModel(query_I=query,warn_I=warn_I);
+        except Exception as e:
+            print(e);
             
     ##refactored
     def get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingReplicates(

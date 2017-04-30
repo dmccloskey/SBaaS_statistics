@@ -22,6 +22,14 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # get data:
         data_scores,data_loadings = [],[];
         data_scores,data_loadings = self.get_RExpressionData_analysisID_dataStage02QuantificationPLSScoresLoadings(analysis_id_I,axis_I);
+        # correct for the actual number of axes retrieved:
+        axis = list(set([d['axis'] for d in data_scores]))
+        if len(axis) == 2 and len(axis) < axis_I:
+            PCs = [[1,2]]
+        elif len(axis) == 3 and len(axis) < axis_I:
+            PCs = [[1,2],[1,3],[2,3]]
+        elif len(axis) == 4 and len(axis) < axis_I:
+            PCs = [[1,2],[1,3],[2,3],[1,4],[2,4],[3,4]]
         # reformat the data
         data_scores_123,data_loadings_123 = [],[];
         data_scores = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSScores(analysis_id_I,axis_I)
@@ -385,6 +393,10 @@ class stage02_quantification_pls_io(stage02_quantification_pls_query,
         # get data:
         data_loadings = [];
         data_loadings = self.get_rows_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I);
+        # correct for the actual number of axes retrieved:
+        axis = list(set([d['axis'] for d in data_loadings]))
+        axis_I = len(axis)
+        # get data:
         data_dict = {};
         data_dict = self.get_rowAxisDict_analysisID_dataStage02QuantificationPLSLoadings(analysis_id_I,axis_I);
 

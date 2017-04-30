@@ -332,19 +332,9 @@ r_calc = r_interface();
 ##Analysis tests:
 #################################################################
 analysis_ids_run = [
-    #'ALEsKOs01_sampledFluxes_0_11_evo04',
-    #'ALEsKOs01_RNASequencing_0_11_evo04',
-    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd',
-    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04pgi',
-    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04ptsHIcrr',
-    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04sdhCB',
-    #    'ALEsKOs01_RNASequencing_0_evo04_0_11_evo04tpiA',
-    #'ALEsKOs01_0_evo04_0-1-2-11_evo04pgiEvo01',
-    #'ALEsKOs01_0_11_evo04',
-    #'ALEsKOs01_0_evo04_0_11_evo04pgiEvo01',
-
-    "BloodProject01_P_pre-post_02"
-    #"BloodProject01_PLT_time-course",
+    'BloodProject01',
+    #"BloodProject01_P_pre-post_02",
+    #'BloodProject01_S01_D01_P_25C',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -587,6 +577,25 @@ svd_method = {
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+        
+    # perform a correlation on the means 
+    heatmap01.reset_dataStage02_quantification_heatmap(
+        tables_I = ['data_stage02_quantification_heatmap_descriptiveStats',
+                   'data_stage02_quantification_dendrogram_descriptiveStats'],
+        analysis_id_I=analysis_id,
+        warn_I=False);
+    heatmap01.execute_heatmap_descriptiveStats(
+        analysis_id,
+        calculated_concentration_units_I=['Frequency'],
+        sample_name_abbreviations_I=[],
+        component_names_I=[],
+        order_componentNameBySampleNameAbbreviation_I = True,
+        order_sample_name_abbreviations_I=False,
+        order_component_names_I=False,
+        value_I = 'mean',
+        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
+        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
+    );
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
@@ -792,7 +801,5 @@ for analysis_id in analysis_ids_run:
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)
 
-#spls01.export_dataStage02QuantificationSPLSScoresAndLoadings_js(analysis_id);
-pls01.export_dataStage02QuantificationPLSSPlot_js(analysis_id);
 #enrichment01.export_dataStage02QuantificationPairWiseGeneSetEnrichment_js('ALEsKOs01_0_evo04_0_11_evo04pgi');
 #dpprep01.export_dataStage02QuantificationDataPreProcessingReplicatesCrossTable_js('BloodProject01_PLT');

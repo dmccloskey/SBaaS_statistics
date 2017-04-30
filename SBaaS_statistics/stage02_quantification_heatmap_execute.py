@@ -258,19 +258,21 @@ class stage02_quantification_heatmap_execute(stage02_quantification_heatmap_io,)
                 d['comment_']=None;
                 heatmap_O.append(d);
             # add data to the database for the dendrograms
-            dendrogram_col_1['analysis_id']=analysis_id_I;
-            dendrogram_col_1['value_units']=cu;
-            dendrogram_col_1['used_']=True;
-            dendrogram_col_1['comment_']=None;
-            dendrogram_col_O.append(dendrogram_col_1);
-            dendrogram_row_1['analysis_id']=analysis_id_I;
-            dendrogram_row_1['value_units']=cu;
-            dendrogram_row_1['used_']=True;
-            dendrogram_row_1['comment_']=None;
-            dendrogram_row_O.append(dendrogram_row_1);
-        self.add_rows_table('data_stage02_quantification_heatmap_descriptiveStats',heatmap_O);
-        self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_col_O);
-        self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_row_O);
+            if dendrogram_col_1 and not dendrogram_col_1 is None:
+                dendrogram_col_1['analysis_id']=analysis_id_I;
+                dendrogram_col_1['value_units']=cu;
+                dendrogram_col_1['used_']=True;
+                dendrogram_col_1['comment_']=None;
+                dendrogram_col_O.append(dendrogram_col_1);
+            if dendrogram_row_1 and not dendrogram_row_1 is None:
+                dendrogram_row_1['analysis_id']=analysis_id_I;
+                dendrogram_row_1['value_units']=cu;
+                dendrogram_row_1['used_']=True;
+                dendrogram_row_1['comment_']=None;
+                dendrogram_row_O.append(dendrogram_row_1);
+        if heatmap_O: self.add_rows_table('data_stage02_quantification_heatmap_descriptiveStats',heatmap_O);
+        if dendrogram_col_O: self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_col_O);
+        if dendrogram_row_O: self.add_rows_table('data_stage02_quantification_dendrogram_descriptiveStats',dendrogram_row_O);
 
     ##DEPRECATED
     def execute_heatmap_v1(self, analysis_id_I,calculated_concentration_units_I=[],

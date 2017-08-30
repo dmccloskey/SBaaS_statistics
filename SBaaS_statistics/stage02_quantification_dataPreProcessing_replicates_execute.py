@@ -10,6 +10,7 @@ from r_statistics.r_interface import r_interface
 from python_statistics.calculate_statisticsDescriptive import calculate_statisticsDescriptive
 from python_statistics.calculate_interface import calculate_interface
 from listDict.listDict import listDict
+import numpy as np
 import copy
 
 class stage02_quantification_dataPreProcessing_replicates_execute(

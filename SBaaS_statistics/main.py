@@ -332,9 +332,10 @@ r_calc = r_interface();
 ##Analysis tests:
 #################################################################
 analysis_ids_run = [
-    'BloodProject01',
+    #'BloodProject01',
     #"BloodProject01_P_pre-post_02",
     #'BloodProject01_S01_D01_P_25C',
+'BloodProject01_S01_0-D01_P_25C',
         ];
 pls_model_method = {
     #'PCR-DA':'svdpc',
@@ -575,27 +576,236 @@ svd_method = {
     'robustSvd',
     };
 
+# analyses to run:
+analysis_ids_run = [
+    
+# #Platelet fraction time-course
+# 'BloodProject01_S01_D01_P_25C',
+# 'BloodProject01_S01_D02_P_25C',
+# 'BloodProject01_S01_D03_P_25C',
+# 'BloodProject01_S01_D04_P_25C',
+# 'BloodProject01_S01_D05_P_25C',
+# 'BloodProject01_S02_D01_P_25C',
+# 'BloodProject01_S02_D02_P_25C',
+# 'BloodProject01_S02_D03_P_25C',
+# 'BloodProject01_S02_D04_P_25C',
+# 'BloodProject01_S02_D05_P_25C',
+    
+# #Platelet fraction time-course
+# 'BloodProject01_S01_D01_PLT_25C',
+# 'BloodProject01_S01_D02_PLT_25C',
+# 'BloodProject01_S01_D03_PLT_25C',
+# 'BloodProject01_S01_D04_PLT_25C',
+# 'BloodProject01_S01_D05_PLT_25C',
+# 'BloodProject01_S02_D01_PLT_25C',
+# 'BloodProject01_S02_D02_PLT_25C',
+# 'BloodProject01_S02_D03_PLT_25C',
+# 'BloodProject01_S02_D04_PLT_25C',
+# 'BloodProject01_S02_D05_PLT_25C',
+    
+##RBC fraction time-course
+#'BloodProject01_S01_D01_RBC_25C',
+#'BloodProject01_S01_D02_RBC_25C',
+#'BloodProject01_S01_D03_RBC_25C',
+# 'BloodProject01_S01_D04_RBC_25C',
+# 'BloodProject01_S01_D05_RBC_25C',
+# 'BloodProject01_S02_D01_RBC_25C',
+# 'BloodProject01_S02_D02_RBC_25C',
+# 'BloodProject01_S02_D03_RBC_25C',
+# 'BloodProject01_S02_D04_RBC_25C',
+# 'BloodProject01_S02_D05_RBC_25C',
+    
+##new
+#'BloodProject01_S01_0-D01_P_25C',
+#'BloodProject01_S01_0-D01_PLT_25C',
+#'BloodProject01_S01_0-D01_RBC_25C',
+'BloodProject01_S01_0-D02_P_25C',
+'BloodProject01_S01_0-D02_PLT_25C',
+'BloodProject01_S01_0-D02_RBC_25C',
+'BloodProject01_S01_0-D03_P_25C',
+'BloodProject01_S01_0-D03_PLT_25C',
+'BloodProject01_S01_0-D03_RBC_25C',
+'BloodProject01_S01_0-D04_P_25C',
+'BloodProject01_S01_0-D04_PLT_25C',
+'BloodProject01_S01_0-D04_RBC_25C',
+'BloodProject01_S01_0-D05_P_25C',
+'BloodProject01_S01_0-D05_PLT_25C',
+'BloodProject01_S01_0-D05_RBC_25C',
+'BloodProject01_S02_0-D01_P_25C',
+'BloodProject01_S02_0-D01_PLT_25C',
+'BloodProject01_S02_0-D01_RBC_25C',
+'BloodProject01_S02_0-D02_P_25C',
+'BloodProject01_S02_0-D02_PLT_25C',
+'BloodProject01_S02_0-D02_RBC_25C',
+'BloodProject01_S02_0-D03_P_25C',
+'BloodProject01_S02_0-D03_PLT_25C',
+'BloodProject01_S02_0-D03_RBC_25C',
+'BloodProject01_S02_0-D04_P_25C',
+'BloodProject01_S02_0-D04_PLT_25C',
+'BloodProject01_S02_0-D04_RBC_25C',
+'BloodProject01_S02_0-D05_P_25C',
+'BloodProject01_S02_0-D05_PLT_25C',
+'BloodProject01_S02_0-D05_RBC_25C',
+        ];
+
+#define io modules
+from io_utilities.base_importData import base_importData
+from io_utilities.base_exportData import base_exportData
+
+#read in the parameters
+iobase = base_importData();
+iobase.read_csv(
+    pg_settings.datadir_settings['workspace_data']+\
+    '/_input/170206_BloodProject01_patternMatcher01.csv');
+
+# restructure the data
+analysis_options = {'_del_':[]};
+for row in iobase.data:
+    if not row['analysis_id'] in analysis_options.keys(): analysis_options[row['analysis_id']]=[];
+    time_points = row['time_points'].replace('{','').replace('}','').split(',')
+    row['time_points'] = time_points;
+    analysis_options[row['analysis_id']].append(row);
+del analysis_options['_del_'];
+
+#make the patterns
+pattern_len3 = [
+    '0-0-0',
+    #direction 1
+    '0-1-0',
+    '0-1-1',
+    '0-1-2',
+    '0-2-1',
+    '1-2-0',
+    '0-0-1',
+    #opposite dir
+    '1-0-1',
+    '1-0-0',
+    '2-1-0',
+    '2-0-1',
+    '1-0-2',
+    '1-1-0',]
+pattern_description3 = ['unchanged',
+'restored fast +',
+'unrestored +',
+'reinforced +',
+'partially-restored +',
+'overcompensation +',
+'novel +',
+'restored fast -',
+'unrestored -',
+'reinforced -',
+'partially-restored -',
+'overcompensation -',
+'novel -']
+#make the patterns
+pattern_len4 = [
+    '0-0-0-0',
+    #direction 1
+    '0-1-0-0',
+    '0-1-1-1',
+    '0-1-2-3',
+    '0-2-1-0',
+    '0-2-1-1',
+    '1-2-0-0',
+    '0-0-1-2',
+    #opposite dir
+    '1-0-1-1',
+    '1-0-0-0',
+    '3-2-1-0',
+    '2-1-0-2',
+    '2-0-1-1',
+    '1-0-2-2',
+    '2-2-1-0',]
+pattern_len5 = [
+    '0-0-0-0-0',
+    #direction 1
+    '0-1-0-0-0',
+    '0-1-1-1-1',
+    '0-1-2-3-4',
+    '0-2-1-1-1',
+    '0-3-2-1-0',
+    '1-2-0-0-0',
+    '0-0-1-2-3',
+    #opposite dir
+    '1-0-1-1-1',
+    '1-0-0-0-0',
+    '4-3-2-1-0',
+    '2-0-1-1-1',
+    '3-0-1-2-3',
+    '1-0-2-2-2',
+    '3-3-2-1-0',]
+pattern_len6 = [
+    '0-0-0-0-0-0',
+    #direction 1
+    '0-1-0-0-0-0',
+    '0-1-1-1-1-1',
+    '0-1-2-3-4-5',
+    '0-2-1-1-1-1',
+    '0-4-3-2-1-0',
+    '1-2-0-0-0-0',
+    '0-0-1-2-3-4',
+    #opposite dir
+    '1-0-1-1-1-1',
+    '1-0-0-0-0-0',
+    '5-4-3-2-1-0',
+    '2-0-1-1-1-1',
+    '4-0-1-2-3-4',
+    '1-0-2-2-2-2',
+    '4-4-3-2-1-0',]
+pattern_description4 = ['unchanged',
+'restored fast +',
+'unrestored +',
+'reinforced +',
+'restored slow +',
+'partially-restored +',
+'overcompensation +',
+'novel +',
+'restored fast -',
+'unrestored -',
+'reinforced -',
+'restored slow -',
+'partially-restored -',
+'overcompensation -',
+'novel -']
+
+#update the analysis options with the desired patterns
+for k,v in list(analysis_options.items()):
+    if len(analysis_options[k][0]["time_points"])==3:
+        analysis_options[k][0]['patterns']=pattern_len3;
+        analysis_options[k][0]['pattern_descriptions']=pattern_description3;
+    if len(analysis_options[k][0]["time_points"])==4:
+        analysis_options[k][0]['patterns']=pattern_len4;
+        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
+    if len(analysis_options[k][0]["time_points"])==5:
+        analysis_options[k][0]['patterns']=pattern_len5;
+        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
+    if len(analysis_options[k][0]["time_points"])==6:
+        analysis_options[k][0]['patterns']=pattern_len6;
+        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
+
+
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
+    
+    #reset previous analyses
+    corr01.reset_dataStage02_quantification_correlationPattern(analysis_id);
         
-    # perform a correlation on the means 
-    heatmap01.reset_dataStage02_quantification_heatmap(
-        tables_I = ['data_stage02_quantification_heatmap_descriptiveStats',
-                   'data_stage02_quantification_dendrogram_descriptiveStats'],
-        analysis_id_I=analysis_id,
-        warn_I=False);
-    heatmap01.execute_heatmap_descriptiveStats(
-        analysis_id,
-        calculated_concentration_units_I=['Frequency'],
-        sample_name_abbreviations_I=[],
-        component_names_I=[],
-        order_componentNameBySampleNameAbbreviation_I = True,
-        order_sample_name_abbreviations_I=False,
-        order_component_names_I=False,
-        value_I = 'mean',
-        query_object_descStats_I = 'stage02_quantification_dataPreProcessing_averages_query',
-        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDataPreProcessingAverages',
-    );
+    patterns = analysis_options[analysis_id][0]['patterns'];
+    pattern_descriptions = analysis_options[analysis_id][0]['pattern_descriptions'];
+    for p_cnt,pattern in enumerate(patterns):
+        #run the pattern matcher on all unique patterns
+        corr01.execute_patternMatcher(
+            analysis_id_I=analysis_id,
+            sample_name_abbreviations_I=[],
+            time_points_I=analysis_options[analysis_id][0]['time_points'],
+            concentration_units_I=analysis_options[analysis_id][0]['calculated_concentration_units'],
+            pattern_match_I=pattern,
+            pattern_match_description_I=pattern_descriptions[p_cnt],
+            component_match_I=None,
+            component_match_units_I=None,
+            distance_measure_I=analysis_options[analysis_id][0]['distance_measure'],
+            query_object_I = 'stage02_quantification_descriptiveStats_query',
+            );
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters

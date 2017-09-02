@@ -578,367 +578,146 @@ svd_method = {
 
 # analyses to run:
 analysis_ids_run = [
-    
-# #Platelet fraction time-course
-# 'BloodProject01_S01_D01_P_25C',
-# 'BloodProject01_S01_D02_P_25C',
-# 'BloodProject01_S01_D03_P_25C',
-# 'BloodProject01_S01_D04_P_25C',
-# 'BloodProject01_S01_D05_P_25C',
-# 'BloodProject01_S02_D01_P_25C',
-# 'BloodProject01_S02_D02_P_25C',
-# 'BloodProject01_S02_D03_P_25C',
-# 'BloodProject01_S02_D04_P_25C',
-# 'BloodProject01_S02_D05_P_25C',
-    
-# #Platelet fraction time-course
-# 'BloodProject01_S01_D01_PLT_25C',
-# 'BloodProject01_S01_D02_PLT_25C',
-# 'BloodProject01_S01_D03_PLT_25C',
-# 'BloodProject01_S01_D04_PLT_25C',
-# 'BloodProject01_S01_D05_PLT_25C',
-# 'BloodProject01_S02_D01_PLT_25C',
-# 'BloodProject01_S02_D02_PLT_25C',
-# 'BloodProject01_S02_D03_PLT_25C',
-# 'BloodProject01_S02_D04_PLT_25C',
-# 'BloodProject01_S02_D05_PLT_25C',
-    
-##RBC fraction time-course
-#'BloodProject01_S01_D01_RBC_25C',
-#'BloodProject01_S01_D02_RBC_25C',
-#'BloodProject01_S01_D03_RBC_25C',
-# 'BloodProject01_S01_D04_RBC_25C',
-# 'BloodProject01_S01_D05_RBC_25C',
-# 'BloodProject01_S02_D01_RBC_25C',
-# 'BloodProject01_S02_D02_RBC_25C',
-# 'BloodProject01_S02_D03_RBC_25C',
-# 'BloodProject01_S02_D04_RBC_25C',
-# 'BloodProject01_S02_D05_RBC_25C',
-    
-##new
-#'BloodProject01_S01_0-D01_P_25C',
-#'BloodProject01_S01_0-D01_PLT_25C',
-#'BloodProject01_S01_0-D01_RBC_25C',
-'BloodProject01_S01_0-D02_P_25C',
-'BloodProject01_S01_0-D02_PLT_25C',
-'BloodProject01_S01_0-D02_RBC_25C',
-'BloodProject01_S01_0-D03_P_25C',
-'BloodProject01_S01_0-D03_PLT_25C',
-'BloodProject01_S01_0-D03_RBC_25C',
-'BloodProject01_S01_0-D04_P_25C',
-'BloodProject01_S01_0-D04_PLT_25C',
-'BloodProject01_S01_0-D04_RBC_25C',
-'BloodProject01_S01_0-D05_P_25C',
-'BloodProject01_S01_0-D05_PLT_25C',
-'BloodProject01_S01_0-D05_RBC_25C',
-'BloodProject01_S02_0-D01_P_25C',
-'BloodProject01_S02_0-D01_PLT_25C',
-'BloodProject01_S02_0-D01_RBC_25C',
-'BloodProject01_S02_0-D02_P_25C',
-'BloodProject01_S02_0-D02_PLT_25C',
-'BloodProject01_S02_0-D02_RBC_25C',
-'BloodProject01_S02_0-D03_P_25C',
-'BloodProject01_S02_0-D03_PLT_25C',
-'BloodProject01_S02_0-D03_RBC_25C',
-'BloodProject01_S02_0-D04_P_25C',
-'BloodProject01_S02_0-D04_PLT_25C',
-'BloodProject01_S02_0-D04_RBC_25C',
-'BloodProject01_S02_0-D05_P_25C',
-'BloodProject01_S02_0-D05_PLT_25C',
-'BloodProject01_S02_0-D05_RBC_25C',
+'chemoCLim01',
+'chemoNLim01',
         ];
-
-#define io modules
-from io_utilities.base_importData import base_importData
-from io_utilities.base_exportData import base_exportData
-
-#read in the parameters
-iobase = base_importData();
-iobase.read_csv(
-    pg_settings.datadir_settings['workspace_data']+\
-    '/_input/170206_BloodProject01_patternMatcher01.csv');
-
-# restructure the data
-analysis_options = {'_del_':[]};
-for row in iobase.data:
-    if not row['analysis_id'] in analysis_options.keys(): analysis_options[row['analysis_id']]=[];
-    time_points = row['time_points'].replace('{','').replace('}','').split(',')
-    row['time_points'] = time_points;
-    analysis_options[row['analysis_id']].append(row);
-del analysis_options['_del_'];
-
-#make the patterns
-pattern_len3 = [
-    '0-0-0',
-    #direction 1
-    '0-1-0',
-    '0-1-1',
-    '0-1-2',
-    '0-2-1',
-    '1-2-0',
-    '0-0-1',
-    #opposite dir
-    '1-0-1',
-    '1-0-0',
-    '2-1-0',
-    '2-0-1',
-    '1-0-2',
-    '1-1-0',]
-pattern_description3 = ['unchanged',
-'restored fast +',
-'unrestored +',
-'reinforced +',
-'partially-restored +',
-'overcompensation +',
-'novel +',
-'restored fast -',
-'unrestored -',
-'reinforced -',
-'partially-restored -',
-'overcompensation -',
-'novel -']
-#make the patterns
-pattern_len4 = [
-    '0-0-0-0',
-    #direction 1
-    '0-1-0-0',
-    '0-1-1-1',
-    '0-1-2-3',
-    '0-2-1-0',
-    '0-2-1-1',
-    '1-2-0-0',
-    '0-0-1-2',
-    #opposite dir
-    '1-0-1-1',
-    '1-0-0-0',
-    '3-2-1-0',
-    '2-1-0-2',
-    '2-0-1-1',
-    '1-0-2-2',
-    '2-2-1-0',]
-pattern_len5 = [
-    '0-0-0-0-0',
-    #direction 1
-    '0-1-0-0-0',
-    '0-1-1-1-1',
-    '0-1-2-3-4',
-    '0-2-1-1-1',
-    '0-3-2-1-0',
-    '1-2-0-0-0',
-    '0-0-1-2-3',
-    #opposite dir
-    '1-0-1-1-1',
-    '1-0-0-0-0',
-    '4-3-2-1-0',
-    '2-0-1-1-1',
-    '3-0-1-2-3',
-    '1-0-2-2-2',
-    '3-3-2-1-0',]
-pattern_len6 = [
-    '0-0-0-0-0-0',
-    #direction 1
-    '0-1-0-0-0-0',
-    '0-1-1-1-1-1',
-    '0-1-2-3-4-5',
-    '0-2-1-1-1-1',
-    '0-4-3-2-1-0',
-    '1-2-0-0-0-0',
-    '0-0-1-2-3-4',
-    #opposite dir
-    '1-0-1-1-1-1',
-    '1-0-0-0-0-0',
-    '5-4-3-2-1-0',
-    '2-0-1-1-1-1',
-    '4-0-1-2-3-4',
-    '1-0-2-2-2-2',
-    '4-4-3-2-1-0',]
-pattern_description4 = ['unchanged',
-'restored fast +',
-'unrestored +',
-'reinforced +',
-'restored slow +',
-'partially-restored +',
-'overcompensation +',
-'novel +',
-'restored fast -',
-'unrestored -',
-'reinforced -',
-'restored slow -',
-'partially-restored -',
-'overcompensation -',
-'novel -']
-
-#update the analysis options with the desired patterns
-for k,v in list(analysis_options.items()):
-    if len(analysis_options[k][0]["time_points"])==3:
-        analysis_options[k][0]['patterns']=pattern_len3;
-        analysis_options[k][0]['pattern_descriptions']=pattern_description3;
-    if len(analysis_options[k][0]["time_points"])==4:
-        analysis_options[k][0]['patterns']=pattern_len4;
-        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
-    if len(analysis_options[k][0]["time_points"])==5:
-        analysis_options[k][0]['patterns']=pattern_len5;
-        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
-    if len(analysis_options[k][0]["time_points"])==6:
-        analysis_options[k][0]['patterns']=pattern_len6;
-        analysis_options[k][0]['pattern_descriptions']=pattern_description4;
-
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
     
-    #reset previous analyses
-    corr01.reset_dataStage02_quantification_correlationPattern(analysis_id);
-        
-    patterns = analysis_options[analysis_id][0]['patterns'];
-    pattern_descriptions = analysis_options[analysis_id][0]['pattern_descriptions'];
-    for p_cnt,pattern in enumerate(patterns):
-        #run the pattern matcher on all unique patterns
-        corr01.execute_patternMatcher(
-            analysis_id_I=analysis_id,
-            sample_name_abbreviations_I=[],
-            time_points_I=analysis_options[analysis_id][0]['time_points'],
-            concentration_units_I=analysis_options[analysis_id][0]['calculated_concentration_units'],
-            pattern_match_I=pattern,
-            pattern_match_description_I=pattern_descriptions[p_cnt],
-            component_match_I=None,
-            component_match_units_I=None,
-            distance_measure_I=analysis_options[analysis_id][0]['distance_measure'],
-            query_object_I = 'stage02_quantification_descriptiveStats_query',
-            );
 
-    ##TODO: update notebooks...
-    ##search for the optimal spls parameters
-    #spls01.reset_dataStage02_quantification_spls(
-    #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
-    #    analysis_id_I=analysis_id,
-    #    warn_I=False,
-    #    );
-    ##spls hyperparameter search (DEBUGGING spls methods)
-    #spls01.execute_splsHyperparameter(
-    #    analysis_id_I=analysis_id,
-    #    pipeline_id_I='splsda_R_scaleAndCenter',
-    #    param_dist_I={"kappa": 0.5,
-    #                    "K": [1,2,3,4,5],
-    #                    "eta": [0.1,.3,.5,.7,.9],
-    #                    "classifier":'lda',
-    #                'scale_x':"FALSE",
-    #                    },
-    #    test_size_I = 0.,
-    #    metric_method_I = 'error_rate',
-    #    metric_options_I = None,
-    #    crossval_method_I = 'v-fold',
-    #    crossval_options_I = {'fold':5
-    #                            },
-    #    hyperparameter_method_I = 'GridSearchCV',
-    #    hyperparameter_options_I = {
-    #        'plot_it':"FALSE", 'n_core':2,
-    #        },
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    experiment_ids_I=[],
-    #    sample_name_abbreviations_I=[],
-    #    sample_name_shorts_I=[],
-    #    component_names_I=[],
-    #    component_group_names_I=[],
-    #    time_points_I=[],
-    #    r_calc_I=r_calc
-    #    );
-    ##pls hyperparameter search
-    #for row in splsHyperparameters:
-    #    spls01.execute_splsHyperparameter(
-    #        analysis_id_I=analysis_id,
-    #        pipeline_id_I=row['pipeline_id'],
-    #        param_dist_I=row['param_dist'],
-    #        test_size_I = 0.,
-    #        metric_method_I = row['metric_method'],
-    #        metric_options_I = row['metric_options'],
-    #        crossval_method_I = row['crossval_method'],
-    #        crossval_options_I = row['crossval_options'],
-    #        hyperparameter_method_I = row['hyperparameter_method'],
-    #        hyperparameter_options_I = row['hyperparameter_options'],
-    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        r_calc_I=r_calc
-    #        );
-    ##perform a spls analysis
-    #spls01.reset_dataStage02_quantification_spls(
-    #    tables_I = ['data_stage02_quantification_spls_impfeat',
-    #                'data_stage02_quantification_spls_scores',
-    #                'data_stage02_quantification_spls_loadings',
-    #                'data_stage02_quantification_spls_loadingsResponse',
-    #                'data_stage02_quantification_spls_axis'],
-    #    analysis_id_I=analysis_id,
-    #    warn_I=False,
-    #    );
-    ##PLSDA
-    #spls01.execute_spls(
-    #    analysis_id_I=analysis_id,
-    #    pipeline_id_I='plsda_R_scaleAndCenter',
-    #    test_size_I = 0.,
-    #    loadings_methods_I=[
-    #        {'metric_method':'loadings','metric_options':None},
-    #        {'metric_method':'correlations','metric_options':None}],
-    #    impfeat_methods_I=[
-    #        {'impfeat_method':'coefficients','impfeat_options':None},
-    #        {'impfeat_method':'VIP','impfeat_options':None},],
-    #    scores_methods_I=[
-    #        {'metric_method':'scores','metric_options':None},
-    #        {'metric_method':'scores_response','metric_options':None},
-    #        #{'metric_method':'explained_variance','metric_options':None},
-    #        ],
-    #    loadings_response_methods_I=[
-    #        {'metric_method':'loadings_response','metric_options':None},
-    #        {'metric_method':'correlations_response','metric_options':None},
-    #        ],
-    #    axis_metric_methods_I=[
-    #        {'metric_method':'var_proportional','metric_options':None},
-    #        {'metric_method':'var_cumulative','metric_options':None},
-    #        ],
-    #    calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #    experiment_ids_I=[],
-    #    sample_name_abbreviations_I=[],
-    #    sample_name_shorts_I=[],
-    #    component_names_I=[],
-    #    component_group_names_I=[],
-    #    time_points_I=[],
-    #    r_calc_I=r_calc
-    #    )
-    ##PCA
-    #for pipeline_id in [
-    #    'svdPca_R_scaleAndCenter',
-    #    'robustPca_R_scaleAndCenter',
-    #    'beysianPca_R_scaleAndCenter']:
-    #    spls01.execute_spls(
-    #        analysis_id_I=analysis_id,
-    #        pipeline_id_I=pipeline_id,
-    #        test_size_I = 0.,
-    #        loadings_methods_I=[
-    #            {'metric_method':'loadings','metric_options':None},
-    #            #{'metric_method':'correlations','metric_options':None}
-    #            ],
-    #        impfeat_methods_I=[],
-    #        scores_methods_I=[
-    #            {'metric_method':'scores','metric_options':None},
-    #            ],
-    #        loadings_response_methods_I=[],
-    #        axis_metric_methods_I=[
-    #            {'metric_method':'var_proportional','metric_options':None},
-    #            {'metric_method':'var_cumulative','metric_options':None},
-    #            ],
-    #        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
-    #        experiment_ids_I=[],
-    #        sample_name_abbreviations_I=[],
-    #        sample_name_shorts_I=[],
-    #        component_names_I=[],
-    #        component_group_names_I=[],
-    #        time_points_I=[],
-    #        r_calc_I=r_calc
-    #        )
+    #TODO: update notebooks...
+    #search for the optimal spls parameters
+    spls01.reset_dataStage02_quantification_spls(
+        tables_I = ['data_stage02_quantification_spls_hyperparameter'],
+        analysis_id_I=analysis_id,
+        warn_I=False,
+        );
+    #spls hyperparameter search (DEBUGGING spls methods)
+    spls01.execute_splsHyperparameter(
+        analysis_id_I=analysis_id,
+        pipeline_id_I='splsda_R_scaleAndCenter',
+        param_dist_I={"kappa": 0.5,
+                        "K": [1,2,3,4,5],
+                        "eta": [0.1,.3,.5,.7,.9],
+                        "classifier":'lda',
+                    'scale_x':"FALSE",
+                        },
+        test_size_I = 0.,
+        metric_method_I = 'error_rate',
+        metric_options_I = None,
+        crossval_method_I = 'v-fold',
+        crossval_options_I = {'fold':5
+                                },
+        hyperparameter_method_I = 'GridSearchCV',
+        hyperparameter_options_I = {
+            'plot_it':"FALSE", 'n_core':2,
+            },
+        calculated_concentration_units_I=['mM_glog_normalized'],
+        experiment_ids_I=[],
+        sample_name_abbreviations_I=[],
+        sample_name_shorts_I=[],
+        component_names_I=[],
+        component_group_names_I=[],
+        time_points_I=[],
+        r_calc_I=r_calc
+        );
+    #pls hyperparameter search
+    for row in splsHyperparameters:
+        spls01.execute_splsHyperparameter(
+            analysis_id_I=analysis_id,
+            pipeline_id_I=row['pipeline_id'],
+            param_dist_I=row['param_dist'],
+            test_size_I = 0.,
+            metric_method_I = row['metric_method'],
+            metric_options_I = row['metric_options'],
+            crossval_method_I = row['crossval_method'],
+            crossval_options_I = row['crossval_options'],
+            hyperparameter_method_I = row['hyperparameter_method'],
+            hyperparameter_options_I = row['hyperparameter_options'],
+            calculated_concentration_units_I=['mM_glog_normalized'],
+            experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            sample_name_shorts_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            time_points_I=[],
+            r_calc_I=r_calc
+            );
+    #perform a spls analysis
+    spls01.reset_dataStage02_quantification_spls(
+        tables_I = ['data_stage02_quantification_spls_impfeat',
+                    'data_stage02_quantification_spls_scores',
+                    'data_stage02_quantification_spls_loadings',
+                    'data_stage02_quantification_spls_loadingsResponse',
+                    'data_stage02_quantification_spls_axis'],
+        analysis_id_I=analysis_id,
+        warn_I=False,
+        );
+    #PLSDA
+    spls01.execute_spls(
+        analysis_id_I=analysis_id,
+        pipeline_id_I='plsda_R_scaleAndCenter',
+        test_size_I = 0.,
+        loadings_methods_I=[
+            {'metric_method':'loadings','metric_options':None},
+            {'metric_method':'correlations','metric_options':None}],
+        impfeat_methods_I=[
+            {'impfeat_method':'coefficients','impfeat_options':None},
+            {'impfeat_method':'VIP','impfeat_options':None},],
+        scores_methods_I=[
+            {'metric_method':'scores','metric_options':None},
+            {'metric_method':'scores_response','metric_options':None},
+            #{'metric_method':'explained_variance','metric_options':None},
+            ],
+        loadings_response_methods_I=[
+            {'metric_method':'loadings_response','metric_options':None},
+            {'metric_method':'correlations_response','metric_options':None},
+            ],
+        axis_metric_methods_I=[
+            {'metric_method':'var_proportional','metric_options':None},
+            {'metric_method':'var_cumulative','metric_options':None},
+            ],
+        calculated_concentration_units_I=['mM_glog_normalized'],
+        experiment_ids_I=[],
+        sample_name_abbreviations_I=[],
+        sample_name_shorts_I=[],
+        component_names_I=[],
+        component_group_names_I=[],
+        time_points_I=[],
+        r_calc_I=r_calc
+        )
+    #PCA
+    for pipeline_id in [
+        'svdPca_R_scaleAndCenter',
+        'robustPca_R_scaleAndCenter',
+        'beysianPca_R_scaleAndCenter']:
+        spls01.execute_spls(
+            analysis_id_I=analysis_id,
+            pipeline_id_I=pipeline_id,
+            test_size_I = 0.,
+            loadings_methods_I=[
+                {'metric_method':'loadings','metric_options':None},
+                #{'metric_method':'correlations','metric_options':None}
+                ],
+            impfeat_methods_I=[],
+            scores_methods_I=[
+                {'metric_method':'scores','metric_options':None},
+                ],
+            loadings_response_methods_I=[],
+            axis_metric_methods_I=[
+                {'metric_method':'var_proportional','metric_options':None},
+                {'metric_method':'var_cumulative','metric_options':None},
+                ],
+            calculated_concentration_units_I=['mM_glog_normalized'],
+            experiment_ids_I=[],
+            sample_name_abbreviations_I=[],
+            sample_name_shorts_I=[],
+            component_names_I=[],
+            component_group_names_I=[],
+            time_points_I=[],
+            r_calc_I=r_calc
+            )
 
 ##Analysis export tests:
 #################################################################

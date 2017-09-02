@@ -376,7 +376,7 @@ class stage02_quantification_dataPreProcessing_averages_io(stage02_quantificatio
                     if sna2snaRNASequencing_I: sample_name_abbreviation_2 = sna2snaRNASequencing_I[sample_name_abbreviation_2];
                     else: sample_name_abbreviation_2 = sample_name_abbreviation_2;
                     if experimentID2experimentIDRNASequencing_I: experiment_id_2 = experimentID2experimentIDRNASequencing_I[experiment_ids[sample_name_abbreviation_cnt_2]];
-                    else: experiment_id_2 = experiment_ids[sample_name_abbreviation_cnt_1];
+                    else: experiment_id_2 = experiment_ids[sample_name_abbreviation_cnt_2];
                     geneExpDiff_tmp = [];
                     geneExpDiff_tmp = rnasequencing_geneExpDiff_query.get_rows_experimentIDsAndSampleNameAbbreviationsAndFCAndQValue_dataStage01RNASequencingGeneExpDiff(
                         experiment_id_1,experiment_id_2,sample_name_abbreviation_1,sample_name_abbreviation_2,

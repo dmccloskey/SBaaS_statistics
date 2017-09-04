@@ -295,6 +295,13 @@ class stage02_quantification_dataPreProcessing_replicates_io(stage02_quantificat
         data.format_data();
         self.setUsed2False_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(data.data);
         data.clear_data();
+    def import_setUsed2False_analysisIDAndExperimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self, filename):
+        '''table adds'''
+        data = base_importData();
+        data.read_csv(filename);
+        data.format_data();
+        self.setUsed2False_analysisIDAndExperimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(data.data);
+        data.clear_data();
     def import_delete_rows_experimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self, filename):
         '''table adds'''
         data = base_importData();

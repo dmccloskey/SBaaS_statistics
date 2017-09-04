@@ -589,7 +589,7 @@ analysis_ids_run = [
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
-    
+
     # perform a pair-wise comparison of each condition in the normalized data set
     pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
            tables_I = ['data_stage02_quantification_pairWiseTable'], 
@@ -597,11 +597,30 @@ for analysis_id in analysis_ids_run:
            warn_I=False);
     pairWiseTable01.execute_pairwiseTableAverages(
         analysis_id,
-        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+        calculated_concentration_units_I=[
+             #'umol*gDW-1',
+            'umol*gDW-1_glog_normalized'
+        ],
         redundancy_I=False,
         query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
         query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',
         );
+    pairWiseTable01.clear_data();
+
+    #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
+    #        tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
+    #        analysis_id_I = analysis_id,
+    #        warn_I=False);
+    #pairWiseCorrelation01.execute_pairwiseCorrelationAverages(analysis_id,
+    #    calculated_concentration_units_I=[
+    #        'umol*gDW-1',
+    #        'umol*gDW-1_glog_normalized'
+    #    ],
+    #    redundancy_I=False,
+    #        query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+    #        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',
+    #    r_calc_I=r_calc);
+    #pairWiseCorrelation01.clear_data()
 
     ##TODO: update notebooks...
     ##search for the optimal spls parameters
@@ -802,7 +821,7 @@ for analysis_id in analysis_ids_run:
 ######################################################
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js(analysis_id)
 #pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelationFeatures_js(analysis_id)
-#pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('ALEsKOs01_RNASequencing_0_evo04_0_11_evo04gnd')
+#pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('IndustrialStrains0103_EColi_W3110')
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')
 #descstats01.export_dataStage02QuantificationDescriptiveStats_js("ALEsKOs01_0-1-2-11_evo04pgiEvo01",plot_points_I=True,vertical_I = False)

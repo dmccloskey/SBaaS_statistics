@@ -233,6 +233,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
 
                         # record the data
                         for d_1_cnt,d_1 in enumerate(data_1):
+                            #if d_1['component_name']==data_2[d_1_cnt]['component_name']:
                             assert(d_1['component_name']==data_2[d_1_cnt]['component_name']);
                             tmp = {'analysis_id':analysis_id_I,
                                 'component_group_name':d_1['component_group_name'],
@@ -242,7 +243,8 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                                 'sample_name_abbreviation_2':sna_2,
                                 'value_1':d_1[value_I],
                                 'value_2':data_2[d_1_cnt][value_I],
-                                'calculated_concentration_units':cu,
+                                'calculated_concentration_units_1':cu,
+                                'calculated_concentration_units_2':cu,
                                 'used_':True,
                                 'comment_':None};
                             data_pairwise_O.append(tmp)

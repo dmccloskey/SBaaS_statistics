@@ -529,7 +529,8 @@ class stage02_quantification_pairWiseCorrelation_execute(stage02_quantification_
                         'distance_measure':distance_measure_I,
                         'correlation_coefficient':rho,
                         'pvalue':pval,
-                        'calculated_concentration_units':cu,
+                        'calculated_concentration_units_1':cu,
+                        'calculated_concentration_units_2':cu,
                         'used_':True,
                         'comment_':None};
                     data_O.append(tmp)

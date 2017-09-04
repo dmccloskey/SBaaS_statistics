@@ -1845,6 +1845,24 @@ class stage02_quantification_dataPreProcessing_replicates_query(sbaas_template_q
                 except SQLAlchemyError as e:
                     print(e);
             self.session.commit();
+    def setUsed2False_analysisIDAndExperimentIDAndSampleNameShortAndTimePointAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,data_I):
+        '''update rows of data_stage02_quantification_dataPreProcessing_replicates'''
+        if data_I:
+            for d in data_I:
+                try:
+                    data_update = self.session.query(data_stage02_quantification_dataPreProcessing_replicates).filter(
+                            data_stage02_quantification_dataPreProcessing_replicates.analysis_id.like(d['analysis_id']),
+                            data_stage02_quantification_dataPreProcessing_replicates.experiment_id.like(d['experiment_id']),
+                            data_stage02_quantification_dataPreProcessing_replicates.sample_name_short.like(d['sample_name_short']),
+                            data_stage02_quantification_dataPreProcessing_replicates.time_point.like(d['time_point']),
+                            data_stage02_quantification_dataPreProcessing_replicates.component_name.like(d['component_name']),
+                            data_stage02_quantification_dataPreProcessing_replicates.calculated_concentration_units.like(d['calculated_concentration_units']),).update(
+                            {
+                            'used_':False,},
+                            synchronize_session=False);
+                except SQLAlchemyError as e:
+                    print(e);
+            self.session.commit();
     def setUsed2False_analysisIDAndComponentNameAndCalculatedConcentrationUnits_dataStage02QuantificationDataPreProcessingReplicates(self,data_I):
         '''update rows of data_stage02_quantification_dataPreProcessing_replicates'''
         if data_I:

@@ -60,7 +60,6 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
 
         # add data to database
         self.execute_pairwiseTableAverages_storeData(
-            data_O=self.get_data(),
             table_O = 'data_stage02_quantification_pairWiseTable',
             )
 

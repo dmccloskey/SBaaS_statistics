@@ -194,7 +194,8 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                         #                            correct_I = "TRUE",
                         #                            );
                     
-                            
+                        if tstat is None or np.isnan(tstat): 
+                            continue
                         mean,var,lb,ub = None,None,None,None;
                         if len(data_1)==len(data_2):
                             # calculate the difference
@@ -248,11 +249,14 @@ class stage02_quantification_pairWiseTest_execute(stage02_quantification_pairWis
                     pvalues = data_listDict.dataFrame['pvalue'].get_values();
                     # call R
                     r_calc.clear_workspace();
-                    r_calc.make_vectorFromList(pvalues,'pvalues');
-                    pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
-                    # add in the corrected p-values
-                    data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
-                    data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                    try:
+                        r_calc.make_vectorFromList(pvalues,'pvalues');
+                        pvalue_corrected = r_calc.calculate_pValueCorrected('pvalues','pvalues_O',method_I = pvalue_corrected_description_I);
+                        # add in the corrected p-values
+                        data_listDict.add_column2DataFrame('pvalue_corrected', pvalue_corrected);
+                        data_listDict.add_column2DataFrame('pvalue_corrected_description', pvalue_corrected_description_I);
+                    except Exception as e:
+                        pass
                     data_listDict.convert_dataFrame2ListDict();
                     data_pairwise_O.extend(data_listDict.get_listDict());
 

@@ -548,9 +548,7 @@ splsHyperparameters = [
      'hyperparameter_method':'GridSearchCV',
      'hyperparameter_options':{},
      },
-    ];
 #PCA using pcaMethods
-splsHyperparameters = [
     {'pipeline_id':'svdPca_R_scaleAndCenter',
      'param_dist':{"ncomp":7},
      'metric_method':['msep','rmsep','r2','q2'],
@@ -578,146 +576,165 @@ svd_method = {
 
 # analyses to run:
 analysis_ids_run = [
-'chemoCLim01',
-'chemoNLim01',
+# "IndustrialStrains01_0",
+"IndustrialStrains0103_EColi_BL21",
+"IndustrialStrains0103_EColi_C",
+"IndustrialStrains0103_EColi_Crooks",
+"IndustrialStrains0103_EColi_DH5a",
+"IndustrialStrains0103_EColi_MG1655",
+"IndustrialStrains0103_EColi_W",
+"IndustrialStrains0103_EColi_W3110",
+# "IndustrialStrains03_0"
         ];
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);
     
+    # perform a pair-wise comparison of each condition in the normalized data set
+    pairWiseTable01.reset_dataStage02_quantification_pairWiseTable(
+           tables_I = ['data_stage02_quantification_pairWiseTable'], 
+           analysis_id_I = analysis_id,
+           warn_I=False);
+    pairWiseTable01.execute_pairwiseTableAverages(
+        analysis_id,
+        calculated_concentration_units_I=['umol*gDW-1_glog_normalized'],
+        redundancy_I=False,
+        query_object_descStats_I = 'stage02_quantification_descriptiveStats_query',
+        query_func_descStats_I = 'get_rows_analysisIDAndOrAllColumns_dataStage02QuantificationDescriptiveStats',
+        );
 
-    #TODO: update notebooks...
-    #search for the optimal spls parameters
-    spls01.reset_dataStage02_quantification_spls(
-        tables_I = ['data_stage02_quantification_spls_hyperparameter'],
-        analysis_id_I=analysis_id,
-        warn_I=False,
-        );
-    #spls hyperparameter search (DEBUGGING spls methods)
-    spls01.execute_splsHyperparameter(
-        analysis_id_I=analysis_id,
-        pipeline_id_I='splsda_R_scaleAndCenter',
-        param_dist_I={"kappa": 0.5,
-                        "K": [1,2,3,4,5],
-                        "eta": [0.1,.3,.5,.7,.9],
-                        "classifier":'lda',
-                    'scale_x':"FALSE",
-                        },
-        test_size_I = 0.,
-        metric_method_I = 'error_rate',
-        metric_options_I = None,
-        crossval_method_I = 'v-fold',
-        crossval_options_I = {'fold':5
-                                },
-        hyperparameter_method_I = 'GridSearchCV',
-        hyperparameter_options_I = {
-            'plot_it':"FALSE", 'n_core':2,
-            },
-        calculated_concentration_units_I=['mM_glog_normalized'],
-        experiment_ids_I=[],
-        sample_name_abbreviations_I=[],
-        sample_name_shorts_I=[],
-        component_names_I=[],
-        component_group_names_I=[],
-        time_points_I=[],
-        r_calc_I=r_calc
-        );
-    #pls hyperparameter search
-    for row in splsHyperparameters:
-        spls01.execute_splsHyperparameter(
-            analysis_id_I=analysis_id,
-            pipeline_id_I=row['pipeline_id'],
-            param_dist_I=row['param_dist'],
-            test_size_I = 0.,
-            metric_method_I = row['metric_method'],
-            metric_options_I = row['metric_options'],
-            crossval_method_I = row['crossval_method'],
-            crossval_options_I = row['crossval_options'],
-            hyperparameter_method_I = row['hyperparameter_method'],
-            hyperparameter_options_I = row['hyperparameter_options'],
-            calculated_concentration_units_I=['mM_glog_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            r_calc_I=r_calc
-            );
-    #perform a spls analysis
-    spls01.reset_dataStage02_quantification_spls(
-        tables_I = ['data_stage02_quantification_spls_impfeat',
-                    'data_stage02_quantification_spls_scores',
-                    'data_stage02_quantification_spls_loadings',
-                    'data_stage02_quantification_spls_loadingsResponse',
-                    'data_stage02_quantification_spls_axis'],
-        analysis_id_I=analysis_id,
-        warn_I=False,
-        );
-    #PLSDA
-    spls01.execute_spls(
-        analysis_id_I=analysis_id,
-        pipeline_id_I='plsda_R_scaleAndCenter',
-        test_size_I = 0.,
-        loadings_methods_I=[
-            {'metric_method':'loadings','metric_options':None},
-            {'metric_method':'correlations','metric_options':None}],
-        impfeat_methods_I=[
-            {'impfeat_method':'coefficients','impfeat_options':None},
-            {'impfeat_method':'VIP','impfeat_options':None},],
-        scores_methods_I=[
-            {'metric_method':'scores','metric_options':None},
-            {'metric_method':'scores_response','metric_options':None},
-            #{'metric_method':'explained_variance','metric_options':None},
-            ],
-        loadings_response_methods_I=[
-            {'metric_method':'loadings_response','metric_options':None},
-            {'metric_method':'correlations_response','metric_options':None},
-            ],
-        axis_metric_methods_I=[
-            {'metric_method':'var_proportional','metric_options':None},
-            {'metric_method':'var_cumulative','metric_options':None},
-            ],
-        calculated_concentration_units_I=['mM_glog_normalized'],
-        experiment_ids_I=[],
-        sample_name_abbreviations_I=[],
-        sample_name_shorts_I=[],
-        component_names_I=[],
-        component_group_names_I=[],
-        time_points_I=[],
-        r_calc_I=r_calc
-        )
-    #PCA
-    for pipeline_id in [
-        'svdPca_R_scaleAndCenter',
-        'robustPca_R_scaleAndCenter',
-        'beysianPca_R_scaleAndCenter']:
-        spls01.execute_spls(
-            analysis_id_I=analysis_id,
-            pipeline_id_I=pipeline_id,
-            test_size_I = 0.,
-            loadings_methods_I=[
-                {'metric_method':'loadings','metric_options':None},
-                #{'metric_method':'correlations','metric_options':None}
-                ],
-            impfeat_methods_I=[],
-            scores_methods_I=[
-                {'metric_method':'scores','metric_options':None},
-                ],
-            loadings_response_methods_I=[],
-            axis_metric_methods_I=[
-                {'metric_method':'var_proportional','metric_options':None},
-                {'metric_method':'var_cumulative','metric_options':None},
-                ],
-            calculated_concentration_units_I=['mM_glog_normalized'],
-            experiment_ids_I=[],
-            sample_name_abbreviations_I=[],
-            sample_name_shorts_I=[],
-            component_names_I=[],
-            component_group_names_I=[],
-            time_points_I=[],
-            r_calc_I=r_calc
-            )
+    ##TODO: update notebooks...
+    ##search for the optimal spls parameters
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_hyperparameter'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    ##spls hyperparameter search (DEBUGGING spls methods)
+    #spls01.execute_splsHyperparameter(
+    #    analysis_id_I=analysis_id,
+    #    pipeline_id_I='splsda_R_scaleAndCenter',
+    #    param_dist_I={"kappa": 0.5,
+    #                    "K": [1,2,3,4,5],
+    #                    "eta": [0.1,.3,.5,.7,.9],
+    #                    "classifier":'lda',
+    #                'scale_x':"FALSE",
+    #                    },
+    #    test_size_I = 0.,
+    #    metric_method_I = 'error_rate',
+    #    metric_options_I = None,
+    #    crossval_method_I = 'v-fold',
+    #    crossval_options_I = {'fold':5
+    #                            },
+    #    hyperparameter_method_I = 'GridSearchCV',
+    #    hyperparameter_options_I = {
+    #        'plot_it':"FALSE", 'n_core':2,
+    #        },
+    #    calculated_concentration_units_I=['mM_glog_normalized'],
+    #    experiment_ids_I=[],
+    #    sample_name_abbreviations_I=[],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    time_points_I=[],
+    #    r_calc_I=r_calc
+    #    );
+    ##pls hyperparameter search
+    #for row in splsHyperparameters:
+    #    spls01.execute_splsHyperparameter(
+    #        analysis_id_I=analysis_id,
+    #        pipeline_id_I=row['pipeline_id'],
+    #        param_dist_I=row['param_dist'],
+    #        test_size_I = 0.,
+    #        metric_method_I = row['metric_method'],
+    #        metric_options_I = row['metric_options'],
+    #        crossval_method_I = row['crossval_method'],
+    #        crossval_options_I = row['crossval_options'],
+    #        hyperparameter_method_I = row['hyperparameter_method'],
+    #        hyperparameter_options_I = row['hyperparameter_options'],
+    #        calculated_concentration_units_I=['mM_glog_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        r_calc_I=r_calc
+    #        );
+    ##perform a spls analysis
+    #spls01.reset_dataStage02_quantification_spls(
+    #    tables_I = ['data_stage02_quantification_spls_impfeat',
+    #                'data_stage02_quantification_spls_scores',
+    #                'data_stage02_quantification_spls_loadings',
+    #                'data_stage02_quantification_spls_loadingsResponse',
+    #                'data_stage02_quantification_spls_axis'],
+    #    analysis_id_I=analysis_id,
+    #    warn_I=False,
+    #    );
+    ##PLSDA
+    #spls01.execute_spls(
+    #    analysis_id_I=analysis_id,
+    #    pipeline_id_I='plsda_R_scaleAndCenter',
+    #    test_size_I = 0.,
+    #    loadings_methods_I=[
+    #        {'metric_method':'loadings','metric_options':None},
+    #        {'metric_method':'correlations','metric_options':None}],
+    #    impfeat_methods_I=[
+    #        {'impfeat_method':'coefficients','impfeat_options':None},
+    #        {'impfeat_method':'VIP','impfeat_options':None},],
+    #    scores_methods_I=[
+    #        {'metric_method':'scores','metric_options':None},
+    #        {'metric_method':'scores_response','metric_options':None},
+    #        #{'metric_method':'explained_variance','metric_options':None},
+    #        ],
+    #    loadings_response_methods_I=[
+    #        {'metric_method':'loadings_response','metric_options':None},
+    #        {'metric_method':'correlations_response','metric_options':None},
+    #        ],
+    #    axis_metric_methods_I=[
+    #        {'metric_method':'var_proportional','metric_options':None},
+    #        {'metric_method':'var_cumulative','metric_options':None},
+    #        ],
+    #    calculated_concentration_units_I=['mM_glog_normalized'],
+    #    experiment_ids_I=[],
+    #    sample_name_abbreviations_I=[],
+    #    sample_name_shorts_I=[],
+    #    component_names_I=[],
+    #    component_group_names_I=[],
+    #    time_points_I=[],
+    #    r_calc_I=r_calc
+    #    )
+    ##PCA
+    #for pipeline_id in [
+    #    'svdPca_R_scaleAndCenter',
+    #    #'robustPca_R_scaleAndCenter',
+    #    'beysianPca_R_scaleAndCenter']:
+    #    spls01.execute_spls(
+    #        analysis_id_I=analysis_id,
+    #        pipeline_id_I=pipeline_id,
+    #        test_size_I = 0.,
+    #        loadings_methods_I=[
+    #            {'metric_method':'loadings','metric_options':None},
+    #            #{'metric_method':'correlations','metric_options':None}
+    #            ],
+    #        impfeat_methods_I=[],
+    #        scores_methods_I=[
+    #            {'metric_method':'scores','metric_options':None},
+    #            ],
+    #        loadings_response_methods_I=[],
+    #        axis_metric_methods_I=[
+    #            {'metric_method':'var_proportional','metric_options':None},
+    #            {'metric_method':'var_cumulative','metric_options':None},
+    #            ],
+    #        calculated_concentration_units_I=['mM_glog_normalized'],
+    #        experiment_ids_I=[],
+    #        sample_name_abbreviations_I=[],
+    #        sample_name_shorts_I=[],
+    #        component_names_I=[],
+    #        component_group_names_I=[],
+    #        time_points_I=[],
+    #        r_calc_I=r_calc
+    #        )
 
 ##Analysis export tests:
 #################################################################

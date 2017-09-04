@@ -60,7 +60,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
 
         # add data to database
         self.execute_pairwiseTableAverages_storeData(
-            data_O=data_pairwise_O,
+            data_O=self.get_data(),
             table_O = 'data_stage02_quantification_pairWiseTable',
             )
 
@@ -199,7 +199,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
         calculated_concentration_units.sort();
         sample_name_abbreviations = {k:[] for k in calculated_concentration_units};
         data_analysis = {'_del_':{'_del_':[]}};
-        for row in data_listDict:
+        for row in data_I:
             cu = row['calculated_concentration_units']
             sna = row['sample_name_abbreviation']
             if not cu in data_analysis.keys(): data_analysis[cu]={};
@@ -214,7 +214,7 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
         #apply the analysis to each unique group
         for cu_cnt,cu in enumerate(calculated_concentration_units):
             print('calculating pairwiseTable for concentration_units ' + cu);
-            for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations):
+            for sna_1_cnt,sna_1 in enumerate(sample_name_abbreviations[cu]):
                     
                 data_O=[];
                 #pass 1: calculate the pairwise correlations

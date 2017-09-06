@@ -227,9 +227,17 @@ class stage02_quantification_pairWiseTable_execute(stage02_quantification_pairWi
                         data_1,data_2 = [],[];
                         data_1 = data_analysis[cu][sna_1];
                         data_2 = data_analysis[cu][sna_2];
-
-                        if len(data_1)!=len(data_2):
-                            print('the number of components in sn_1 and sn_2 are not equal.');
+                                            
+                        #check the data
+                        assert(len(data_1)==len(data_2));
+                        cn_1 = list(set(d['component_name'] for d in data_1))
+                        cn_1.sort();
+                        cn_2 = list(set(d['component_name'] for d in data_2))
+                        cn_2.sort();
+                        assert(cn_1==cn_2);
+                        #ensure the data is sorted
+                        data_1 = sorted(data_1,key=lambda x: x['component_name'])
+                        data_2 = sorted(data_2,key=lambda x: x['component_name'])
 
                         # record the data
                         for d_1_cnt,d_1 in enumerate(data_1):

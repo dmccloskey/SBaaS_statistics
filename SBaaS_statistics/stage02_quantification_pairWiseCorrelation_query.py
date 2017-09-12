@@ -64,7 +64,11 @@ class stage02_quantification_pairWiseCorrelation_query(sbaas_template_query):
 	    ];
         query['order_by'] = [
             {"table_name":tables[0],
-            'column_name':'calculated_concentration_units',
+            'column_name':'calculated_concentration_units_1',
+            'order':'ASC',
+            },
+            {"table_name":tables[0],
+            'column_name':'calculated_concentration_units_2',
             'order':'ASC',
             },
             {"table_name":tables[0],

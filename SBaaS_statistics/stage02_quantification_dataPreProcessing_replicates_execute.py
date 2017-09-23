@@ -295,9 +295,9 @@ class stage02_quantification_dataPreProcessing_replicates_execute(
                         normalization_options_I['time_point_FC'],
                         d['component_name']
                         )
-                    ##check
-                    #if d['component_name'] == '6pgc.6pgc_1.Light':
-                    #    print('check');
+                    #check
+                    if not desc_stats:
+                        print('check');
                     if normalization_method_I in ["FC-median","log2(FC-median)"]:
                         data_1 = desc_stats[0]['median'];
                     elif normalization_method_I in ["FC-mean","log2(FC-mean)"]:

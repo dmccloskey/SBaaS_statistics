@@ -577,18 +577,31 @@ svd_method = {
 # analyses to run:
 analysis_ids_run = [
 # "IndustrialStrains01_0",
-"IndustrialStrains0103_EColi_BL21",
-"IndustrialStrains0103_EColi_C",
-"IndustrialStrains0103_EColi_Crooks",
-"IndustrialStrains0103_EColi_DH5a",
-"IndustrialStrains0103_EColi_MG1655",
-"IndustrialStrains0103_EColi_W",
-"IndustrialStrains0103_EColi_W3110",
-# "IndustrialStrains03_0"
+#"IndustrialStrains0103_EColi_BL21",
+#"IndustrialStrains0103_EColi_C",
+#"IndustrialStrains0103_EColi_Crooks",
+#"IndustrialStrains0103_EColi_DH5a",
+#"IndustrialStrains0103_EColi_MG1655",
+#"IndustrialStrains0103_EColi_W",
+#"IndustrialStrains0103_EColi_W3110",
+ "IndustrialStrains03_0"
         ];
 
 for analysis_id in analysis_ids_run:
     print("running analysis " + analysis_id);  
+    #normalize the data
+    dpprep01.execute_normalization(
+        analysis_id_I = analysis_id,
+        calculated_concentration_units_I=['umol*gDW-1'],
+        normalization_method_I="log2(FC-median)",
+        normalization_options_I={
+        'type':"relative",
+         'scale_values':None,
+         'scale_fold_change':"log2",
+         'sample_name_abbreviation_FC':'EColi_MG1655',
+         'experiment_id_FC':'IndustrialStrains03',
+         'time_point_FC':'0'},
+        r_calc_I=r_calc)
 
     #pairWiseCorrelation01.reset_dataStage02_quantification_pairWiseCorrelation(
     #        tables_I = ['data_stage02_quantification_pairWiseCorrelation'], 
@@ -803,7 +816,7 @@ for analysis_id in analysis_ids_run:
 ##data export tests
 ######################################################
 #covariance01.export_dataStage02QuantificationCovarianceSamples_js(analysis_id)
-pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('IndustrialStrains03_0')
+#pairWiseCorrelation01.export_dataStage02QuantificationPairWiseCorrelation_js('IndustrialStrains03_0')
 #pairWiseTable01.export_dataStage02QuantificationPairWiseTable_js('IndustrialStrains0103_EColi_W3110')
 
 #heatmap01.export_dataStage02QuantificationDendrogramDescriptiveStats_js('ALEsKOs01_DNAResequencing_11_evo04pgi')

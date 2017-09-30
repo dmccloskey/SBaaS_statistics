@@ -11,7 +11,7 @@ class stage02_quantification_histogram_execute(
             stage02_quantification_histogram_io,
             stage02_quantification_histogram_dependencies,
             ):
-    def execute_binFeatures(self,analysis_id_I,features_I=[],feature_units_I=[],n_bins_I=[],
+    def execute_binFeatures(self,analysis_id_I,features_I=[],feature_units_I=[],n_bins_I=[],n_range_I=None,
                             query_object_descStats_I = 'stage02_quantification_descriptiveStats_query'):
         '''bin features of continuous data from the normalized data
         INPUT:
@@ -53,7 +53,7 @@ class stage02_quantification_histogram_execute(
                     data_hist = quantification_dataPreProcessing_replicates_query.get_allCalculatedConcentrations_analysisIDAndUnits_dataStage02QuantificationDataPreProcessingReplicates(analysis_id_I,feature_units);
                     #make the bins for the histogram
                     if data_hist:
-                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
+                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I,n_range_I=n_range_I);
                         tmp = self.record_histogram(analysis_id_I,features,feature_units,x_O,dx_O,y_O);
                         data_O.extend(tmp);
             elif features == 'mean':
@@ -68,7 +68,7 @@ class stage02_quantification_histogram_execute(
                         print('query instance does not have the required method.');
                     #make the bins for the histogram
                     if data_hist:
-                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
+                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I,n_range_I=n_range_I);
                         tmp = self.record_histogram(analysis_id_I,features,feature_units,x_O,dx_O,y_O);
                         data_O.extend(tmp);
             elif features == 'cv':
@@ -83,7 +83,7 @@ class stage02_quantification_histogram_execute(
                         print('query instance does not have the required method.');
                     #make the bins for the histogram
                     if data_hist:
-                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
+                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I,n_range_I=n_range_I);
                         tmp = self.record_histogram(analysis_id_I,features,feature_units,x_O,dx_O,y_O);
                         data_O.extend(tmp);
             elif features == 'var':
@@ -98,7 +98,7 @@ class stage02_quantification_histogram_execute(
                         print('query instance does not have the required method.');
                     #make the bins for the histogram
                     if data_hist:
-                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
+                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I,n_range_I=n_range_I);
                         tmp = self.record_histogram(analysis_id_I,features,feature_units,x_O,dx_O,y_O);
                         data_O.extend(tmp);
             elif features == 'median':
@@ -113,7 +113,7 @@ class stage02_quantification_histogram_execute(
                         print('query instance does not have the required method.');
                     #make the bins for the histogram
                     if data_hist:
-                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I);
+                        x_O,dx_O,y_O = calculatehistogram.histogram(data_I=data_hist,n_bins_I=n_bins,calc_bins_I=calc_bins_I,n_range_I=n_range_I);
                         tmp = self.record_histogram(analysis_id_I,features,feature_units,x_O,dx_O,y_O);
                         data_O.extend(tmp);
             else:
